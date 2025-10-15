@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIMS Media Hive | Join Us</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Lucide Icons for aesthetic elements -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Custom styles to match the dark theme and font */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Oswald:wght@200..700&display=swap');
+
+        :root {
+            --primary-color: #eab308; /* Tailwind yellow-500 equivalent */
+            --dark-bg: #0d0d0d;
+            --mid-bg: #1a1a1a;
+            --text-light: #f3f4f6;
+            --text-muted: #9ca3af;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+            overflow-x: hidden;
+            /* Ensures space below the fixed header for the content */
+            padding-top: 6rem; 
+        }
+
+        .oswald {
+            font-family: 'Oswald', sans-serif;
+        }
+
+        /* Hero image specific to this page */
+        #join-hero {
+            background-image: url('/src/join.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .step-card {
+            background-color: #1a1a1a;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header & Navigation Bar (Fixed for consistency) -->
+    <header class="bg-black fixed top-0 left-0 w-full z-10 pt-6 shadow-xl border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-start">
+            <!-- Logo -->
+            <div class="text-xl font-extrabold tracking-widest text-white oswald">
+                <a href="index.html">SIMS Media Hive</a>
+            </div>
+
+            <!-- Contact Info (Top Right) -->
+            <div class="hidden md:block text-right text-xs text-gray-400">
+                <p>hive@simsmedia.edu</p>
+                <p>+91 9876 543 210</p>
+            </div>
+        </div>
+
+        <!-- Main Navigation Links (Centered) -->
+        <nav class="hidden md:flex justify-center mt-4 pb-4">
+            <ul class="flex space-x-8 text-sm font-medium uppercase tracking-widest text-gray-300">
+                <li><a href="/index.html" class="hover:text-yellow-500 transition duration-300">Home</a></li>
+                <li><a href="/index.html#focus" class="hover:text-yellow-500 transition duration-300">Focus</a></li>
+                <li><a href="/index.html#work" class="hover:text-yellow-500 transition duration-300">Projects</a></li>
+                <li><a href="/members.html" class="hover:text-yellow-500 transition duration-300">Members</a></li>
+                <li><a href="/blog.html" class="hover:text-yellow-500 transition duration-300">Blog</a></li>
+                <!-- Highlighted Active Link -->
+                <li><a href="/contact.html" class="text-yellow-500 transition duration-300">Join Us</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Join Us Hero Section -->
+    <section id="join-hero" class="relative py-24 md:py-40 flex items-center">
+        <div class="absolute inset-0 bg-black bg-opacity-70"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-0 text-center">
+            <p class="text-sm text-yellow-500 uppercase tracking-widest mb-4">Your Story Starts Here</p>
+            <h1 class="text-5xl sm:text-7xl font-bold leading-tight text-white oswald mb-4">
+                Be the Next Voice of SIMS
+            </h1>
+            <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                Ready to turn your passion for media into real-world projects? Join the SIMS Media Hive and collaborate on films, photography, and design.
+            </p>
+        </div>
+    </section>
+
+    <!-- Why Join & Opportunities Section -->
+    <section class="bg-black py-20 md:py-32 border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-4xl font-bold text-center mb-16 oswald text-white">
+                Opportunities Within the Hive
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                
+                <!-- Benefit 1 -->
+                <div class="text-center p-6 step-card rounded-lg border border-gray-800 hover:border-yellow-500 transition duration-300">
+                    <i data-lucide="monitor-play" class="w-10 h-10 mx-auto mb-4 text-yellow-500"></i>
+                    <h3 class="text-xl font-semibold oswald mb-3">Hands-On Experience</h3>
+                    <p class="text-sm text-gray-400">
+                        Work with professional-grade equipment on actual campus events and creative assignments. Build a portfolio that stands out.
+                    </p>
+                </div>
+
+                <!-- Benefit 2 -->
+                <div class="text-center p-6 step-card rounded-lg border border-gray-800 hover:border-yellow-500 transition duration-300">
+                    <i data-lucide="users" class="w-10 h-10 mx-auto mb-4 text-yellow-500"></i>
+                    <h3 class="text-xl font-semibold oswald mb-3">Mentorship & Network</h3>
+                    <p class="text-sm text-gray-400">
+                        Learn from senior members and faculty advisors. Network with alumni working in film, journalism, and digital media.
+                    </p>
+                </div>
+
+                <!-- Benefit 3 -->
+                <div class="text-center p-6 step-card rounded-lg border border-gray-800 hover:border-yellow-500 transition duration-300">
+                    <i data-lucide="wand" class="w-10 h-10 mx-auto mb-4 text-yellow-500"></i>
+                    <h3 class="text-xl font-semibold oswald mb-3">Creative Freedom</h3>
+                    <p class="text-sm text-gray-400">
+                        Pitch your own ideas and lead projects. We provide the platform for you to express your unique creative vision.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Application Process Section -->
+    <section class="bg-gray-950 py-20 md:py-32">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <p class="text-sm text-center text-yellow-500 uppercase tracking-widest mb-2">How to Apply</p>
+            <h2 class="text-4xl font-bold text-center mb-16 oswald text-white">
+                Our 3-Step Recruitment Process
+            </h2>
+            
+            <!-- Step 1 -->
+            <div class="flex items-start mb-12">
+                <span class="text-5xl font-extrabold text-yellow-500 mr-8 oswald">01</span>
+                <div>
+                    <h3 class="text-2xl font-bold oswald mb-2">Submit Your Application Form</h3>
+                    <p class="text-gray-400">Fill out our online application form detailing your interests (Filmmaking, Photography, Design, or Writing) and any relevant experience or coursework.</p>
+                </div>
+            </div>
+            
+            <!-- Step 2 -->
+            <div class="flex items-start mb-12">
+                <span class="text-5xl font-extrabold text-yellow-500 mr-8 oswald">02</span>
+                <div>
+                    <h3 class="text-2xl font-bold oswald mb-2">The Portfolio & Interview</h3>
+                    <p class="text-gray-400">Shortlisted candidates will be invited for a brief interview and asked to present a small portfolio or a creative prompt response.</p>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="flex items-start">
+                <span class="text-5xl font-extrabold text-yellow-500 mr-8 oswald">03</span>
+                <div>
+                    <h3 class="text-2xl font-bold oswald mb-2">Welcome to the Hive</h3>
+                    <p class="text-gray-400">Successful applicants will be inducted and assigned to a specific production team to begin training and project work.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Final CTA Button -->
+        <div class="text-center mt-20">
+            <a href="https://forms.gle/d6RVZdhSabe4pCKM7" class="inline-block px-12 py-5 bg-yellow-500 text-black font-semibold uppercase tracking-wider text-lg rounded-full transition duration-300 hover:bg-yellow-600 shadow-lg hover:shadow-yellow-500/50">
+                Start Your Application Now
+            </a>
+            <p class="text-sm text-gray-500 mt-4">Applications close October 30th.</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 py-10 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-500">
+            <p>&copy; 2024 SIMS Media Hive. All Rights Reserved. Designed to mimic the cinematic FRAME-S aesthetic.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>

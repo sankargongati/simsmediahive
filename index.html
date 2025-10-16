@@ -51,11 +51,9 @@
             }
         }
 
-        /* Hero Section Specific Styling */
+        /* Hero Section Specific Styling - Image background removed, handled by video */
         #hero {
-            background-image: url('/src/main.jpg');
-            background-size: cover;
-            background-position: center 30%;
+             /* Video will cover this area */
         }
 
         .oswald {
@@ -105,7 +103,54 @@
     </header>
 <hr>
     <section id="hero" class="relative pt-40 pb-20 md:pb-32 h-[80vh] min-h-[600px] flex items-end">
-        <div class="absolute inset-0 bg-black bg-opacity-60"></div>
+        
+        <div id="video-sequence" class="absolute inset-0 w-full h-full z-[-2]">
+            
+            <video 
+                id="video-1"
+                data-video-id="1"
+                autoplay 
+                loop 
+                muted 
+                playsinline 
+                poster="/src/main.jpg" 
+                class="hero-video absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-100"
+            >
+                <source src="/src/vid1.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+
+            <video 
+                id="video-2"
+                data-video-id="2"
+                autoplay 
+                loop 
+                muted 
+                playsinline 
+                poster="https://placehold.co/1200x800/1c1917/f59e0b?text=VIDEO+CLIP+2+POSTER" 
+                class="hero-video absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-0"
+            >
+                <source src="path/to/video-2.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+
+            <video 
+                id="video-3"
+                data-video-id="3"
+                autoplay 
+                loop 
+                muted 
+                playsinline 
+                poster="https://placehold.co/1200x800/1c1917/f59e0b?text=VIDEO+CLIP+3+POSTER" 
+                class="hero-video absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-0"
+            >
+                <source src="path/to/video-3.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            
+        </div>
+        <div class="absolute inset-0 bg-black bg-opacity-60 z-[-1]"></div>
+
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-0 w-full">
             <div class="md:w-3/5">
                 <p class="text-xs tracking-[0.2em] uppercase text-yellow-500 mb-4 font-semibold flex items-center">
@@ -317,6 +362,71 @@
                 }
             });
         });
+        
+        // --- NEW: Video Sequence Logic ---
+        const heroVideos = document.querySelectorAll('.hero-video');
+        const videoCount = heroVideos.length;
+
+        if (videoCount > 0) {
+            let currentVideoIndex = 0;
+
+            function playNextVideo() {
+                // Hide current video using opacity for a smooth fade
+                heroVideos[currentVideoIndex].classList.remove('opacity-100');
+                heroVideos[currentVideoIndex].classList.add('opacity-0');
+                
+                // Increment index, looping back to 0 if it exceeds the count
+                currentVideoIndex = (currentVideoIndex + 1) % videoCount;
+
+                const nextVideo = heroVideos[currentVideoIndex];
+
+                // Start playing the next video and make it visible
+                nextVideo.play().catch(error => {
+                    console.warn("Autoplay was prevented, user interaction might be needed:", error);
+                    // Fallback: Just display the video if it can't autoplay
+                });
+                nextVideo.classList.remove('opacity-0');
+                nextVideo.classList.add('opacity-100');
+
+                // Set a new timer for the next transition
+                setupVideoTransition(nextVideo);
+            }
+
+            function setupVideoTransition(videoElement) {
+                // Remove previous event listener just in case
+                videoElement.removeEventListener('loadeddata', handleLoadedData);
+
+                // Use 'loadeddata' to ensure we have the duration before setting the timer
+                function handleLoadedData() {
+                    // Determine the duration of the clip
+                    const duration = videoElement.duration; 
+                    // We switch 0.5 seconds before the video naturally ends for a smooth fade (duration-0.5)
+                    const delay = (duration - 0.5) * 1000; 
+
+                    // Ensure a minimum delay if the video is extremely short
+                    if (delay > 100) { 
+                        setTimeout(playNextVideo, delay);
+                    } else {
+                        // If video is too short or metadata is missing, just switch after a fixed time (e.g., 3 seconds)
+                        setTimeout(playNextVideo, 3000); 
+                    }
+
+                    // Remove the one-time listener after it fires
+                    videoElement.removeEventListener('loadeddata', handleLoadedData);
+                }
+
+                // If video metadata is already loaded, execute the logic immediately
+                if (videoElement.readyState >= 2) { // READY_STATE_ENOUGH_DATA
+                    handleLoadedData();
+                } else {
+                    // Otherwise, wait for the metadata
+                    videoElement.addEventListener('loadeddata', handleLoadedData);
+                }
+            }
+
+            // Start the sequence with the first video
+            setupVideoTransition(heroVideos[0]);
+        }
     </script>
 </body>
 </html>

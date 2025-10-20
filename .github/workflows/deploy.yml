@@ -1,0 +1,41 @@
+name: Deploy Static Site from src/
+
+on:
+  push:
+    branches:
+      - main # Trigger on push to the main branch
+  
+  # Allow manual deployment from the Actions tab
+  workflow_dispatch:
+
+# Grant the necessary permissions for the GITHUB_TOKEN to deploy
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  # The single job handles fetching, packaging, and deploying
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: ⬇️ Checkout Repository Code
+        uses: actions/checkout@v4
+
+      - name: 🌐 Configure GitHub Pages Environment
+        # This action sets up the environment variables needed for deployment
+        uses: actions/configure-pages@v5
+
+      - name: 📁 Upload 'src' Folder as Deployment Artifact
+        # This step is CRUCIAL: it packages the contents of your 'src' folder.
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './src' # <-- This points to your static files folder
+
+      - name: 🚀 Deploy to GitHub Pages
+        id: deployment
+        # This final action publishes the uploaded artifact to your live site
+        uses: actions/deploy-pages@v4

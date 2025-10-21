@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIMS Media Hive | Gallery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Custom styles to match the dark theme and font (COPIED FROM ORIGINAL) */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Oswald:wght@200..700&display=swap');
+
+        :root {
+            --primary-color: #eab308; /* Tailwind yellow-500 equivalent */
+            --dark-bg: #0d0d0d;
+            --mid-bg: #1a1a1a;
+            --text-light: #f3f4f6;
+            --text-muted: #9ca3af;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+            overflow-x: hidden;
+        }
+
+        /* Copied this style for consistency, though it's not used on this specific page */
+        .circular-text-container {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            border: 1px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            animation: rotate 15s linear infinite;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .oswald {
+            font-family: 'Oswald', sans-serif;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-transparent absolute top-0 left-0 w-full z-20 pt-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-start">
+            <div class="text-xl font-extrabold tracking-widest text-white oswald">
+                SIMS Media Hive
+            </div>
+
+            <div class="hidden md:block text-right text-xs text-gray-400">
+                <p>gds.simshive@gmail.com</p>
+                <p>+91 7981 951 879</p>
+            </div>
+            
+            <button id="mobile-menu-button" class="md:hidden p-2 text-yellow-500 hover:text-white transition duration-300 z-30">
+                <i data-lucide="menu" class="w-7 h-7"></i>
+            </button>
+        </div>
+
+        <nav class="hidden md:flex justify-center mt-4">
+            <ul class="flex space-x-8 text-sm font-medium uppercase tracking-widest text-gray-300">
+                <li><a href="/index.html" class="hover:text-yellow-500 transition duration-300">Home</a></li>
+                <li><a href="/index.html#focus" class="hover:text-yellow-500 transition duration-300">Focus</a></li>
+                <li><a href="/index.html#work" class="hover:text-yellow-500 transition duration-300">Projects</a></li>
+                <li><a href="/members.html" class="hover:text-yellow-500 transition duration-300">Members</a></li>
+                <li><a href="/blog.html" class="hover:text-yellow-500 transition duration-300">Blog</a></li>
+                <li><a href="/contact.html" class="hover:text-yellow-500 transition duration-300">Join Us</a></li>
+            </ul>
+        </nav>
+
+        <nav id="mobile-menu" class="hidden md:hidden fixed top-0 left-0 w-full h-full bg-gray-950/95 backdrop-blur-sm pt-24 pb-8 overflow-y-auto z-10">
+            <ul class="flex flex-col items-center space-y-8 text-xl font-semibold uppercase tracking-widest text-gray-300">
+                <li><a href="/index.html" class="hover:text-yellow-500 transition duration-300 block py-2">Home</a></li>
+                <li><a href="/index.html#focus" class="hover:text-yellow-500 transition duration-300 block py-2">Focus</a></li>
+                <li><a href="/index.html#work" class="hover:text-yellow-500 transition duration-300 block py-2">Projects</a></li>
+                <li><a href="/members.html" class="hover:text-yellow-500 transition duration-300 block py-2">Members</a></li>
+                <li><a href="/blog.html" class="hover:text-yellow-500 transition duration-300 block py-2">Blog</a></li>
+                <li><a href="/contact.html" class="hover:text-yellow-500 transition duration-300 block py-2">Join Us</a></li>
+            </ul>
+        </nav>
+    </header>
+    <section class="bg-black pt-40 pb-20 md:pb-32 border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p class="text-sm text-yellow-500 uppercase tracking-widest mb-2">Our Work</p>
+            <h1 class="text-4xl sm:text-6xl font-bold text-white oswald">
+                Creative Gallery
+            </h1>
+            <p class="text-lg text-gray-400 max-w-3xl mx-auto mt-6">
+                A visual journey through our projects, from campus events and creative short films to graphic design and portrait photography.
+            </p>
+        </div>
+    </section>
+
+    <section id="gallery-grid" class="bg-gray-950 py-20 md:py-32">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <div class="group relative overflow-hidden rounded-lg aspect-[4/3]">
+                    <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Event+Photography" alt="Event Photography" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
+                    <div class="absolute bottom-4 left-4">
+                        <span class="text-xs text-yellow-500 uppercase tracking-widest">Photography</span>
+                        <h3 class="text-2xl font-bold text-white oswald">Annual Fest</h3>
+                    </div>
+                </div>
+                
+                <div class="group relative overflow-hidden rounded-lg aspect-[4/3]">
+                    <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Short+Film+Still" alt="Short Film Still" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
+                    <div class="absolute bottom-4 left-4">
+                        <span class="text-xs text-yellow-500 uppercase tracking-widest">Film Making</span>
+                        <h3 class="text-2xl font-bold text-white oswald">"The Echo"</h3>
+                    </div>
+                </div>
+
+                <div class="group relative overflow-hidden rounded-lg aspect-[4/3]">
+                    <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Graphic+Design+Poster" alt="Graphic Design Poster" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
+                    <div class="absolute bottom-4 left-4">
+                        <span class="text-xs text-yellow-500 uppercase tracking-widest">Design</span>
+                        <h3 class="text-2xl font-bold text-white oswald">Workshop Poster</h3>
+                    </div>
+                </div>
+
+                <div class="group relative overflow-hidden rounded-lg aspect-[4/3]">
+                    <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Portrait+Shot" alt="Portrait Shot" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
+                    <div class="absolute bottom-4 left-4">
+                        <span class="text-xs text-yellow-500 uppercase tracking-widest">Photography</span>
+                        <h3 class="text-2xl font-bold text-white oswald">Member Headshot</h3>
+                    </div>
+                </div>
+
+                <div class="group relative overflow-hidden rounded-lg aspect-[4/3]">
+                    <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Podcast+Cover+Art" alt="Podcast Cover Art" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
+                    <div class="absolute bottom-4 left-4">
+                        <span class="text-xs text-yellow-500 uppercase tracking-widest">Design</span>
+                        <h3 class="text-2xl font-bold text-white oswald">Hive Talk Podcast</h3>
+                    </div>
+                </div>
+
+                <div class="group relative overflow-hidden rounded-lg aspect-[4/3]">
+                    <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Behind+The+Scenes" alt="Behind The Scenes" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
+                    <div class="absolute bottom-4 left-4">
+                        <span class="text-xs text-yellow-500 uppercase tracking-widest">Production</span>
+                        <h3 class="text-2xl font-bold text-white oswald">On Set</h3>
+                    </div>
+                </div>
+                
+                <div class="group relative overflow-hidden rounded-lg aspect-[4/3]">
+                    <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Social+Media+Graphic" alt="Social Media Graphic" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
+                    <div class="absolute bottom-4 left-4">
+                        <span class="text-xs text-yellow-500 uppercase tracking-widest">Social Media</span>
+                        <h3 class="text-2xl font-bold text-white oswald">Event Promo</h3>
+                    </div>
+                </div>
+                
+                <div class="group relative overflow-hidden rounded-lg aspect-[4/3]">
+                    <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Campus+Architecture" alt="Campus Architecture" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
+                    <div class="absolute bottom-4 left-4">
+                        <span class="text-xs text-yellow-500 uppercase tracking-widest">Photography</span>
+                        <h3 class="text-2xl font-bold text-white oswald">Campus Views</h3>
+                    </div>
+                </div>
+                
+                <div class="group relative overflow-hidden rounded-lg aspect-[4/3]">
+                    <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Music+Video+Still" alt="Music Video Still" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
+                    <div class="absolute bottom-4 left-4">
+                        <span class="text-xs text-yellow-500 uppercase tracking-widest">Film Making</span>
+                        <h3 class="text-2xl font-bold text-white oswald">Band Promo</h3>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+    <footer class="bg-gray-900 py-10 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-500">
+           <p>&copy; 2025 SIMS Media Hive. All Rights Reserved. Designed by <a href="https://dcagency.in" target="_blank">Darion Creative Agency.</a>.</p>
+        </div>
+    </footer>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // --- Mobile Menu Toggle Logic (Copied) ---
+        const menuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIcon = menuButton.querySelector('i');
+
+        menuButton.addEventListener('click', () => {
+            // Toggle the 'hidden' class on the mobile menu
+            mobileMenu.classList.toggle('hidden');
+            
+            // Toggle the visibility of the main body content (to prevent scrolling behind the menu)
+            document.body.classList.toggle('overflow-hidden');
+
+            // Toggle the icon (Menu <-> X)
+            const isMenuOpen = !mobileMenu.classList.contains('hidden');
+            if (isMenuOpen) {
+                // Menu is open, show 'x' icon
+                menuIcon.setAttribute('data-lucide', 'x');
+            } else {
+                // Menu is closed, show 'menu' icon
+                menuIcon.setAttribute('data-lucide', 'menu');
+            }
+            lucide.createIcons(); // Re-render the icon
+        });
+
+        // Close the mobile menu when a link is clicked (Copied)
+        document.querySelectorAll('#mobile-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                // Close the menu
+                mobileMenu.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+                
+                // Reset the icon
+                menuIcon.setAttribute('data-lucide', 'menu');
+                lucide.createIcons();
+            });
+        });
+
+        // Simple smooth scrolling for navigation (Copied)
+        // This is kept in case anchor links are added back to the home page
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if (targetId && targetId !== '#') {
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                         targetElement.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    }
+                }
+            });
+        });
+        
+        // --- Video Sequence Logic from original page has been REMOVED ---
+        // as it is not needed on the gallery page.
+
+    </script>
+</body>
+</html>

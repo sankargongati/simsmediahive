@@ -81,9 +81,7 @@
                 <li><a href="/index.html#work" class="hover:text-yellow-500 transition duration-300">Projects</a></li>
                 <li><a href="/members.html" class="hover:text-yellow-500 transition duration-300">Members</a></li>
                 <li><a href="/blog.html" class="hover:text-yellow-500 transition duration-300">Blog</a></li>
-                <li><a href="/gallery.html" class="hover:text-yellow-500 transition duration-300">Gallery</a></li>
                 <li><a href="/contact.html" class="hover:text-yellow-500 transition duration-300">Join Us</a></li>
-                
             </ul>
         </nav>
 
@@ -94,7 +92,6 @@
                 <li><a href="/index.html#work" class="hover:text-yellow-500 transition duration-300 block py-2">Projects</a></li>
                 <li><a href="/members.html" class="hover:text-yellow-500 transition duration-300 block py-2">Members</a></li>
                 <li><a href="/blog.html" class="hover:text-yellow-500 transition duration-300 block py-2">Blog</a></li>
-                <li><a href="/gallery.html" class="hover:text-yellow-500 transition duration-300">Gallery</a></li>
                 <li><a href="/contact.html" class="hover:text-yellow-500 transition duration-300 block py-2">Join Us</a></li>
             </ul>
         </nav>
@@ -114,9 +111,26 @@
     <section id="gallery-grid" class="bg-gray-950 py-20 md:py-32">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div id="filter-buttons" class="flex justify-center items-center space-x-4 mb-12">
+                <button 
+                    class="filter-btn px-6 py-2 font-semibold uppercase tracking-wider text-sm rounded-full transition duration-300 bg-yellow-500 text-black" 
+                    data-filter="all">
+                    All
+                </button>
+                <button 
+                    class="filter-btn px-6 py-2 font-semibold uppercase tracking-wider text-sm rounded-full transition duration-300 bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white" 
+                    data-filter="photo">
+                    Photos
+                </button>
+                <button 
+                    class="filter-btn px-6 py-2 font-semibold uppercase tracking-wider text-sm rounded-full transition duration-300 bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white" 
+                    data-filter="video">
+                    Videos
+                </button>
+            </div>
+            <div id="gallery-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
-                <div class="group relative overflow-hidden rounded-lg aspect-[4/3]">
+                <div class="gallery-item group relative overflow-hidden rounded-lg aspect-[4/3]" data-category="photo">
                     <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Event+Photography" alt="Event Photography" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
                     <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
                     <div class="absolute bottom-4 left-4">
@@ -125,7 +139,7 @@
                     </div>
                 </div>
                 
-                <div class="group relative overflow-hidden rounded-lg aspect-[4/3]">
+                <div class="gallery-item group relative overflow-hidden rounded-lg aspect-[4/3]" data-category="video">
                     <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Short+Film+Still" alt="Short Film Still" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
                     <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
                     <div class="absolute bottom-4 left-4">
@@ -134,7 +148,7 @@
                     </div>
                 </div>
 
-                <div class="group relative overflow-hidden rounded-lg aspect-[4/3]">
+                <div class="gallery-item group relative overflow-hidden rounded-lg aspect-[4/3]" data-category="photo">
                     <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Graphic+Design+Poster" alt="Graphic Design Poster" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
                     <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
                     <div class="absolute bottom-4 left-4">
@@ -143,7 +157,7 @@
                     </div>
                 </div>
 
-                <div class="group relative overflow-hidden rounded-lg aspect-[4/3]">
+                <div class="gallery-item group relative overflow-hidden rounded-lg aspect-[4/3]" data-category="photo">
                     <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Portrait+Shot" alt="Portrait Shot" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
                     <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
                     <div class="absolute bottom-4 left-4">
@@ -152,7 +166,7 @@
                     </div>
                 </div>
 
-                <div class="group relative overflow-hidden rounded-lg aspect-[4/3]">
+                <div class="gallery-item group relative overflow-hidden rounded-lg aspect-[4/3]" data-category="photo">
                     <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Podcast+Cover+Art" alt="Podcast Cover Art" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
                     <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
                     <div class="absolute bottom-4 left-4">
@@ -161,7 +175,7 @@
                     </div>
                 </div>
 
-                <div class="group relative overflow-hidden rounded-lg aspect-[4/3]">
+                <div class="gallery-item group relative overflow-hidden rounded-lg aspect-[4/3]" data-category="video">
                     <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Behind+The+Scenes" alt="Behind The Scenes" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
                     <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
                     <div class="absolute bottom-4 left-4">
@@ -170,8 +184,8 @@
                     </div>
                 </div>
                 
-                <div class="group relative overflow-hidden rounded-lg aspect-[4/3]">
-                    <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Social+Media+Graphic" alt="Social Media Graphic" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
+                <div class="gallery-item group relative overflow-hidden rounded-lg aspect-[4/3]" data-category="photo">
+                    <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Social+Media+Graphic" alt="Social Media Graphic" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-1TEST-TOKEN_img">
                     <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
                     <div class="absolute bottom-4 left-4">
                         <span class="text-xs text-yellow-500 uppercase tracking-widest">Social Media</span>
@@ -179,7 +193,7 @@
                     </div>
                 </div>
                 
-                <div class="group relative overflow-hidden rounded-lg aspect-[4/3]">
+                <div class="gallery-item group relative overflow-hidden rounded-lg aspect-[4/3]" data-category="photo">
                     <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Campus+Architecture" alt="Campus Architecture" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
                     <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
                     <div class="absolute bottom-4 left-4">
@@ -188,7 +202,7 @@
                     </div>
                 </div>
                 
-                <div class="group relative overflow-hidden rounded-lg aspect-[4/3]">
+                <div class="gallery-item group relative overflow-hidden rounded-lg aspect-[4/3]" data-category="video">
                     <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Music+Video+Still" alt="Music Video Still" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
                     <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
                     <div class="absolute bottom-4 left-4">
@@ -215,39 +229,28 @@
         const menuIcon = menuButton.querySelector('i');
 
         menuButton.addEventListener('click', () => {
-            // Toggle the 'hidden' class on the mobile menu
             mobileMenu.classList.toggle('hidden');
-            
-            // Toggle the visibility of the main body content (to prevent scrolling behind the menu)
             document.body.classList.toggle('overflow-hidden');
-
-            // Toggle the icon (Menu <-> X)
             const isMenuOpen = !mobileMenu.classList.contains('hidden');
             if (isMenuOpen) {
-                // Menu is open, show 'x' icon
                 menuIcon.setAttribute('data-lucide', 'x');
             } else {
-                // Menu is closed, show 'menu' icon
                 menuIcon.setAttribute('data-lucide', 'menu');
             }
-            lucide.createIcons(); // Re-render the icon
+            lucide.createIcons(); 
         });
 
         // Close the mobile menu when a link is clicked (Copied)
         document.querySelectorAll('#mobile-menu a').forEach(link => {
             link.addEventListener('click', () => {
-                // Close the menu
                 mobileMenu.classList.add('hidden');
                 document.body.classList.remove('overflow-hidden');
-                
-                // Reset the icon
                 menuIcon.setAttribute('data-lucide', 'menu');
                 lucide.createIcons();
             });
         });
 
         // Simple smooth scrolling for navigation (Copied)
-        // This is kept in case anchor links are added back to the home page
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -263,9 +266,47 @@
             });
         });
         
-        // --- Video Sequence Logic from original page has been REMOVED ---
-        // as it is not needed on the gallery page.
 
+        // --- NEW: Gallery Filter Logic ---
+        const filterButtons = document.querySelectorAll('#filter-buttons .filter-btn');
+        const galleryItems = document.querySelectorAll('#gallery-container .gallery-item');
+        
+        // Define the Tailwind classes for active/inactive states
+        const activeClasses = ['bg-yellow-500', 'text-black'];
+        const inactiveClasses = ['bg-gray-800', 'text-gray-400', 'hover:bg-gray-700', 'hover:text-white'];
+
+        if (filterButtons.length > 0 && galleryItems.length > 0) {
+            
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Get the filter value from the clicked button
+                    const filterValue = button.getAttribute('data-filter');
+
+                    // 1. Update button styles
+                    // First, set all buttons to inactive
+                    filterButtons.forEach(btn => {
+                        btn.classList.remove(...activeClasses);
+                        btn.classList.add(...inactiveClasses);
+                    });
+                    // Then, set the clicked button to active
+                    button.classList.remove(...inactiveClasses);
+                    button.classList.add(...activeClasses);
+
+                    // 2. Filter gallery items
+                    galleryItems.forEach(item => {
+                        const itemCategory = item.getAttribute('data-category');
+                        
+                        // Show item if 'all' is clicked OR if category matches filter
+                        if (filterValue === 'all' || itemCategory === filterValue) {
+                            item.classList.remove('hidden'); // Show it
+                        } else {
+                            item.classList.add('hidden'); // Hide it
+                        }
+                    });
+                });
+            });
+        }
+        
     </script>
 </body>
 </html>

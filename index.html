@@ -322,27 +322,27 @@
                         <h3 class="text-2xl font-bold text-white oswald">Annual Tech Fest</h3>
                     </div>
                 </div>
-
-                                <div class="group relative overflow-hidden rounded-lg logo-reveal-card" data-video-src="/src/logo_reveal.mp4">
+                <div class="group relative overflow-hidden rounded-lg logo-reveal-card" data-video-src="/src/logo_reveal.mp4">
                     <video
                         id="logo-video"
                         loop
                         muted
                         playsinline
                         preload="metadata"
-                        poster="https://placehold.co/800x600/1c1917/f59e0b?text=PROJECT+3%3A+LOGO+REVEAL"
+                        poster="https://placehold.co/800x600/1c1917/f59e0b?text=PROJECT+3%3A+DESIGN+CAMPAIGN+CLICK+TO+PLAY"
                         class="w-full h-auto object-cover transform transition duration-500 group-hover:scale-105"
                         oncontextmenu="return false;"
                     >
                         <source src="/src/logo_reveal.mp4" type="video/mp4">
                         Your browser does not support the video tag.
                     </video>
-                    <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
-                    <div class="absolute bottom-4 left-4">
-                        <span class="text-xs text-yellow-500 uppercase tracking-widest">Graphic Design</span>
-                        <h3 class="text-2xl font-bold text-white oswald">New Logo Reveal</h3>
-                    </div>
-                </div>
+                
+                    <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
+                    <div class="absolute bottom-4 left-4">
+                        <span class="text-xs text-yellow-500 uppercase tracking-widest">Graphic Design</span>
+                        <h3 class="text-2xl font-bold text-white oswald">New Logo Reveal</h3>
+                    </div>
+                </div>
 
                 <div class="group relative overflow-hidden rounded-lg">
                     <img src="https://placehold.co/800x600/1c1917/f59e0b?text=PROJECT+4%3A+MUSIC+VIDEO" onerror="this.onerror=null;this.src='https://placehold.co/800x600/1c1917/f59e0b?text=PROJECT+4%3A+MUSIC+VIDEO';" alt="Project 4" class="w-full h-auto object-cover transform transition duration-500 group-hover:scale-105">
@@ -416,7 +416,7 @@
             });
         });
         
-        // --- Hero Video Sequence Logic ---
+        // --- NEW: Video Sequence Logic ---
         const heroVideos = document.querySelectorAll('.hero-video');
         const videoCount = heroVideos.length;
 
@@ -480,28 +480,25 @@
             // Start the sequence with the first video
             setupVideoTransition(heroVideos[0]);
         }
-
-        // --- NEW: Logo Reveal Hover-to-Play Logic ---
+              // --- NEW: Logo Reveal Hover-to-Play Logic ---
         const logoVideo = document.getElementById('logo-video');
-        const logoVideoContainer = logoVideo ? logoVideo.closest('.logo-reveal-card') : null;
-
+        const logoVideoContainer = logoVideo.closest('.logo-reveal-card'); // Find the parent element with the class
+        
         if (logoVideo && logoVideoContainer) {
             logoVideoContainer.addEventListener('mouseenter', () => {
                 // Play the video when mouse enters the card
                 logoVideo.play().catch(error => {
                     console.warn("Play prevented, attempting a muted play:", error);
-                    // Muted play fallback for browsers that require user interaction
-                    logoVideo.muted = true;
-                    logoVideo.play();
                 });
             });
-
+        
             logoVideoContainer.addEventListener('mouseleave', () => {
                 // Pause and reset the video when mouse leaves the card
                 logoVideo.pause();
                 logoVideo.currentTime = 0; // Reset to the start
             });
         }
-    </script>
+            
+    </script>
 </body>
 </html>

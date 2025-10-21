@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel | SIMS Media Hive</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Oswald:wght@700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #0d0d0d; color: #f3f4f6; }
+        .oswald { font-family: 'Oswald', sans-serif; }
+    </style>
+</head>
+<body class="antialiased">
+    <!-- Header -->
+    <header class="bg-gray-900 border-b border-gray-800 py-4">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-white oswald tracking-wider">Admin Panel</h1>
+            <button id="logout-button" class="px-4 py-2 text-sm font-semibold bg-red-600 text-white rounded-md hover:bg-red-700 transition">Logout</button>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <!-- Upload Form Section -->
+        <section class="bg-gray-900 p-8 rounded-lg border border-gray-800 mb-12">
+            <h2 class="text-2xl font-bold text-yellow-500 oswald mb-6">Add New Gallery Item</h2>
+            <form id="upload-form" class="space-y-6">
+                <div>
+                    <label for="image-title" class="block text-sm font-medium text-gray-300 mb-2">Image Title</label>
+                    <input type="text" id="image-title" required class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-yellow-500 focus:border-yellow-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Category</label>
+                    <div class="flex items-center space-x-6">
+                        <label class="flex items-center"><input type="radio" name="category" value="photo" checked class="text-yellow-500 focus:ring-yellow-500"> <span class="ml-2">Photo</span></label>
+                        <label class="flex items-center"><input type="radio" name="category" value="video" class="text-yellow-500 focus:ring-yellow-500"> <span class="ml-2">Video</span></label>
+                    </div>
+                </div>
+                <div>
+                    <label for="image-file" class="block text-sm font-medium text-gray-300 mb-2">Image File</label>
+                    <input type="file" id="image-file" accept="image/*" required class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-500 file:text-black hover:file:bg-yellow-600">
+                </div>
+                <div>
+                    <button type="submit" class="w-full py-3 px-4 font-semibold text-black bg-yellow-500 rounded-md hover:bg-yellow-600 transition">Upload Image</button>
+                </div>
+                <div id="upload-status" class="text-center text-sm"></div>
+            </form>
+        </section>
+
+        <!-- Existing Images Section -->
+        <section>
+            <h2 class="text-2xl font-bold text-yellow-500 oswald mb-6">Manage Gallery</h2>
+            <div id="image-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <!-- Images will be loaded here by JavaScript -->
+            </div>
+        </section>
+    </main>
+    
+    <!-- Firebase SDKs -->
+    <script type="module">
+        // IMPORTANT: Paste your Firebase config object here
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+        apiKey: "AIzaSyA-Kcss4mnTnHhjDvgpNnlpVx70FUDvkDE",
+        authDomain: "simsmedia-1f168.firebaseapp.com",
+        projectId: "simsmedia-1f168",
+        storageBucket: "simsmedia-1f168.firebasestorage.app",
+        messagingSenderId: "373738766823",
+        appId: "1:373738766823:web:139dacde30a4ecccb03d42",
+        measurementId: "G-KK5BQZWGE8"
+        };
+        
+        // Import Firebase functions
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, getDocs, addDoc, serverTimestamp, deleteDoc, doc, orderBy, query } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        const uploadForm = document.getElementById('upload-form');
+        const imageList = document.getElementById('image-list');
+        const uploadStatus = document.getElementById('upload-status');
+        const logoutButton = document.getElementById('logout-button');
+
+        // --- Authentication Guard ---
+        // This is crucial. It checks if a user is logged in. If not, it redirects to the login page.
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // User is signed in, allow access to the page and load the images.
+                console.log('Admin user authenticated.');
+                loadImages();
+            } else {
+                // No user is signed in, redirect to login page.
+                console.log('No user authenticated, redirecting to login.');
+                window.location.href = '/login.html';
+            }
+        });
+
+        // --- Logout Logic ---
+        logoutButton.addEventListener('click', () => {
+            signOut(auth).then(() => {
+                console.log('User signed out.');
+                window.location.href = '/login.html';
+            }).catch((error) => {
+                console.error('Sign out error', error);
+            });
+        });
+
+        // --- Load Existing Images ---
+        async function loadImages() {
+            imageList.innerHTML = '<p class="text-gray-400">Loading images...</p>';
+            const q = query(collection(db, "galleryImages"), orderBy("createdAt", "desc"));
+            const querySnapshot = await getDocs(q);
+            imageList.innerHTML = ''; // Clear loading message
+            if (querySnapshot.empty) {
+                imageList.innerHTML = '<p class="text-gray-400">No images in the gallery yet. Upload one above!</p>';
+            } else {
+                querySnapshot.forEach((doc) => {
+                    const imageData = doc.data();
+                    const imageCard = `
+                        <div class="relative group bg-gray-900 border border-gray-800 rounded-lg overflow-hidden">
+                            <img src="${imageData.imageUrl}" alt="${imageData.title}" class="w-full h-48 object-cover">
+                            <div class="p-4">
+                                <p class="font-bold text-white truncate">${imageData.title}</p>
+                                <p class="text-sm text-gray-400 capitalize">${imageData.category}</p>
+                            </div>
+                            <button data-id="${doc.id}" data-path="${imageData.storagePath}" class="delete-btn absolute top-2 right-2 p-1.5 bg-red-600 text-white rounded-full hover:bg-red-700 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            </button>
+                        </div>
+                    `;
+                    imageList.insertAdjacentHTML('beforeend', imageCard);
+                });
+            }
+        }
+
+        // --- Handle Image Upload ---
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('image-title').value;
+            const category = document.querySelector('input[name="category"]:checked').value;
+            const file = document.getElementById('image-file').files[0];
+            
+            if (!file) {
+                uploadStatus.textContent = 'Please select a file.';
+                uploadStatus.style.color = 'red';
+                return;
+            }
+
+            uploadStatus.textContent = 'Uploading...';
+            uploadStatus.style.color = 'white';
+
+            try {
+                // 1. Upload file to Firebase Storage
+                const storagePath = `gallery/${Date.now()}_${file.name}`;
+                const storageRef = ref(storage, storagePath);
+                await uploadBytes(storageRef, file);
+
+                // 2. Get the public URL of the file
+                const imageUrl = await getDownloadURL(storageRef);
+
+                // 3. Add image metadata to Firestore
+                await addDoc(collection(db, "galleryImages"), {
+                    title: title,
+                    category: category,
+                    imageUrl: imageUrl,
+                    storagePath: storagePath, // Store path for deletion
+                    createdAt: serverTimestamp()
+                });
+                
+                uploadStatus.textContent = 'Upload successful!';
+                uploadStatus.style.color = 'green';
+                uploadForm.reset();
+                loadImages(); // Refresh the list
+
+            } catch (error) {
+                console.error("Upload failed:", error);
+                uploadStatus.textContent = `Upload failed: ${error.message}`;
+                uploadStatus.style.color = 'red';
+            }
+        });
+
+        // --- Handle Image Deletion (using event delegation) ---
+        imageList.addEventListener('click', async (e) => {
+            if (e.target.closest('.delete-btn')) {
+                const button = e.target.closest('.delete-btn');
+                const docId = button.dataset.id;
+                const storagePath = button.dataset.path;
+
+                if (confirm('Are you sure you want to delete this image?')) {
+                    try {
+                        // 1. Delete Firestore document
+                        await deleteDoc(doc(db, "galleryImages", docId));
+                        
+                        // 2. Delete file from Storage
+                        const storageRef = ref(storage, storagePath);
+                        await deleteObject(storageRef);
+
+                        alert('Image deleted successfully!');
+                        loadImages(); // Refresh the list
+                    } catch (error) {
+                        console.error("Deletion failed:", error);
+                        alert(`Deletion failed: ${error.message}`);
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

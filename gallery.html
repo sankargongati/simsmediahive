@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,6 +6,8 @@
     <title>SIMS Media Hive | Gallery</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Include the Supabase JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         /* Custom styles to match the dark theme and font (COPIED FROM ORIGINAL) */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Oswald:wght@200..700&display=swap');
@@ -23,32 +25,6 @@
             background-color: var(--dark-bg);
             color: var(--text-light);
             overflow-x: hidden;
-        }
-
-        /* Copied this style for consistency, though it's not used on this specific page */
-        .circular-text-container {
-            width: 90px;
-            height: 90px;
-            border-radius: 50%;
-            border: 1px solid var(--primary-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            animation: rotate 15s linear infinite;
-        }
-
-        @keyframes rotate {
-            from {
-                transform: rotate(0deg);
-            }
-            to {
-                transform: rotate(360deg);
-            }
         }
 
         .oswald {
@@ -128,152 +104,10 @@
                     Videos
                 </button>
             </div>
+            <!-- This container will be populated by Supabase -->
             <div id="gallery-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-
-                <div class="gallery-item group relative overflow-hidden rounded-lg aspect-[4/3]" data-category="photo">
-                    <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Event+Photography" alt="Event Photography" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
-                    <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
-                    <div class="absolute bottom-4 left-4">
-                        <span class="text-xs text-yellow-500 uppercase tracking-widest">Photography</span>
-                        <h3 class="text-2xl font-bold text-white oswald">Annual Fest</h3>
-                    </div>
-                </div>
-                
-                <div class="gallery-item group relative overflow-hidden rounded-lg aspect-[4/3]" data-category="video">
-                    <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Short+Film+Still" alt="Short Film Still" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
-                    <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
-                    <div class="absolute bottom-4 left-4">
-                        <span class="text-xs text-yellow-500 uppercase tracking-widest">Film Making</span>
-                        <h3 class="text-2xl font-bold text-white oswald">"The Echo"</h3>
-                    </div>
-                </div>
-
-                <div class="gallery-item group relative overflow-hidden rounded-lg aspect-[4/3]" data-category="photo">
-                    <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Graphic+Design+Poster" alt="Graphic Design Poster" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
-                    <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
-                    <div class="absolute bottom-4 left-4">
-                        <span class="text-xs text-yellow-500 uppercase tracking-widest">Design</span>
-                        <h3 class="text-2xl font-bold text-white oswald">Workshop Poster</h3>
-                    </div>
-                </div>
-
-                <div class="gallery-item group relative overflow-hidden rounded-lg aspect-[4/3]" data-category="photo">
-                    <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Portrait+Shot" alt="Portrait Shot" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
-                    <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
-                    <div class="absolute bottom-4 left-4">
-                        <span class="text-xs text-yellow-500 uppercase tracking-widest">Photography</span>
-                        <h3 class="text-2xl font-bold text-white oswald">Member Headshot</h3>
-                    </div>
-                </div>
-
-                <div class="gallery-item group relative overflow-hidden rounded-lg aspect-[4/3]" data-category="photo">
-                    <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Podcast+Cover+Art" alt="Podcast Cover Art" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
-                    <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
-                    <div class="absolute bottom-4 left-4">
-                        <span class="text-xs text-yellow-500 uppercase tracking-widest">Design</span>
-                        <h3 class="text-2xl font-bold text-white oswald">Hive Talk Podcast</h3>
-                    </div>
-                </div>
-
-                <div class="gallery-item group relative overflow-hidden rounded-lg aspect-[4/3]" data-category="video">
-                    <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Behind+The+Scenes" alt="Behind The Scenes" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
-                    <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
-                    <div class="absolute bottom-4 left-4">
-                        <span class="text-xs text-yellow-500 uppercase tracking-widest">Production</span>
-                        <h3 class="text-2xl font-bold text-white oswald">On Set</h3>
-                    </div>
-                </div>
-                
-                <div class="gallery-item group relative overflow-hidden rounded-lg aspect-[4/3]" data-category="photo">
-                    <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Social+Media+Graphic" alt="Social Media Graphic" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
-                    <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
-                    <div class="absolute bottom-4 left-4">
-                        <span class="text-xs text-yellow-500 uppercase tracking-widest">Social Media</span>
-                        <h3 class="text-2xl font-bold text-white oswald">Event Promo</h3>
-                    </div>
-                </div>
-                
-                <div class="gallery-item group relative overflow-hidden rounded-lg aspect-[4/3]" data-category="photo">
-                    <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Campus+Architecture" alt="Campus Architecture" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
-                    <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
-                    <div class="absolute bottom-4 left-4">
-                        <span class="text-xs text-yellow-500 uppercase tracking-widest">Photography</span>
-                        <h3 class="text-2xl font-bold text-white oswald">Campus Views</h3>
-                    </div>
-                </div>
-                
-                <div class="gallery-item group relative overflow-hidden rounded-lg aspect-[4/3]" data-category="video">
-                    <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Music+Video+Still" alt="Music Video Still" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
-                    <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
-                    <div class="absolute bottom-4 left-4">
-                        <span class="text-xs text-yellow-500 uppercase tracking-widest">Film Making</span>
-                        <h3 class="text-2xl font-bold text-white oswald">Band Promo</h3>
-                    </div>
-                </div>
-                
-                <div class="gallery-item group relative overflow-hidden rounded-lg aspect-[4/3]" data-category="photo">
-                    <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Cultural+Night" alt="Cultural Night" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
-                    <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
-                    <div class="absolute bottom-4 left-4">
-                        <span class="text-xs text-yellow-500 uppercase tracking-widest">Photography</span>
-                        <h3 class="text-2xl font-bold text-white oswald">Cultural Night</h3>
-                    </div>
-                </div>
-
-                <div class="gallery-item group relative overflow-hidden rounded-lg aspect-[4/3]" data-category="video">
-                    <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Interview+Setup" alt="Interview Setup" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
-                    <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
-                    <div class="absolute bottom-4 left-4">
-                        <span class="text-xs text-yellow-500 uppercase tracking-widest">Video</span>
-                        <h3 class="text-2xl font-bold text-white oswald">Guest Interview</h3>
-                    </div>
-                </div>
-
-                <div class="gallery-item group relative overflow-hidden rounded-lg aspect-[4/3]" data-category="photo">
-                    <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Drone+Shot" alt="Drone Shot" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
-                    <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
-                    <div class="absolute bottom-4 left-4">
-                        <span class="text-xs text-yellow-500 uppercase tracking-widest">Photography</span>
-                        <h3 class="text-2xl font-bold text-white oswald">Aerial View</h3>
-                    </div>
-                </div>
-
-                <div class="gallery-item group relative overflow-hidden rounded-lg aspect-[4/3]" data-category="video">
-                    <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Promo+Video" alt="Promo Video" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
-                    <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
-                    <div class="absolute bottom-4 left-4">
-                        <span class="text-xs text-yellow-500 uppercase tracking-widest">Video</span>
-                        <h3 class="text-2xl font-bold text-white oswald">Join Us Promo</h3>
-                    </div>
-                </div>
-
-                <div class="gallery-item group relative overflow-hidden rounded-lg aspect-[4/3]" data-category="photo">
-                    <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Team+Photo" alt="Team Photo" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
-                    <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
-                    <div class="absolute bottom-4 left-4">
-                        <span class="text-xs text-yellow-500 uppercase tracking-widest">Group</span>
-                        <h3 class="text-2xl font-bold text-white oswald">Media Hive Team</h3>
-                    </div>
-                </div>
-
-                <div class="gallery-item group relative overflow-hidden rounded-lg aspect-[4/3]" data-category="video">
-                    <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Sports+Highlight" alt="Sports Highlight" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
-                    <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
-                    <div class="absolute bottom-4 left-4">
-                        <span class="text-xs text-yellow-500 uppercase tracking-widest">Video</span>
-                        <h3 class="text-2xl font-bold text-white oswald">Sports Day Reel</h3>
-                    </div>
-                </div>
-
-                <div class="gallery-item group relative overflow-hidden rounded-lg aspect-[4/3]" data-category="photo">
-                    <img src="https://placehold.co/800x600/1c1917/f59e0b?text=Logo+Mockup" alt="Logo Mockup" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
-                    <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
-                    <div class="absolute bottom-4 left-4">
-                        <span class="text-xs text-yellow-500 uppercase tracking-widest">Design</span>
-                        <h3 class="text-2xl font-bold text-white oswald">Brand Identity</h3>
-                    </div>
-                </div>
-                </div>
+                <!-- A loading message will be shown initially -->
+            </div>
             </div>
     </section>
     <footer class="bg-gray-900 py-10 border-t border-gray-800">
@@ -281,11 +115,13 @@
            <p>&copy; 2025 SIMS Media Hive. All Rights Reserved. Designed by <a href="https://dcagency.in" target="_blank">Darion Creative Agency.</a>.</p>
         </div>
     </footer>
-    <script>
+
+    <!-- ======================= START: NEW SCRIPT BLOCK ======================= -->
+    <script type="module">
         // Initialize Lucide icons
         lucide.createIcons();
 
-        // --- Mobile Menu Toggle Logic (Copied) ---
+        // --- Mobile Menu Toggle Logic (Copied from original) ---
         const menuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
         const menuIcon = menuButton.querySelector('i');
@@ -302,7 +138,6 @@
             lucide.createIcons(); 
         });
 
-        // Close the mobile menu when a link is clicked (Copied)
         document.querySelectorAll('#mobile-menu a').forEach(link => {
             link.addEventListener('click', () => {
                 mobileMenu.classList.add('hidden');
@@ -312,7 +147,6 @@
             });
         });
 
-        // Simple smooth scrolling for navigation (Copied)
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -328,47 +162,98 @@
             });
         });
         
-
-        // --- Gallery Filter Logic (Unchanged) ---
-        const filterButtons = document.querySelectorAll('#filter-buttons .filter-btn');
-        const galleryItems = document.querySelectorAll('#gallery-container .gallery-item');
+        // --- Supabase Gallery Logic ---
         
-        // Define the Tailwind classes for active/inactive states
-        const activeClasses = ['bg-yellow-500', 'text-black'];
-        const inactiveClasses = ['bg-gray-800', 'text-gray-400', 'hover:bg-gray-700', 'hover:text-white'];
+        // --- CONFIGURATION ---
+        // PASTE YOUR KEYS FROM THE SUPABASE DASHBOARD HERE
+        const SUPABASE_URL = 'https://gswdqdsviqrzsoahxapc.supabase.co/'; 
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdzd2RxZHN2aXFyenNvYWh4YXBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4ODM5NzcsImV4cCI6MjA3NjQ1OTk3N30.JFF6NFIdqZAE9ioHeMdfIVpN84UtN_Z0K2pZYodlpZY';
 
-        if (filterButtons.length > 0 && galleryItems.length > 0) {
-            
-            filterButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    // Get the filter value from the clicked button
-                    const filterValue = button.getAttribute('data-filter');
 
-                    // 1. Update button styles
-                    // First, set all buttons to inactive
-                    filterButtons.forEach(btn => {
-                        btn.classList.remove(...activeClasses);
-                        btn.classList.add(...inactiveClasses);
-                    });
-                    // Then, set the clicked button to active
-                    button.classList.remove(...inactiveClasses);
-                    button.classList.add(...activeClasses);
+        // --- INITIALIZATION ---
+        const { createClient } = supabase;
+        const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-                    // 2. Filter gallery items
-                    galleryItems.forEach(item => {
-                        const itemCategory = item.getAttribute('data-category');
-                        
-                        // Show item if 'all' is clicked OR if category matches filter
-                        if (filterValue === 'all' || itemCategory === filterValue) {
-                            item.classList.remove('hidden'); // Show it
-                        } else {
-                            item.classList.add('hidden'); // Hide it
-                        }
-                    });
+        const galleryContainer = document.getElementById('gallery-container');
+
+        async function loadGallery() {
+            galleryContainer.innerHTML = '<p class="text-gray-400 col-span-full text-center">Loading gallery...</p>';
+            try {
+                // Fetch data from the 'galleryImages' table in Supabase
+                const { data, error } = await _supabase
+                    .from('galleryImages')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error; // If Supabase returns an error, jump to the catch block
+                
+                galleryContainer.innerHTML = ''; // Clear the loading message
+                
+                if (data.length === 0) {
+                    galleryContainer.innerHTML = '<p class="text-gray-400 col-span-full text-center">The gallery is currently empty.</p>';
+                    return;
+                }
+
+                // If data is found, loop through it and create the HTML for each image
+                data.forEach((item) => {
+                    const galleryItemHTML = `
+                        <div class="gallery-item group relative overflow-hidden rounded-lg aspect-[4/3]" data-category="${item.category}">
+                            <img src="${item.imageUrl}" alt="${item.title}" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
+                            <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
+                            <div class="absolute bottom-4 left-4">
+                                <span class="text-xs text-yellow-500 uppercase tracking-widest">${item.category}</span>
+                                <h3 class="text-2xl font-bold text-white oswald">${item.title}</h3>
+                            </div>
+                        </div>
+                    `;
+                    galleryContainer.insertAdjacentHTML('beforeend', galleryItemHTML);
                 });
-            });
+
+                // Once images are loaded, make the filter buttons work
+                initializeFilter();
+
+            } catch (error) {
+                console.error("Error loading gallery:", error);
+                galleryContainer.innerHTML = `<p class="text-red-500 col-span-full text-center">Could not load gallery: ${error.message}</p>`;
+            }
         }
         
+        // --- Filter Logic (Copied from original) ---
+        function initializeFilter() {
+            const filterButtons = document.querySelectorAll('#filter-buttons .filter-btn');
+            const galleryItems = document.querySelectorAll('#gallery-container .gallery-item');
+            
+            const activeClasses = ['bg-yellow-500', 'text-black'];
+            const inactiveClasses = ['bg-gray-800', 'text-gray-400', 'hover:bg-gray-700', 'hover:text-white'];
+
+            if (filterButtons.length > 0 && galleryItems.length > 0) {
+                filterButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        const filterValue = button.getAttribute('data-filter');
+                        filterButtons.forEach(btn => {
+                            btn.classList.remove(...activeClasses);
+                            btn.classList.add(...inactiveClasses);
+                        });
+                        button.classList.remove(...inactiveClasses);
+                        button.classList.add(...activeClasses);
+
+                        galleryItems.forEach(item => {
+                            const itemCategory = item.getAttribute('data-category');
+                            if (filterValue === 'all' || itemCategory === filterValue) {
+                                item.classList.remove('hidden');
+                            } else {
+                                item.classList.add('hidden');
+                            }
+                        });
+                    });
+                });
+            }
+        }
+        
+        // --- Initial Page Load ---
+        document.addEventListener('DOMContentLoaded', loadGallery);
+        
     </script>
+    <!-- ======================== END: NEW SCRIPT BLOCK ======================== -->
 </body>
 </html>

@@ -1,4 +1,4 @@
-
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,254 +6,213 @@
     <title>SIMS Media Hive | Gallery</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Include the Supabase JS Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Custom styles to match the dark theme and font (COPIED FROM ORIGINAL) */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Oswald:wght@200..700&display=swap');
+        :root { --primary-color: #eab308; --dark-bg: #0d0d0d; --mid-bg: #1a1a1a; --text-light: #f3f4f6; --text-muted: #9ca3af; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--dark-bg); color: var(--text-light); overflow-x: hidden; }
+        .oswald { font-family: 'Oswald', sans-serif; }
 
-        :root {
-            --primary-color: #eab308; /* Tailwind yellow-500 equivalent */
-            --dark-bg: #0d0d0d;
-            --mid-bg: #1a1a1a;
-            --text-light: #f3f4f6;
-            --text-muted: #9ca3af;
-        }
+        /* Styles for the lightbox modal */
+        #lightbox-modal { display: none; /* Hidden by default */ position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.9); backdrop-filter: blur(5px); align-items: center; justify-content: center; } /* Use Flexbox for centering */
+        .lightbox-content { margin: auto; display: block; max-width: 90%; max-height: 85vh; /* Adjusted from absolute positioning */ }
+        .lightbox-content img, .lightbox-content video { width: auto; height: auto; max-width: 100%; max-height: 85vh; display: block; margin: 0 auto; border: 2px solid #374151; border-radius: 4px; }
+        #lightbox-close { position: absolute; top: 20px; right: 35px; color: #f1f1f1; font-size: 40px; font-weight: bold; transition: 0.3s; cursor: pointer; line-height: 1; z-index: 1010; }
+        #lightbox-close:hover, #lightbox-close:focus { color: #bbb; text-decoration: none; }
+        #lightbox-caption { margin: auto; display: block; width: 80%; max-width: 700px; text-align: center; color: #ccc; padding: 10px 0; /* Adjusted positioning if needed */ position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); font-size: 1rem; }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--dark-bg);
-            color: var(--text-light);
-            overflow-x: hidden;
-        }
-
-        .oswald {
-            font-family: 'Oswald', sans-serif;
-        }
+         /* Style for Video Icon Overlay */
+         .video-overlay-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 48px; height: 48px; background-color: rgba(0,0,0,0.6); border-radius: 50%; display: flex; align-items: center; justify-content: center; pointer-events: none; opacity: 0.8; transition: opacity 0.3s ease; }
+         .gallery-item:hover .video-overlay-icon { opacity: 1; }
+         .video-overlay-icon svg { color: white; width: 24px; height: 24px; }
     </style>
 </head>
 <body class="antialiased">
 
     <header class="bg-transparent absolute top-0 left-0 w-full z-20 pt-6">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-start">
-            <div class="text-xl font-extrabold tracking-widest text-white oswald">
-            <a href="index.html">SIMS Media Hive</a>
-            </div>
-
-            <div class="hidden md:block text-right text-xs text-gray-400">
-                <p>gds.simshive@gmail.com</p>
-                <p>+91 7981 951 879</p>
-            </div>
-            
-            <button id="mobile-menu-button" class="md:hidden p-2 text-yellow-500 hover:text-white transition duration-300 z-30">
-                <i data-lucide="menu" class="w-7 h-7"></i>
-            </button>
-        </div>
-
-        <nav class="hidden md:flex justify-center mt-4">
-            <ul class="flex space-x-8 text-sm font-medium uppercase tracking-widest text-gray-300">
-                <li><a href="/index.html" class="hover:text-yellow-500 transition duration-300">Home</a></li>
-                <li><a href="/index.html#focus" class="hover:text-yellow-500 transition duration-300">Focus</a></li>
-                <li><a href="/index.html#work" class="hover:text-yellow-500 transition duration-300">Projects</a></li>
-                <li><a href="/members.html" class="hover:text-yellow-500 transition duration-300">Members</a></li>
-                <li><a href="/blog.html" class="hover:text-yellow-500 transition duration-300">Blog</a></li>
-                <li><a href="/contact.html" class="hover:text-yellow-500 transition duration-300">Join Us</a></li>
-            </ul>
-        </nav>
-
-        <nav id="mobile-menu" class="hidden md:hidden fixed top-0 left-0 w-full h-full bg-gray-950/95 backdrop-blur-sm pt-24 pb-8 overflow-y-auto z-10">
-            <ul class="flex flex-col items-center space-y-8 text-xl font-semibold uppercase tracking-widest text-gray-300">
-                <li><a href="/index.html" class="hover:text-yellow-500 transition duration-300 block py-2">Home</a></li>
-                <li><a href="/index.html#focus" class="hover:text-yellow-500 transition duration-300 block py-2">Focus</a></li>
-                <li><a href="/index.html#work" class="hover:text-yellow-500 transition duration-300 block py-2">Projects</a></li>
-                <li><a href="/members.html" class="hover:text-yellow-500 transition duration-300 block py-2">Members</a></li>
-                <li><a href="/blog.html" class="hover:text-yellow-500 transition duration-300 block py-2">Blog</a></li>
-                <li><a href="/contact.html" class="hover:text-yellow-500 transition duration-300 block py-2">Join Us</a></li>
-            </ul>
-        </nav>
+         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-start"><div class="text-xl font-extrabold tracking-widest text-white oswald"><a href="index.html">SIMS Media Hive</a></div><div class="hidden md:block text-right text-xs text-gray-400"><p>gds.simshive@gmail.com</p><p>+91 7981 951 879</p></div><button id="mobile-menu-button" class="md:hidden p-2 text-yellow-500 hover:text-white transition duration-300 z-30"><i data-lucide="menu" class="w-7 h-7"></i></button></div><nav class="hidden md:flex justify-center mt-4"><ul class="flex space-x-8 text-sm font-medium uppercase tracking-widest text-gray-300"><li><a href="/index.html" class="hover:text-yellow-500 transition duration-300">Home</a></li><li><a href="/index.html#focus" class="hover:text-yellow-500 transition duration-300">Focus</a></li><li><a href="/index.html#work" class="hover:text-yellow-500 transition duration-300">Projects</a></li><li><a href="/members.html" class="hover:text-yellow-500 transition duration-300">Members</a></li><li><a href="/blog.html" class="hover:text-yellow-500 transition duration-300">Blog</a></li><li><a href="/contact.html" class="hover:text-yellow-500 transition duration-300">Join Us</a></li></ul></nav><nav id="mobile-menu" class="hidden md:hidden fixed top-0 left-0 w-full h-full bg-gray-950/95 backdrop-blur-sm pt-24 pb-8 overflow-y-auto z-10"><ul class="flex flex-col items-center space-y-8 text-xl font-semibold uppercase tracking-widest text-gray-300"><li><a href="/index.html" class="hover:text-yellow-500 transition duration-300 block py-2">Home</a></li><li><a href="/index.html#focus" class="hover:text-yellow-500 transition duration-300 block py-2">Focus</a></li><li><a href="/index.html#work" class="hover:text-yellow-500 transition duration-300 block py-2">Projects</a></li><li><a href="/members.html" class="hover:text-yellow-500 transition duration-300 block py-2">Members</a></li><li><a href="/blog.html" class="hover:text-yellow-500 transition duration-300 block py-2">Blog</a></li><li><a href="/contact.html" class="hover:text-yellow-500 transition duration-300 block py-2">Join Us</a></li></ul></nav>
     </header>
+
     <section class="bg-black pt-40 pb-20 md:pb-32 border-b border-gray-800">
-        <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <p class="text-sm text-yellow-500 uppercase tracking-widest mb-2">Our Work</p>
-            <h1 class="text-4xl sm:text-6xl font-bold text-white oswald">
-                Creative Gallery
-            </h1>
-            <p class="text-lg text-gray-400 max-w-3xl mx-auto mt-6">
-                A visual journey through our projects, from campus events and creative short films to graphic design and portrait photography.
-            </p>
+         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center"><p class="text-sm text-yellow-500 uppercase tracking-widest mb-2">Our Work</p><h1 class="text-4xl sm:text-6xl font-bold text-white oswald">Creative Gallery</h1><p class="text-lg text-gray-400 max-w-3xl mx-auto mt-6">A visual journey through our projects.</p></div>
+    </section>
+
+    <section id="gallery-grid-section" class="bg-gray-950 py-20 md:py-32">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div id="filter-buttons" class="flex justify-center items-center space-x-4 mb-12">
+                <button class="filter-btn px-6 py-2 font-semibold uppercase tracking-wider text-sm rounded-full transition duration-300 bg-yellow-500 text-black" data-filter="all">All</button>
+                <button class="filter-btn px-6 py-2 font-semibold uppercase tracking-wider text-sm rounded-full transition duration-300 bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white" data-filter="photo">Photos</button>
+                <button class="filter-btn px-6 py-2 font-semibold uppercase tracking-wider text-sm rounded-full transition duration-300 bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white" data-filter="video">Videos</button>
+            </div>
+            <div id="gallery-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <p id="loading-message" class="text-gray-400 col-span-full text-center">Loading gallery...</p>
+            </div>
         </div>
     </section>
 
-    <section id="gallery-grid" class="bg-gray-950 py-20 md:py-32">
-        <div class="max-w-8xl mx-auto px-4 sm:px-7 lg:px-8">
-            
-            <div id="filter-buttons" class="flex justify-center items-center space-x-4 mb-12">
-                <button 
-                    class="filter-btn px-6 py-2 font-semibold uppercase tracking-wider text-sm rounded-full transition duration-300 bg-yellow-500 text-black" 
-                    data-filter="all">
-                    All
-                </button>
-                <button 
-                    class="filter-btn px-6 py-2 font-semibold uppercase tracking-wider text-sm rounded-full transition duration-300 bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white" 
-                    data-filter="photo">
-                    Photos
-                </button>
-                <button 
-                    class="filter-btn px-6 py-2 font-semibold uppercase tracking-wider text-sm rounded-full transition duration-300 bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white" 
-                    data-filter="video">
-                    Videos
-                </button>
-            </div>
-            <!-- This container will be populated by Supabase -->
-            <div id="gallery-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <!-- A loading message will be shown initially -->
-            </div>
-            </div>
-    </section>
     <footer class="bg-gray-900 py-10 border-t border-gray-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-500">
-           <p>&copy; 2025 SIMS Media Hive. All Rights Reserved. Designed by <a href="https://dcagency.in" target="_blank">Darion Creative Agency.</a>.</p>
-        </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-500"><p>&copy; 2025 SIMS Media Hive. All Rights Reserved.</p></div>
     </footer>
 
-    <!-- ======================= START: NEW SCRIPT BLOCK ======================= -->
+    <div id="lightbox-modal" class="cursor-pointer">
+        <span id="lightbox-close">&times;</span>
+        <div id="lightbox-media-content" class="lightbox-content">
+            </div>
+        <div id="lightbox-caption"></div>
+    </div>
+
+
     <script type="module">
-        // Initialize Lucide icons
         lucide.createIcons();
+        // --- Mobile Menu Logic ---
+        const menuButton = document.getElementById('mobile-menu-button'); const mobileMenu = document.getElementById('mobile-menu'); if (menuButton) { const menuIcon = menuButton.querySelector('i'); if (mobileMenu && menuIcon) { menuButton.addEventListener('click', () => { mobileMenu.classList.toggle('hidden'); document.body.classList.toggle('overflow-hidden'); const isOpen = !mobileMenu.classList.contains('hidden'); menuIcon.setAttribute('data-lucide', isOpen ? 'x' : 'menu'); lucide.createIcons(); }); document.querySelectorAll('#mobile-menu a').forEach(link => { link.addEventListener('click', () => { mobileMenu.classList.add('hidden'); document.body.classList.remove('overflow-hidden'); menuIcon.setAttribute('data-lucide', 'menu'); lucide.createIcons(); }); }); } }
 
-        // --- Mobile Menu Toggle Logic (Copied from original) ---
-        const menuButton = document.getElementById('mobile-menu-button');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const menuIcon = menuButton.querySelector('i');
-
-        menuButton.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-            document.body.classList.toggle('overflow-hidden');
-            const isMenuOpen = !mobileMenu.classList.contains('hidden');
-            if (isMenuOpen) {
-                menuIcon.setAttribute('data-lucide', 'x');
-            } else {
-                menuIcon.setAttribute('data-lucide', 'menu');
-            }
-            lucide.createIcons(); 
-        });
-
-        document.querySelectorAll('#mobile-menu a').forEach(link => {
-            link.addEventListener('click', () => {
-                mobileMenu.classList.add('hidden');
-                document.body.classList.remove('overflow-hidden');
-                menuIcon.setAttribute('data-lucide', 'menu');
-                lucide.createIcons();
-            });
-        });
-
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const targetId = this.getAttribute('href');
-                if (targetId && targetId !== '#') {
-                    const targetElement = document.querySelector(targetId);
-                    if (targetElement) {
-                         targetElement.scrollIntoView({
-                            behavior: 'smooth'
-                        });
-                    }
-                }
-            });
-        });
-        
-        // --- Supabase Gallery Logic ---
-        
-        // --- CONFIGURATION ---
-        // PASTE YOUR KEYS FROM THE SUPABASE DASHBOARD HERE
+        // --- Supabase & Gallery Logic ---
         const SUPABASE_URL = 'https://gswdqdsviqrzsoahxapc.supabase.co/'; 
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdzd2RxZHN2aXFyenNvYWh4YXBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4ODM5NzcsImV4cCI6MjA3NjQ1OTk3N30.JFF6NFIdqZAE9ioHeMdfIVpN84UtN_Z0K2pZYodlpZY';
 
-
-        // --- INITIALIZATION ---
         const { createClient } = supabase;
         const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const galleryContainer = document.getElementById('gallery-container');
+        const loadingMessage = document.getElementById('loading-message');
+        const defaultPlaceholder = 'https://placehold.co/800x600/1c1917/f59e0b?text=MEDIA';
+
+        // Lightbox elements
+        const lightboxModal = document.getElementById('lightbox-modal');
+        const lightboxMediaContent = document.getElementById('lightbox-media-content');
+        const lightboxCaption = document.getElementById('lightbox-caption');
+        const lightboxClose = document.getElementById('lightbox-close');
+
+        function isVideoUrl(url) {
+            if (!url) return false;
+            const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv'];
+            const lowerUrl = url.toLowerCase();
+            return videoExtensions.some(ext => lowerUrl.endsWith(ext));
+        }
 
         async function loadGallery() {
-            galleryContainer.innerHTML = '<p class="text-gray-400 col-span-full text-center">Loading gallery...</p>';
             try {
-                // Fetch data from the 'galleryImages' table in Supabase
                 const { data, error } = await _supabase
-                    .from('galleryImages')
+                    .from('galleryImages') // Use the correct table name
                     .select('*')
                     .order('created_at', { ascending: false });
 
-                if (error) throw error; // If Supabase returns an error, jump to the catch block
-                
-                galleryContainer.innerHTML = ''; // Clear the loading message
-                
+                if (error) throw error;
+                galleryContainer.innerHTML = ''; // Clear loading
+
                 if (data.length === 0) {
-                    galleryContainer.innerHTML = '<p class="text-gray-400 col-span-full text-center">The gallery is currently empty.</p>';
+                    galleryContainer.innerHTML = '<p class="text-gray-400 col-span-full text-center">Gallery is empty.</p>';
                     return;
                 }
 
-                // If data is found, loop through it and create the HTML for each image
                 data.forEach((item) => {
+                    // Determine category based on DB field OR URL if needed
+                    const isVideo = item.category === 'video' || (item.category !== 'photo' && isVideoUrl(item.imageUrl));
+                    const itemCategory = isVideo ? 'video' : 'photo';
+                    // Use actual image URL for preview if it's an image, otherwise use default
+                    const previewSrc = !isVideo && item.imageUrl ? item.imageUrl : defaultPlaceholder;
+
                     const galleryItemHTML = `
-                        <div class="gallery-item group relative overflow-hidden rounded-lg aspect-[4/3]" data-category="${item.category}">
-                            <img src="${item.imageUrl}" alt="${item.title}" class="absolute inset-0 w-full h-full object-cover transform transition duration-500 group-hover:scale-105">
+                        <div class="gallery-item group relative overflow-hidden rounded-lg aspect-[4/3] cursor-pointer bg-gray-800"
+                             data-category="${itemCategory}"
+                             data-src="${item.imageUrl || ''}"
+                             data-title="${item.title || 'Gallery Item'}"
+                             data-is-video="${isVideo}">
+                            <img src="${previewSrc}"
+                                 alt="Preview: ${item.title || 'Gallery item'}"
+                                 onerror="this.onerror=null;this.src='${defaultPlaceholder}';"
+                                 class="absolute inset-0 w-full h-full object-cover transition duration-500 group-hover:scale-105">
+                            ${isVideo ? `
+                                <div class="video-overlay-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                </div>
+                            ` : ''}
                             <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
-                            <div class="absolute bottom-4 left-4">
-                                <span class="text-xs text-yellow-500 uppercase tracking-widest">${item.category}</span>
-                                <h3 class="text-2xl font-bold text-white oswald">${item.title}</h3>
+                            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent pt-10">
+                                <span class="text-xs text-yellow-500 uppercase tracking-widest">${itemCategory}</span>
+                                <h3 class="text-lg font-bold text-white oswald truncate">${item.title || 'Untitled'}</h3>
                             </div>
                         </div>
                     `;
                     galleryContainer.insertAdjacentHTML('beforeend', galleryItemHTML);
                 });
 
-                // Once images are loaded, make the filter buttons work
-                initializeFilter();
+                initializeFilter(); // Setup filter buttons
+                initializeLightbox(); // Setup lightbox clicks
 
             } catch (error) {
                 console.error("Error loading gallery:", error);
+                 if(loadingMessage) loadingMessage.remove(); // Remove loading msg on error
                 galleryContainer.innerHTML = `<p class="text-red-500 col-span-full text-center">Could not load gallery: ${error.message}</p>`;
+            } finally {
+                lucide.createIcons(); // Render any icons (like video overlay)
             }
         }
-        
-        // --- Filter Logic (Copied from original) ---
+
+        // --- Filter Logic (Unchanged) ---
         function initializeFilter() {
             const filterButtons = document.querySelectorAll('#filter-buttons .filter-btn');
             const galleryItems = document.querySelectorAll('#gallery-container .gallery-item');
-            
             const activeClasses = ['bg-yellow-500', 'text-black'];
             const inactiveClasses = ['bg-gray-800', 'text-gray-400', 'hover:bg-gray-700', 'hover:text-white'];
-
-            if (filterButtons.length > 0 && galleryItems.length > 0) {
-                filterButtons.forEach(button => {
-                    button.addEventListener('click', () => {
-                        const filterValue = button.getAttribute('data-filter');
-                        filterButtons.forEach(btn => {
-                            btn.classList.remove(...activeClasses);
-                            btn.classList.add(...inactiveClasses);
-                        });
-                        button.classList.remove(...inactiveClasses);
-                        button.classList.add(...activeClasses);
-
-                        galleryItems.forEach(item => {
-                            const itemCategory = item.getAttribute('data-category');
-                            if (filterValue === 'all' || itemCategory === filterValue) {
-                                item.classList.remove('hidden');
-                            } else {
-                                item.classList.add('hidden');
-                            }
-                        });
-                    });
-                });
-            }
+            filterButtons.forEach(button => { button.addEventListener('click', () => { const filterValue = button.getAttribute('data-filter'); filterButtons.forEach(btn => { btn.classList.remove(...activeClasses); btn.classList.add(...inactiveClasses); }); button.classList.remove(...inactiveClasses); button.classList.add(...activeClasses); galleryItems.forEach(item => { const itemCategory = item.getAttribute('data-category'); if (filterValue === 'all' || itemCategory === filterValue) { item.classList.remove('hidden'); } else { item.classList.add('hidden'); } }); }); });
         }
-        
-        // --- Initial Page Load ---
+
+        // --- Lightbox Logic ---
+        function initializeLightbox() {
+            galleryContainer.addEventListener('click', function(e) {
+                const galleryItem = e.target.closest('.gallery-item');
+                if (galleryItem) {
+                    const src = galleryItem.dataset.src;
+                    const title = galleryItem.dataset.title;
+                    const isVideo = galleryItem.dataset.isVideo === 'true';
+
+                    if (!src) { console.warn("No src found for gallery item."); return; }
+
+                    let mediaElementHTML = '';
+                    if (isVideo) {
+                        mediaElementHTML = `<video src="${src}" controls autoplay loop class="lightbox-content" preload="auto">Video not supported.</video>`;
+                    } else {
+                        mediaElementHTML = `<img src="${src}" alt="${title}" class="lightbox-content">`;
+                    }
+
+                    lightboxMediaContent.innerHTML = mediaElementHTML;
+                    lightboxCaption.textContent = title;
+                    lightboxModal.style.display = "flex"; // Use flex for centering
+                    document.body.style.overflow = 'hidden'; // Prevent background scroll
+                }
+            });
+
+            // Close lightbox events
+            lightboxClose.addEventListener('click', closeLightbox);
+            lightboxModal.addEventListener('click', function(e) {
+                 if (e.target === lightboxModal) { // Click on backdrop closes
+                    closeLightbox();
+                 }
+            });
+            document.addEventListener('keydown', function(e) { // Escape key closes
+                 if (e.key === "Escape" && lightboxModal.style.display === "flex") {
+                     closeLightbox();
+                 }
+            });
+        }
+
+        function closeLightbox() {
+            lightboxModal.style.display = "none";
+            const mediaElement = lightboxMediaContent.querySelector('video, audio');
+            if (mediaElement) {
+                mediaElement.pause();
+                mediaElement.currentTime = 0;
+            }
+            lightboxMediaContent.innerHTML = ''; // Clear content
+            lightboxCaption.textContent = '';
+            document.body.style.overflow = ''; // Restore scrolling
+        }
+
+        // --- Initial Load ---
         document.addEventListener('DOMContentLoaded', loadGallery);
-        
+
     </script>
-    <!-- ======================== END: NEW SCRIPT BLOCK ======================== -->
 </body>
 </html>

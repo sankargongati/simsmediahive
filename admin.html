@@ -43,7 +43,7 @@
          .gallery-item.hidden { display: none; }
          /* Style delete button */
          .delete-btn { transition: opacity 0.2s ease; }
-        /* Style for temporary video element */
+        /* Style for temporary video element (Copied from working blog.html implementation) */
         .thumbnail-generator-video { position: absolute; top: -9999px; left: -9999px; width: 320px; height: auto; }
     </style>
 </head>
@@ -133,9 +133,8 @@
     <!-- Hidden file input used by EasyMDE custom upload button -->
     <input type="file" id="easymde-file-input" style="display: none;" accept="image/*,video/*">
 
- <script type="module">
+    <script type="module">
         // --- CONFIGURATION ---
-        // REPLACE WITH YOUR ACTUAL SUPABASE CREDENTIALS
         const SUPABASE_URL = 'https://gswdqdsviqrzsoahxapc.supabase.co/'; 
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdzd2RxZHN2aXFyenNvYWh4YXBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4ODM5NzcsImV4cCI6MjA3NjQ1OTk3N30.JFF6NFIdqZAE9ioHeMdfIVpN84UtN_Z0K2pZYodlpZY';
 
@@ -170,7 +169,7 @@
         const blogHeaderMediaInput = document.getElementById('blog-header-media-file');
         const easymdeFileInput = document.getElementById('easymde-file-input');
 
-        let easymde = null; // Declare EasyMDE instance globally
+        let easymde = null;
 
         // --- Initialize EasyMDE ---
         function initializeEasyMDE() {
@@ -191,20 +190,28 @@
             if (!url) return false; const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv']; const lowerUrl = url.toLowerCase(); return videoExtensions.some(ext => lowerUrl.endsWith(ext));
         }
 
+        // --- Video Thumbnail Generation Function (Copied from working blog.html logic) ---
         async function generateVideoThumbnail(videoUrl) {
             return new Promise((resolve) => {
                 const video = document.createElement('video');
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
                 let resolved = false;
-                video.classList.add('thumbnail-generator-video'); video.muted = true; video.playsInline = true; video.preload = 'metadata'; video.crossOrigin = 'anonymous';
+
+                video.classList.add('thumbnail-generator-video'); // Apply hidden style
+                video.muted = true; video.playsInline = true; video.preload = 'metadata'; video.crossOrigin = 'anonymous';
+
                 const onError = (e) => { if (resolved) return; console.warn(`Thumb gen failed for ${videoUrl}:`, (e.type || 'Error'), e); cleanup(); resolve(null); };
                 const cleanup = () => { video.removeEventListener('loadeddata', onLoadedData); video.removeEventListener('seeked', onSeeked); video.removeEventListener('error', onError); video.removeEventListener('stalled', onError); video.removeEventListener('abort', onError); clearTimeout(timeoutId); if (video.parentNode === document.body) document.body.removeChild(video); };
                 const timeoutId = setTimeout(() => { if (resolved) return; console.warn(`Thumb gen timed out for ${videoUrl}`); cleanup(); resolve(null); }, 10000); // 10 sec timeout
-                const onLoadedData = () => { if (!video.videoWidth || !video.videoHeight) { console.warn(`Invalid dimensions for ${videoUrl}`); cleanup(); resolve(null); return; } canvas.width = video.videoWidth; canvas.height = video.videoHeight; video.currentTime = Math.min(1, (video.duration || 1) / 2); };
-                const onSeeked = () => { if (resolved) return; setTimeout(() => { if (resolved) return; try { context.drawImage(video, 0, 0, canvas.width, canvas.height); const dataUrl = canvas.toDataURL('image/jpeg', 0.7); resolved = true; cleanup(); resolve(dataUrl); } catch (drawError) { onError(drawError); } }, 100); };
+
+                const onLoadedData = () => { if (!video.videoWidth || !video.videoHeight) { console.warn(`Invalid dimensions for ${videoUrl}`); cleanup(); resolve(null); return; } canvas.width = video.videoWidth; canvas.height = video.videoHeight; video.currentTime = Math.min(1, (video.duration || 1) / 2); }; // Seek to 1s or middle
+                const onSeeked = () => { if (resolved) return; setTimeout(() => { if (resolved) return; try { context.drawImage(video, 0, 0, canvas.width, canvas.height); const dataUrl = canvas.toDataURL('image/jpeg', 0.7); resolved = true; cleanup(); resolve(dataUrl); } catch (drawError) { onError(drawError); } }, 100); }; // Delay draw
+
                 video.addEventListener('loadeddata', onLoadedData); video.addEventListener('seeked', onSeeked); video.addEventListener('error', onError); video.addEventListener('stalled', onError); video.addEventListener('abort', onError);
-                video.src = videoUrl; document.body.appendChild(video); video.load();
+                video.src = videoUrl;
+                document.body.appendChild(video); // Add to body to ensure loading
+                video.load(); // Explicitly call load
             });
         }
 
@@ -223,7 +230,7 @@
             blogTabBtn.addEventListener('click', () => { blogTabBtn.classList.add('active'); galleryTabBtn.classList.remove('active'); blogContent.classList.add('active'); galleryContent.classList.remove('active'); initializeEasyMDE(); setTimeout(loadBlogPosts, 50); });
         }
 
-        // --- GALLERY MANAGEMENT ---
+        // --- GALLERY MANAGEMENT (Using Thumbnail Generation) ---
         async function loadGalleryItems() {
              galleryList.innerHTML = '<p class="text-gray-400 col-span-full text-center">Loading gallery...</p>';
              try {
@@ -231,27 +238,29 @@
                 if (error) throw error;
                 galleryList.innerHTML = ''; // Clear loading/error
 
-                // **** DEFINITIVE FIX: Check if data is null OR empty array ****
                 if (!data || data.length === 0) {
                     galleryList.innerHTML = '<p class="text-gray-400 col-span-full text-center">No items in the gallery yet.</p>';
                     initializeGalleryFilter(); // Still init filter
                 } else {
                     galleryStatus.textContent = 'Generating video thumbnails (may take time)...'; galleryStatus.style.color='white';
+                    // Use Promise.all to handle potential async thumbnail generation
                     const itemPromises = data.map(async (itemData) => {
                         const isVideo = itemData.category === 'video' || (itemData.category !== 'photo' && isVideoUrl(itemData.imageUrl));
                         const itemCategory = isVideo ? 'video' : 'photo';
                         let previewSrc = defaultPlaceholder;
 
                         if (isVideo && itemData.imageUrl) {
+                            // --- Generate Thumbnail ---
                             const thumbnailUrl = await generateVideoThumbnail(itemData.imageUrl);
-                            previewSrc = thumbnailUrl || defaultPlaceholder;
+                            previewSrc = thumbnailUrl || defaultPlaceholder; // Use generated or fallback
                         } else if (!isVideo && itemData.imageUrl) {
-                            previewSrc = itemData.imageUrl;
+                            previewSrc = itemData.imageUrl; // Use actual image URL
                         }
 
                         const filePathMaybe = itemData.imageUrl ? new URL(itemData.imageUrl).pathname.split(`/${GALLERY_BUCKET}/`)[1] : null;
                         const filePath = filePathMaybe || `missing_path_${itemData.id}`;
 
+                        // Return the HTML string for this card
                         return `
                             <div class="gallery-item relative group bg-gray-900 border border-gray-800 rounded-lg overflow-hidden aspect-[4/3]" data-category="${itemCategory}">
                                 <img src="${previewSrc}" alt="Preview: ${itemData.title}" class="absolute inset-0 w-full h-full object-cover bg-gray-800" onerror="this.onerror=null;this.src='${defaultPlaceholder}';">
@@ -266,12 +275,13 @@
                             </div>`;
                     });
 
+                    // Wait for all thumbnail attempts and card HTML generation
                     const cardHTMLArray = await Promise.all(itemPromises);
                     galleryList.innerHTML = cardHTMLArray.join('');
                     galleryStatus.textContent = ''; // Clear thumbnail status
 
                     initializeGalleryFilter();
-                    lucide.createIcons(); // Render icons
+                    lucide.createIcons(); // Render icons after HTML insertion
                 }
              } catch (error) { // Catch any error during fetch or processing
                  console.error('Error fetching gallery items:', error);
@@ -284,7 +294,6 @@
         function initializeGalleryFilter() {
             const filterButtons = document.querySelectorAll('#gallery-filter-buttons .filter-btn');
             const galleryItems = document.querySelectorAll('#gallery-list .gallery-item');
-            // Check if galleryItems exists AND has length > 0
             if ((!galleryItems || galleryItems.length === 0) && filterButtons.length > 0) {
                 if (!filterButtons[0].classList.contains('active')) {
                      filterButtons.forEach(btn => btn.classList.remove('active', 'bg-yellow-500', 'text-black'));
@@ -317,7 +326,6 @@
              }
         }
 
-
         galleryForm.addEventListener('submit', async (e) => {
             e.preventDefault(); const submitBtn = galleryForm.querySelector('button[type="submit"]'); submitBtn.disabled = true; submitBtn.textContent = 'Uploading...'; galleryStatus.textContent = 'Starting...'; galleryStatus.style.color = 'white'; const title = galleryTitleInput.value; const category = galleryForm.querySelector('input[name="gallery-category"]:checked').value; const file = galleryMediaInput.files[0]; if (!file) { galleryStatus.textContent = 'Select a file.'; galleryStatus.style.color = 'red'; submitBtn.disabled = false; submitBtn.textContent = 'Upload Media'; return; } const filePath = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`; try { galleryStatus.textContent = `Uploading ${file.type.split('/')[0]}...`; const { error: uploadError } = await _supabase.storage.from(GALLERY_BUCKET).upload(filePath, file); if (uploadError) throw uploadError; const { data: urlData } = _supabase.storage.from(GALLERY_BUCKET).getPublicUrl(filePath); if (!urlData || !urlData.publicUrl) throw new Error("Could not get public URL."); galleryStatus.textContent = 'Saving details...'; const { error: dbError } = await _supabase.from('galleryImages').insert([{ title, category, imageUrl: urlData.publicUrl }]); if (dbError) throw dbError; galleryStatus.textContent = 'Success!'; galleryStatus.style.color = '#22c55e'; galleryForm.reset(); await loadGalleryItems(); } catch (error) { console.error("Gallery upload failed:", error); galleryStatus.textContent = `Error: ${error.message}`; galleryStatus.style.color = '#ef4444'; } finally { submitBtn.disabled = false; submitBtn.textContent = 'Upload Media'; setTimeout(() => galleryStatus.textContent = '', 4000); }
         });
@@ -327,7 +335,9 @@
         });
 
         // --- BLOG MANAGEMENT ---
-        easymdeFileInput.addEventListener('change', async (e) => { /* ... unchanged ... */ });
+        easymdeFileInput.addEventListener('change', async (e) => {
+             const file = e.target.files[0]; if (!file) return; if (!easymde) { console.error("Editor not initialized"); return; } easymde.codemirror.setOption('readOnly', true); const originalStatus = blogStatus.textContent; blogStatus.textContent = `Uploading ${file.name}...`; blogStatus.style.color = 'white'; const filePath = `content_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`; try { blogStatus.textContent = `Uploading ${file.type}...`; const { error: uploadError } = await _supabase.storage.from(BLOG_BUCKET).upload(filePath, file); if (uploadError) throw uploadError; const { data: urlData } = _supabase.storage.from(BLOG_BUCKET).getPublicUrl(filePath); const publicURL = urlData.publicUrl; const cm = easymde.codemirror; const doc = cm.getDoc(); const cursor = doc.getCursor(); let markdownSyntax = ''; if (file.type.startsWith('image/')) { markdownSyntax = `\n![${file.name || 'image alt text'}](${publicURL})\n`; } else if (file.type.startsWith('video/')) { markdownSyntax = `\n<video controls width="100%" src="${publicURL}"></video>\n`; } else { markdownSyntax = `\n[${file.name}](${publicURL})\n`; } doc.replaceRange(markdownSyntax, cursor); blogStatus.textContent = 'Media inserted!'; blogStatus.style.color = 'green'; } catch (error) { console.error("EasyMDE Upload failed:", error); blogStatus.textContent = `Media upload failed: ${error.message}`; blogStatus.style.color = 'red'; } finally { easymdeFileInput.value = ''; easymde.codemirror.setOption('readOnly', false); setTimeout(() => { if (blogStatus.textContent.includes('inserted') || blogStatus.textContent.includes('failed')) blogStatus.textContent = originalStatus || ''; }, 3000); }
+        });
 
         async function loadBlogPosts() {
             blogPostList.innerHTML = '<p class="text-gray-400 text-center">Loading posts...</p>';
@@ -335,7 +345,6 @@
                 const { data, error } = await _supabase.from('blogPosts').select('id, title, author, imageUrl').order('created_at', { ascending: false });
                 if (error) throw error;
                 blogPostList.innerHTML = '';
-                // **** DEFINITIVE FIX: Check if data is null OR empty array ****
                 if (!data || data.length === 0) {
                     blogPostList.innerHTML = '<p class="text-gray-400 text-center">No blog posts yet.</p>';
                 } else {
@@ -348,15 +357,26 @@
                         blogPostList.appendChild(postEl);
                     });
                 }
-             } catch (error) { // Catch any error during fetch or processing
+             } catch (error) {
                  console.error('Error loading posts:', error); blogPostList.innerHTML = `<p class="text-red-500 text-center">Error loading posts: ${error.message}</p>`;
              }
         }
 
-        blogForm.addEventListener('submit', async (e) => { /* ... unchanged ... */ });
-        async function handleBlogDelete(postId, postMediaUrl) { /* ... unchanged ... */ }
-        async function populateBlogFormForEdit(postId) { /* ... unchanged ... */ }
-        function clearBlogForm() { /* ... unchanged ... */ }
+        blogForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); const submitBtn = blogForm.querySelector('button[type="submit"]'); submitBtn.disabled = true; submitBtn.textContent = 'Saving...'; blogStatus.textContent = 'Processing...'; blogStatus.style.color='white'; const postId = blogPostIdInput.value; const title = blogTitleInput.value; const author = blogAuthorInput.value; const content = easymde ? easymde.value() : document.getElementById('blog-content-editor').value; const headerFile = blogHeaderMediaInput.files[0]; let headerMediaUrl = null; try { if (headerFile) { blogStatus.textContent = `Uploading header ${headerFile.type.split('/')[0]}...`; const filePath = `${Date.now()}_header_${headerFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`; const { error: uploadError } = await _supabase.storage.from(BLOG_BUCKET).upload(filePath, headerFile); if (uploadError) throw uploadError; headerMediaUrl = _supabase.storage.from(BLOG_BUCKET).getPublicUrl(filePath).data.publicUrl; } let postData = { title, author, content }; if (headerMediaUrl) postData.imageUrl = headerMediaUrl; if (postId) { blogStatus.textContent = 'Updating database record...'; const { error } = await _supabase.from('blogPosts').update(postData).eq('id', postId); if (error) throw error; blogStatus.textContent = 'Post updated successfully!'; } else { blogStatus.textContent = 'Creating database record...'; if (!headerMediaUrl) throw new Error("Header media (image or video) required for new posts."); postData.imageUrl = headerMediaUrl; const { error } = await _supabase.from('blogPosts').insert([postData]); if (error) throw error; blogStatus.textContent = 'Post created successfully!'; } blogStatus.style.color = 'green'; clearBlogForm(); await loadBlogPosts(); } catch (error) { console.error("Blog save failed:", error); blogStatus.textContent = `Error: ${error.message}`; blogStatus.style.color = 'red'; } finally { submitBtn.disabled = false; submitBtn.textContent = 'Save Post'; setTimeout(() => blogStatus.textContent = '', 4000); }
+        });
+
+        async function handleBlogDelete(postId, postMediaUrl) {
+            if (!confirm('Delete this blog post permanently?')) return; blogStatus.textContent = `Deleting post ${postId}...`; blogStatus.style.color = 'white'; try { if (postMediaUrl) { try { const filePath = new URL(postMediaUrl).pathname.split(`/${BLOG_BUCKET}/`)[1]; if (filePath) await _supabase.storage.from(BLOG_BUCKET).remove([filePath]); } catch (mediaError) { console.warn("Could not delete header media:", mediaError); } } const { error: dbError } = await _supabase.from('blogPosts').delete().eq('id', postId); if (dbError) throw dbError; blogStatus.textContent = 'Post deleted!'; blogStatus.style.color='#22c55e'; await loadBlogPosts(); } catch (error) { console.error('Delete failed:', error); blogStatus.textContent = `Deletion failed: ${error.message}`; blogStatus.style.color = 'red'; } finally { setTimeout(() => blogStatus.textContent = '', 4000); }
+        }
+
+        async function populateBlogFormForEdit(postId) {
+             blogStatus.textContent = "Loading post data..."; blogStatus.style.color='white'; try { const { data: post, error } = await _supabase.from('blogPosts').select('*').eq('id', postId).single(); if (error || !post) throw error || new Error("Post not found"); blogPostIdInput.value = post.id; blogTitleInput.value = post.title; blogAuthorInput.value = post.author; if (easymde) { easymde.value(post.content || ''); } else { document.getElementById('blog-content-editor').value = post.content || ''; console.warn("Populating textarea because EasyMDE not ready."); } blogHeaderMediaInput.value = ''; blogStatus.textContent = "Editing post. Upload new header media to replace existing."; blogStatus.style.color = 'white'; window.scrollTo({ top: blogForm.offsetTop - 100, behavior: 'smooth' }); } catch (error) { console.error("Failed to load post for editing:", error); blogStatus.textContent = "Could not load post data."; blogStatus.style.color='red'; }
+        }
+
+        function clearBlogForm() {
+            blogForm.reset(); blogPostIdInput.value = ''; if (easymde) easymde.value(''); else document.getElementById('blog-content-editor').value = ''; blogStatus.textContent = ''; blogHeaderMediaInput.value = '';
+        }
         clearBlogFormBtn.addEventListener('click', clearBlogForm);
 
         // --- INITIAL PAGE LOAD ---

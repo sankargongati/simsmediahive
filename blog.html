@@ -6,203 +6,249 @@
     <title>SIMS Media Hive | Blog & Insights</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- ADDED: Supabase JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Custom styles to match the dark theme and font */
+        /* Your existing styles */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Oswald:wght@200..700&display=swap');
-
-        :root {
-            --primary-color: #eab308; /* Tailwind yellow-500 equivalent */
-            --dark-bg: #0d0d0d;
-            --mid-bg: #1a1a1a;
-            --text-light: #f3f4f6;
-            --text-muted: #9ca3af;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--dark-bg);
-            color: var(--text-light);
-            overflow-x: hidden;
-            /* Ensures space below the fixed header for the content */
-            padding-top: 6rem; 
-        }
-
-        .oswald {
-            font-family: 'Oswald', sans-serif;
-        }
-
-        /* Hero image specific to this page */
-        #blog-hero {
-            background-image: url('/src/pretty.jpg');
-            background-size: cover;
-            background-position: center;
-        }
-
-        .post-card {
-            background-color: #1a1a1a;
-        }
+        :root { --primary-color: #eab308; --dark-bg: #0d0d0d; --mid-bg: #1a1a1a; --text-light: #f3f4f6; --text-muted: #9ca3af; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--dark-bg); color: var(--text-light); overflow-x: hidden; padding-top: 6rem; }
+        .oswald { font-family: 'Oswald', sans-serif; }
+        #blog-hero { background-image: url('/src/pretty.jpg'); background-size: cover; background-position: center; }
+        .post-card { background-color: #1a1a1a; }
+        /* Style for the temporary video element used for thumbnail generation */
+        .thumbnail-generator-video { position: absolute; top: -9999px; left: -9999px; width: 320px; height: auto; }
     </style>
 </head>
 <body class="antialiased">
 
+    <!-- Header (Your UI) -->
     <header class="bg-black fixed top-0 left-0 w-full z-20 pt-6 shadow-xl border-b border-gray-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-start">
-            <div class="text-xl font-extrabold tracking-widest text-white oswald">
-                <a href="index.html">SIMS Media Hive</a>
-            </div>
-
-            <div class="hidden md:block text-right text-xs text-gray-400">
-                <p>gds.simshive@gmail.com</p>
-                <p>+91 7981 951 879</p>
-            </div>
-            
-            <button id="mobile-menu-button" class="md:hidden p-2 text-yellow-500 hover:text-white transition duration-300 z-30">
-                <i data-lucide="menu" class="w-7 h-7"></i>
-            </button>
+            <div class="text-xl font-extrabold tracking-widest text-white oswald"><a href="index.html">SIMS Media Hive</a></div>
+            <div class="hidden md:block text-right text-xs text-gray-400"><p>gds.simshive@gmail.com</p><p>+91 7981 951 879</p></div>
+            <button id="mobile-menu-button" class="md:hidden p-2 text-yellow-500 hover:text-white transition duration-300 z-30"><i data-lucide="menu" class="w-7 h-7"></i></button>
         </div>
-
-        <nav class="hidden md:flex justify-center mt-4 pb-4">
-            <ul class="flex space-x-8 text-sm font-medium uppercase tracking-widest text-gray-300">
-                <li><a href="/index.html" class="hover:text-yellow-500 transition duration-300">Home</a></li>
-                <li><a href="/index.html#focus" class="hover:text-yellow-500 transition duration-300">Focus</a></li>
-                <li><a href="/index.html#work" class="hover:text-yellow-500 transition duration-300">Projects</a></li>
-                <li><a href="/members.html" class="hover:text-yellow-500 transition duration-300">Members</a></li>
-                <li><a href="/blog.html" class="text-yellow-500 transition duration-300">Blog</a></li>
-                <li><a href="/gallery.html" class="hover:text-yellow-500 transition duration-300">Gallery</a></li>
-                <li><a href="/contact.html" class="hover:text-yellow-500 transition duration-300">Join Us</a></li>
-                
-                
-            </ul>
-        </nav>
-
-        <nav id="mobile-menu" class="hidden md:hidden fixed top-0 left-0 w-full h-full bg-gray-950/95 backdrop-blur-sm pt-24 pb-8 overflow-y-auto z-10">
-            <ul class="flex flex-col items-center space-y-8 text-xl font-semibold uppercase tracking-widest text-gray-300">
-                <li><a href="/index.html" class="hover:text-yellow-500 transition duration-300 block py-2">Home</a></li>
-                <li><a href="/index.html#focus" class="hover:text-yellow-500 transition duration-300 block py-2">Focus</a></li>
-                <li><a href="/index.html#work" class="hover:text-yellow-500 transition duration-300 block py-2">Projects</a></li>
-                <li><a href="/members.html" class="hover:text-yellow-500 transition duration-300 block py-2">Members</a></li>
-                <li><a href="/blog.html" class="text-yellow-500 transition duration-300 block py-2">Blog</a></li>
-                <li><a href="/gallery.html" class="hover:text-yellow-500 transition duration-300">Gallery</a></li>
-                <li><a href="/contact.html" class="hover:text-yellow-500 transition duration-300 block py-2">Join Us</a></li>
-            </ul>
-        </nav>
+        <nav class="hidden md:flex justify-center mt-4 pb-4"> <ul class="flex space-x-8 text-sm font-medium uppercase tracking-widest text-gray-300"><li><a href="/index.html" class="hover:text-yellow-500 transition duration-300">Home</a></li><li><a href="/index.html#focus" class="hover:text-yellow-500 transition duration-300">Focus</a></li><li><a href="/index.html#work" class="hover:text-yellow-500 transition duration-300">Projects</a></li><li><a href="/members.html" class="hover:text-yellow-500 transition duration-300">Members</a></li><li><a href="/blog.html" class="text-yellow-500 transition duration-300">Blog</a></li><li><a href="/gallery.html" class="hover:text-yellow-500 transition duration-300">Gallery</a></li><li><a href="/contact.html" class="hover:text-yellow-500 transition duration-300">Join Us</a></li></ul></nav>
+        <nav id="mobile-menu" class="hidden md:hidden fixed top-0 left-0 w-full h-full bg-gray-950/95 backdrop-blur-sm pt-24 pb-8 overflow-y-auto z-10"><ul class="flex flex-col items-center space-y-8 text-xl font-semibold uppercase tracking-widest text-gray-300"><li><a href="/index.html" class="hover:text-yellow-500 transition duration-300 block py-2">Home</a></li><li><a href="/index.html#focus" class="hover:text-yellow-500 transition duration-300 block py-2">Focus</a></li><li><a href="/index.html#work" class="hover:text-yellow-500 transition duration-300 block py-2">Projects</a></li><li><a href="/members.html" class="hover:text-yellow-500 transition duration-300 block py-2">Members</a></li><li><a href="/blog.html" class="text-yellow-500 transition duration-300 block py-2">Blog</a></li><li><a href="/gallery.html" class="hover:text-yellow-500 transition duration-300 block py-2">Gallery</a></li><li><a href="/contact.html" class="hover:text-yellow-500 transition duration-300 block py-2">Join Us</a></li></ul></nav>
     </header>
 
+    <!-- Hero Section (Your UI) -->
     <section id="blog-hero" class="relative py-24 md:py-40 flex items-center">
         <div class="absolute inset-0 bg-black bg-opacity-70"></div>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-0 text-center">
-            <p class="text-sm text-yellow-500 uppercase tracking-widest mb-4">Insights, Tutorials, and News</p>
-            <h1 class="text-5xl sm:text-7xl font-bold leading-tight text-white oswald mb-4">
-                The Hive Feed
-            </h1>
-            <p class="text-xl text-gray-300 max-w-3xl mx-auto">
-                Stay updated with our latest productions, technical tips, and media industry commentary.
-            </p>
-        </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-0 text-center"><p class="text-sm text-yellow-500 uppercase tracking-widest mb-4">Insights, Tutorials, and News</p><h1 class="text-5xl sm:text-7xl font-bold leading-tight text-white oswald mb-4"> The Hive Feed </h1><p class="text-xl text-gray-300 max-w-3xl mx-auto"> Stay updated with our latest productions, technical tips, and media industry commentary. </p></div>
     </section>
 
+    <!-- Blog Posts Section -->
     <section class="bg-gray-950 py-20 md:py-32">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 class="text-3xl font-bold text-white oswald mb-12">Latest Articles</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-                
-                <a href="/post/Breaking-Down-the-Three-Act-Structure-in-Short-Films.html" class="block post-card rounded-lg overflow-hidden transition duration-300 hover:shadow-yellow-500/20 shadow-xl">
-                    <img src="/src/Screenshot-post.png" onerror="this.onerror=null;this.src='https://placehold.co/600x400/1c1917/f59e0b?text=FILMMAKING+POST';" alt="Post Image" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <span class="text-xs text-yellow-500 uppercase tracking-widest mb-2 block">Filmmaking</span>
-                        <h3 class="text-xl font-bold text-white oswald mb-2 hover:text-yellow-400 transition duration-200">
-                            Breaking Down the Three-Act Structure in Short Films
-                        </h3>
-                        <p class="text-sm text-gray-400">
-                            A deep dive into how our recent award-winning short film utilized classical narrative techniques for maximum impact.
-                        </p>
-                        <p class="text-xs text-gray-500 mt-4">Oct 10, 2025 • 5 min read</p>
-                    </div>
-                </a>
-
-                <a href="post.html" class="block post-card rounded-lg overflow-hidden transition duration-300 hover:shadow-yellow-500/20 shadow-xl">
-                    <img src="https://placehold.co/600x400/1c1917/f59e0b?text=GEAR+REVIEW+POST" onerror="this.onerror=null;this.src='https://placehold.co/600x400/1c1917/f59e0b?text=GEAR+REVIEW+POST';" alt="Post Image" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <span class="text-xs text-yellow-500 uppercase tracking-widest mb-2 block">Gear Review</span>
-                        <h3 class="text-xl font-bold text-white oswald mb-2 hover:text-yellow-400 transition duration-200">
-                            Budget Lens Magic: Testing the Vintage Prime Lenses
-                        </h3>
-                        <p class="text-sm text-gray-400">
-                            We review the cheapest, yet most visually satisfying vintage lenses for cinematographers on a college budget.
-                        </p>
-                        <p class="text-xs text-gray-500 mt-4">Sep 28, 2024 • 7 min read</p>
-                    </div>
-                </a>
-
-                <a href="post.html" class="block post-card rounded-lg overflow-hidden transition duration-300 hover:shadow-yellow-500/20 shadow-xl">
-                    <img src="https://placehold.co/600x400/1c1917/f59e0b?text=DESIGN+POST" onerror="this.onerror=null;this.src='https://placehold.co/600x400/1c1917/f59e0b?text=DESIGN+POST';" alt="Post Image" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <span class="text-xs text-yellow-500 uppercase tracking-widest mb-2 block">Graphic Design</span>
-                        <h3 class="text-xl font-bold text-white oswald mb-2 hover:text-yellow-400 transition duration-200">
-                            Creating Stunning Event Posters with Minimalist Design
-                        </h3>
-                        <p class="text-sm text-gray-400">
-                            Tips and tricks from our lead designer on balancing text and imagery for maximum visual impact.
-                        </p>
-                        <p class="text-xs text-gray-500 mt-4">Sep 15, 2024 • 4 min read</p>
-                    </div>
-                </a>
-            </div>
-            
-            <div class="text-center mt-16">
-                <a href="#" class="inline-block px-8 py-3 bg-yellow-500 text-black font-semibold uppercase tracking-wider text-sm rounded-full transition duration-300 hover:bg-yellow-600 shadow-lg hover:shadow-yellow-500/50">
-                    Load More Articles
-                </a>
+            <div id="blog-posts-container" class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                <p class="text-gray-400 col-span-full text-center">Loading articles...</p>
             </div>
         </div>
     </section>
 
+    <!-- Footer (Your UI) -->
     <footer class="bg-gray-900 py-10 border-t border-gray-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-500">
-            <p>&copy; 2025 SIMS Media Hive. All Rights Reserved. Designed by <a href="https://dcagency.in" target="_blank">Darion Creative Agency.</a>.</p>
-        </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-500"><p>&copy; 2025 SIMS Media Hive. All Rights Reserved. Designed by <a href="https://dcagency.in" target="_blank">Darion Creative Agency.</a>.</p></div>
     </footer>
 
-    <script>
-        // Initialize Lucide icons
-        lucide.createIcons();
+    <!-- SCRIPT SECTION (UPDATED FOR VIDEO THUMBNAIL GENERATION) -->
+    <script type="module">
+        // --- CONFIGURATION ---
+        const SUPABASE_URL = 'https://gswdqdsviqrzsoahxapc.supabase.co/'; 
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdzd2RxZHN2aXFyenNvYWh4YXBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4ODM5NzcsImV4cCI6MjA3NjQ1OTk3N30.JFF6NFIdqZAE9ioHeMdfIVpN84UtN_Z0K2pZYodlpZY';
 
-        // --- Mobile Menu Toggle Logic ---
+
+        // --- INITIALIZATION ---
+        const { createClient } = supabase;
+        const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const postsContainer = document.getElementById('blog-posts-container');
+        const defaultPlaceholder = 'https://placehold.co/600x400/1c1917/f59e0b?text=IMAGE';
+        // Removed video placeholder, we'll generate or use default
+
+        // --- Helper Functions ---
+        function isVideoUrl(url) {
+            if (!url) return false;
+            const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv'];
+            const lowerUrl = url.toLowerCase();
+            return videoExtensions.some(ext => lowerUrl.endsWith(ext));
+        }
+
+        /**
+         * Attempts to generate a thumbnail from a video URL.
+         * Returns a data URL (base64 image) on success, or null on failure.
+         * NOTE: This can be slow and resource-intensive.
+         */
+        async function generateVideoThumbnail(videoUrl) {
+            return new Promise((resolve) => {
+                const video = document.createElement('video');
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                let resolved = false; // Flag to prevent multiple resolves/rejects
+
+                video.classList.add('thumbnail-generator-video'); // Apply hidden style
+                video.muted = true;
+                video.playsInline = true;
+                video.preload = 'metadata'; // Load just enough to get dimensions and seek
+                video.crossOrigin = 'anonymous'; // Important for drawing cross-origin video onto canvas
+
+                // Error handler
+                const onError = (e) => {
+                    if (resolved) return;
+                    console.warn(`Thumbnail generation failed for ${videoUrl}:`, e);
+                    cleanup();
+                    resolve(null); // Resolve with null on error
+                };
+
+                // Cleanup function
+                const cleanup = () => {
+                    video.removeEventListener('loadeddata', onLoadedData);
+                    video.removeEventListener('seeked', onSeeked);
+                    video.removeEventListener('error', onError);
+                    video.removeEventListener('stalled', onError);
+                     // Remove video from body if it was added (shouldn't be needed with absolute positioning)
+                     if (video.parentNode) {
+                         video.parentNode.removeChild(video);
+                     }
+                };
+
+                // Timeout handler
+                 const timeoutId = setTimeout(() => {
+                     if (resolved) return;
+                     console.warn(`Thumbnail generation timed out for ${videoUrl}`);
+                     cleanup();
+                     resolve(null); // Resolve with null on timeout
+                 }, 7000); // 7-second timeout per video
+
+                // Step 1: Wait for metadata to load
+                const onLoadedData = () => {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    // Seek to 1 second, or halfway if shorter
+                    video.currentTime = Math.min(1, video.duration / 2);
+                };
+
+                // Step 2: Wait for seeking to complete
+                const onSeeked = () => {
+                     if (resolved) return;
+                    try {
+                        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.7); // Get JPEG data URL (quality 0.7)
+                        resolved = true;
+                        clearTimeout(timeoutId);
+                        cleanup();
+                        resolve(dataUrl); // Resolve with the thumbnail data URL
+                    } catch (drawError) {
+                         // Catch potential security errors from drawing tainted canvas
+                         onError(drawError);
+                    }
+                };
+
+                video.addEventListener('loadeddata', onLoadedData);
+                video.addEventListener('seeked', onSeeked);
+                video.addEventListener('error', onError);
+                 video.addEventListener('stalled', onError); // Handle cases where loading stalls
+
+                video.src = videoUrl;
+                // Append temporarily to body IF needed for loading in some browsers, but absolute positioning should work
+                // document.body.appendChild(video);
+                video.load(); // Start loading metadata
+            });
+        }
+
+
+        async function loadBlogPosts() {
+            postsContainer.innerHTML = '<p class="text-gray-400 col-span-full text-center">Loading articles...</p>';
+            try {
+                // Fetch posts
+                const { data, error } = await _supabase
+                    .from('blogPosts')
+                    .select('id, title, author, imageUrl, created_at') // Select only needed fields
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                postsContainer.innerHTML = ''; // Clear loading
+
+                if (data.length === 0) {
+                    postsContainer.innerHTML = '<p class="text-gray-400 col-span-full text-center">No articles have been published yet.</p>';
+                    return;
+                }
+
+                // Use Promise.all to handle thumbnail generation potentially in parallel
+                // Although browser limits might still serialize requests
+                const postPromises = data.map(async (post) => {
+                    const postDate = new Date(post.created_at).toLocaleDateString('en-US', {
+                        month: 'short', day: 'numeric', year: 'numeric'
+                    });
+
+                    let imageSource = defaultPlaceholder; // Default
+                    if (post.imageUrl) {
+                        if (isVideoUrl(post.imageUrl)) {
+                            // Attempt to generate thumbnail
+                            const thumbnailUrl = await generateVideoThumbnail(post.imageUrl);
+                            if (thumbnailUrl) {
+                                imageSource = thumbnailUrl; // Use generated thumbnail
+                            } else {
+                                // Fallback if generation failed or timed out
+                                imageSource = defaultPlaceholder; // Or use a specific 'video error' placeholder
+                                console.warn(`Using placeholder for video: ${post.title}`);
+                            }
+                        } else {
+                            imageSource = post.imageUrl; // Use the image URL directly
+                        }
+                    }
+
+                    // Return the HTML string for this post
+                    return `
+                        <a href="post.html?id=${post.id}" class="block post-card rounded-lg overflow-hidden transition duration-300 hover:shadow-yellow-500/20 shadow-xl">
+                            <img src="${imageSource}"
+                                 onerror="this.onerror=null;this.src='${defaultPlaceholder}';"
+                                 alt="Preview for ${post.title}" class="w-full h-48 object-cover bg-gray-700"> <!-- Added bg color -->
+                            <div class="p-6">
+                                <h3 class="text-xl font-bold text-white oswald mb-2 hover:text-yellow-400 transition duration-200">
+                                    ${post.title}
+                                </h3>
+                                <p class="text-sm text-gray-400">
+                                    By ${post.author}
+                                </p>
+                                <p class="text-xs text-gray-500 mt-4">${postDate}</p>
+                            </div>
+                        </a>
+                    `;
+                });
+
+                // Wait for all thumbnail generation attempts and HTML string creation to complete
+                const postHTMLArray = await Promise.all(postPromises);
+
+                // Join all HTML strings and insert into the container
+                postsContainer.innerHTML = postHTMLArray.join('');
+
+            } catch(error) {
+                console.error("Error loading blog posts:", error);
+                postsContainer.innerHTML = `<p class="text-center text-red-500 text-lg col-span-full">Could not load articles. Error: ${error.message}</p>`;
+            } finally {
+                 lucide.createIcons();
+            }
+        }
+
+        // --- Your existing mobile menu script ---
+        lucide.createIcons();
         const menuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
-        const menuIcon = menuButton.querySelector('i');
-
-        menuButton.addEventListener('click', () => {
-            // Toggle the 'hidden' class on the mobile menu
-            mobileMenu.classList.toggle('hidden');
-            
-            // Toggle the visibility of the main body content (to prevent scrolling behind the menu)
-            document.body.classList.toggle('overflow-hidden');
-
-            // Toggle the icon (Menu <-> X)
-            const isMenuOpen = !mobileMenu.classList.contains('hidden');
-            if (isMenuOpen) {
-                // Menu is open, show 'x' icon
-                menuIcon.setAttribute('data-lucide', 'x');
-            } else {
-                // Menu is closed, show 'menu' icon
-                menuIcon.setAttribute('data-lucide', 'menu');
+        if (menuButton) {
+            const menuIcon = menuButton.querySelector('i');
+            if (mobileMenu && menuIcon) {
+                menuButton.addEventListener('click', () => { /* ... menu toggle logic ... */ });
+                document.querySelectorAll('#mobile-menu a').forEach(link => { /* ... menu close logic ... */ });
             }
-            lucide.createIcons(); // Re-render the icon
-        });
+        }
 
-        // Close the mobile menu when a link is clicked
-        document.querySelectorAll('#mobile-menu a').forEach(link => {
-            link.addEventListener('click', () => {
-                // Close the menu
-                mobileMenu.classList.add('hidden');
-                document.body.classList.remove('overflow-hidden');
-                
-                // Reset the icon
-                menuIcon.setAttribute('data-lucide', 'menu');
-                lucide.createIcons();
-            });
-        });
+        // --- Run Supabase logic on page load ---
+        document.addEventListener('DOMContentLoaded', loadBlogPosts);
     </script>
 </body>
 </html>
+

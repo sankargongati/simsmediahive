@@ -13,7 +13,10 @@
         :root { --primary-color: #eab308; --dark-bg: #0d0d0d; --mid-bg: #1a1a1a; --text-light: #f3f4f6; --text-muted: #9ca3af; }
         body { font-family: 'Inter', sans-serif; background-color: var(--dark-bg); color: var(--text-light); overflow-x: hidden; padding-top: 6rem; }
         .oswald { font-family: 'Oswald', sans-serif; }
-        #blog-hero { background-image: url('/src/pretty.jpg'); background-size: cover; background-position: center; }
+        
+        /* Corrected CSS path (removed leading slash) */
+        #blog-hero { background-image: url('src/pretty.jpg'); background-size: cover; background-position: center; }
+        
         .post-card { background-color: #1a1a1a; }
         /* Style for the temporary video element used for thumbnail generation */
         .thumbnail-generator-video { position: absolute; top: -9999px; left: -9999px; width: 320px; height: auto; }
@@ -79,7 +82,7 @@
         </section>
     </main>
 
- <footer class="bg-gray-900 border-t border-gray-800">
+   <footer class="bg-gray-900 border-t border-gray-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
@@ -107,7 +110,7 @@
                     <h4 class="text-lg font-semibold text-white oswald tracking-wider mb-4">Quick Links</h4>
                     <ul class="space-y-3 text-sm">
                         <li><a href="/index.html" class="text-gray-400 hover:text-yellow-500 transition duration-300">Home</a></li>
-<li><a href="/index.html#work" class="text-gray-400 hover:text-yellow-500 transition duration-300">Projects</a></li>
+                        <li><a href="/index.html#work" class="text-gray-400 hover:text-yellow-500 transition duration-300">Projects</a></li>
                         <li><a href="/members.html" class="text-gray-400 hover:text-yellow-500 transition duration-300">Members</a></li>
                         
                         <li><a href="/login.html" class="text-gray-400 hover:text-yellow-500 transition duration-300">Member Login</a></li>
@@ -147,11 +150,52 @@
         </div>
     </footer>
 
-    <script type="module">
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // --- Mobile Menu Toggle Logic ---
+        const menuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIcon = menuButton.querySelector('i');
+
+        menuButton.addEventListener('click', () => {
+            // Toggle the 'hidden' class on the mobile menu
+            mobileMenu.classList.toggle('hidden');
+            
+            // Toggle the visibility of the main body content (to prevent scrolling behind the menu)
+            document.body.classList.toggle('overflow-hidden');
+
+            // Toggle the icon (Menu <-> X)
+            const isMenuOpen = !mobileMenu.classList.contains('hidden');
+            if (isMenuOpen) {
+                // Menu is open, show 'x' icon
+                menuIcon.setAttribute('data-lucide', 'x');
+            } else {
+                // Menu is closed, show 'menu' icon
+                menuIcon.setAttribute('data-lucide', 'menu');
+            }
+            lucide.createIcons(); // Re-render the icon
+        });
+
+        // Close the mobile menu when a link is clicked
+        document.querySelectorAll('#mobile-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                // Close the menu
+                mobileMenu.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+                
+                // Reset the icon
+                menuIcon.setAttribute('data-lucide', 'menu');
+                lucide.createIcons();
+            });
+        });
+    </script>
+
+    <script>
         // --- CONFIGURATION ---
         const SUPABASE_URL = 'https://gswdqdsviqrzsoahxapc.supabase.co/'; 
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdzd2RxZHN2aXFyenNvYWh4YXBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4ODM5NzcsImV4cCI6MjA3NjQ1OTk3N30.JFF6NFIdqZAE9ioHeMdfIVpN84UtN_Z0K2pZYodlpZY';
-
 
         // --- INITIALIZATION ---
         const { createClient } = supabase;
@@ -159,8 +203,7 @@
 
         const postsContainer = document.getElementById('blog-posts-container');
         const defaultPlaceholder = 'https://placehold.co/600x400/1c1917/f59e0b?text=IMAGE';
-        // Removed video placeholder, we'll generate or use default
-
+        
         // --- Helper Functions ---
         function isVideoUrl(url) {
             if (!url) return false;
@@ -169,72 +212,58 @@
             return videoExtensions.some(ext => lowerUrl.endsWith(ext));
         }
 
-        /**
-         * Attempts to generate a thumbnail from a video URL.
-         * Returns a data URL (base64 image) on success, or null on failure.
-         * NOTE: This can be slow and resource-intensive.
-         */
         async function generateVideoThumbnail(videoUrl) {
             return new Promise((resolve) => {
                 const video = document.createElement('video');
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
-                let resolved = false; // Flag to prevent multiple resolves/rejects
-
-                video.classList.add('thumbnail-generator-video'); // Apply hidden style
+                let resolved = false; 
+                video.classList.add('thumbnail-generator-video');
                 video.muted = true;
                 video.playsInline = true;
-                video.preload = 'metadata'; // Load just enough to get dimensions and seek
-                video.crossOrigin = 'anonymous'; // Important for drawing cross-origin video onto canvas
+                video.preload = 'metadata';
+                video.crossOrigin = 'anonymous'; 
 
-                // Error handler
                 const onError = (e) => {
                     if (resolved) return;
                     console.warn(`Thumbnail generation failed for ${videoUrl}:`, e);
                     cleanup();
-                    resolve(null); // Resolve with null on error
+                    resolve(null); 
                 };
 
-                // Cleanup function
                 const cleanup = () => {
                     video.removeEventListener('loadeddata', onLoadedData);
                     video.removeEventListener('seeked', onSeeked);
                     video.removeEventListener('error', onError);
                     video.removeEventListener('stalled', onError);
-                     // Remove video from body if it was added (shouldn't be needed with absolute positioning)
                      if (video.parentNode) {
                          video.parentNode.removeChild(video);
                      }
                 };
 
-                // Timeout handler
                  const timeoutId = setTimeout(() => {
                      if (resolved) return;
                      console.warn(`Thumbnail generation timed out for ${videoUrl}`);
                      cleanup();
-                     resolve(null); // Resolve with null on timeout
-                 }, 7000); // 7-second timeout per video
+                     resolve(null);
+                 }, 7000); 
 
-                // Step 1: Wait for metadata to load
                 const onLoadedData = () => {
                     canvas.width = video.videoWidth;
                     canvas.height = video.videoHeight;
-                    // Seek to 1 second, or halfway if shorter
                     video.currentTime = Math.min(1, video.duration / 2);
                 };
 
-                // Step 2: Wait for seeking to complete
                 const onSeeked = () => {
                      if (resolved) return;
                     try {
                         context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                        const dataUrl = canvas.toDataURL('image/jpeg', 0.7); // Get JPEG data URL (quality 0.7)
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
                         resolved = true;
                         clearTimeout(timeoutId);
                         cleanup();
-                        resolve(dataUrl); // Resolve with the thumbnail data URL
+                        resolve(dataUrl);
                     } catch (drawError) {
-                         // Catch potential security errors from drawing tainted canvas
                          onError(drawError);
                     }
                 };
@@ -242,63 +271,60 @@
                 video.addEventListener('loadeddata', onLoadedData);
                 video.addEventListener('seeked', onSeeked);
                 video.addEventListener('error', onError);
-                 video.addEventListener('stalled', onError); // Handle cases where loading stalls
+                video.addEventListener('stalled', onError);
 
                 video.src = videoUrl;
-                // Append temporarily to body IF needed for loading in some browsers, but absolute positioning should work
-                // document.body.appendChild(video);
-                video.load(); // Start loading metadata
+                video.load(); 
             });
         }
 
-
+        // --- SUPABASE BLOG POST LOGIC ---
         async function loadBlogPosts() {
+            if (!postsContainer) {
+                console.error("Blog posts container not found!");
+                return;
+            }
             postsContainer.innerHTML = '<p class="text-gray-400 col-span-full text-center">Loading articles...</p>';
             try {
-                // Fetch posts
                 const { data, error } = await _supabase
                     .from('blogPosts')
-                    .select('id, title, author, imageUrl, created_at') // Select only needed fields
+                    .select('id, title, author, imageUrl, created_at')
                     .order('created_at', { ascending: false });
 
                 if (error) throw error;
-                postsContainer.innerHTML = ''; // Clear loading
+                postsContainer.innerHTML = ''; 
 
                 if (data.length === 0) {
                     postsContainer.innerHTML = '<p class="text-gray-400 col-span-full text-center">No articles have been published yet.</p>';
                     return;
                 }
-
-                // Use Promise.all to handle thumbnail generation potentially in parallel
-                // Although browser limits might still serialize requests
+                
                 const postPromises = data.map(async (post) => {
                     const postDate = new Date(post.created_at).toLocaleDateString('en-US', {
                         month: 'short', day: 'numeric', year: 'numeric'
                     });
 
-                    let imageSource = defaultPlaceholder; // Default
+                    let imageSource = defaultPlaceholder; 
                     if (post.imageUrl) {
                         if (isVideoUrl(post.imageUrl)) {
-                            // Attempt to generate thumbnail
                             const thumbnailUrl = await generateVideoThumbnail(post.imageUrl);
                             if (thumbnailUrl) {
-                                imageSource = thumbnailUrl; // Use generated thumbnail
+                                imageSource = thumbnailUrl; 
                             } else {
-                                // Fallback if generation failed or timed out
-                                imageSource = defaultPlaceholder; // Or use a specific 'video error' placeholder
+                                imageSource = defaultPlaceholder; 
                                 console.warn(`Using placeholder for video: ${post.title}`);
                             }
                         } else {
-                            imageSource = post.imageUrl; // Use the image URL directly
+                            imageSource = post.imageUrl;
                         }
                     }
 
-                    // Return the HTML string for this post
                     return `
                         <a href="post.html?id=${post.id}" class="block post-card rounded-lg overflow-hidden transition duration-300 hover:shadow-yellow-500/20 shadow-xl">
                             <img src="${imageSource}"
                                  onerror="this.onerror=null;this.src='${defaultPlaceholder}';"
-                                 alt="Preview for ${post.title}" class="w-full h-48 object-cover bg-gray-700"> <div class="p-6">
+                                 alt="Preview for ${post.title}" class="w-full h-48 object-cover bg-gray-700">
+                            <div class="p-6">
                                 <h3 class="text-xl font-bold text-white oswald mb-2 hover:text-yellow-400 transition duration-200">
                                     ${post.title}
                                 </h3>
@@ -311,10 +337,7 @@
                     `;
                 });
 
-                // Wait for all thumbnail generation attempts and HTML string creation to complete
                 const postHTMLArray = await Promise.all(postPromises);
-
-                // Join all HTML strings and insert into the container
                 postsContainer.innerHTML = postHTMLArray.join('');
 
             } catch(error) {
@@ -325,20 +348,9 @@
             }
         }
 
-        // --- Your existing mobile menu script ---
-        lucide.createIcons();
-        const menuButton = document.getElementById('mobile-menu-button');
-        const mobileMenu = document.getElementById('mobile-menu');
-        if (menuButton) {
-            const menuIcon = menuButton.querySelector('i');
-            if (mobileMenu && menuIcon) {
-                menuButton.addEventListener('click', () => { /* ... menu toggle logic ... */ });
-                document.querySelectorAll('#mobile-menu a').forEach(link => { /* ... menu close logic ... */ });
-            }
-        }
-
-        // --- Run Supabase logic on page load ---
-        document.addEventListener('DOMContentLoaded', loadBlogPosts);
+        // --- Run Blog Post Logic ---
+        // This runs separately from the menu script.
+        loadBlogPosts();
     </script>
 </body>
 </html>

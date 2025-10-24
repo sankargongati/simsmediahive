@@ -3,218 +3,422 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIMS Media Hive | Member Login</title>
+    <title>Admin Panel | SIMS Media Hive</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+    <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* Your existing styles */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Oswald:wght@200..700&display=swap');
-        :root { --primary-color: #eab308; --dark-bg: #0d0d0d; --mid-bg: #1a1a1a; --text-light: #f3f4f6; --text-muted: #9ca3af; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--dark-bg); color: var(--text-light); overflow-x: hidden; padding-top: 6rem; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Oswald:wght@700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #0d0d0d; color: #f3f4f6; }
         .oswald { font-family: 'Oswald', sans-serif; }
+        /* Tab Styles */
+        .tab-btn.active { background-color: #eab308; color: #000; }
+        .tab-btn { background-color: #374151; color: #d1d5db; transition: background-color 0.2s ease, color 0.2s ease; }
+        .tab-btn:hover { background-color: #4b5563; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* EasyMDE Dark Theme Adjustments */
+        .editor-toolbar, .EasyMDEContainer .CodeMirror { background-color: #1f2937 !important; border-color: #4b5563 !important; color: #d1d5db; }
+        .editor-toolbar button { color: #d1d5db !important; }
+        .editor-toolbar button.active, .editor-toolbar button:hover { background: #4b5563 !important; border-color: #6b7280 !important; }
+        .CodeMirror-cursor { border-left-color: #eab308 !important; }
+        .cm-s-easymde .cm-link { color: #facc15 !important; } .cm-s-easymde .cm-url { color: #9ca3af !important; } .cm-s-easymde .cm-formatting-image { color: #facc15 !important;}
+        .editor-preview { background-color: #111827 !important; color: #d1d5db; } .editor-preview h1, .editor-preview h2, .editor-preview h3 { color: #f3f4f6; }
+        .editor-statusbar { background: #1f2937; color: #9ca3af; }
+        /* Gallery Filter Buttons */
+        .filter-btn.active { background-color: #eab308; color: #000; }
+        .filter-btn { background-color: #374151; color: #d1d5db; }
+         /* Style for Video Icon Overlay */
+         .video-overlay-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 36px; height: 36px; background-color: rgba(0,0,0,0.6); border-radius: 50%; display: flex; align-items: center; justify-content: center; pointer-events: none; opacity: 0.8; transition: opacity 0.3s ease; }
+         .gallery-item:hover .video-overlay-icon { opacity: 1; }
+         .video-overlay-icon svg { color: white; width: 20px; height: 20px; }
+         /* Ensure hidden items in gallery stay hidden */
+         .gallery-item.hidden { display: none; }
+         /* Style delete button */
+         .delete-btn { transition: opacity 0.2s ease; }
+        /* Style for temporary video element (Copied from working blog.html implementation) */
+        .thumbnail-generator-video { position: absolute; top: -9999px; left: -9999px; width: 320px; height: auto; }
     </style>
 </head>
-<body class="antialiased flex flex-col min-h-screen">
-
-    <!-- Header (Copied from your other pages) -->
-    <header class="bg-black fixed top-0 left-0 w-full z-20 pt-6 shadow-xl border-b border-gray-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-start">
-            <div class="text-xl font-extrabold tracking-widest text-white oswald">
-                <a href="index.html">SIMS Media Hive</a>
-            </div>
-
-            <div class="hidden md:block text-right text-xs text-gray-400">
-                <p>gds.simshive@gmail.com</p>
-                <p>+91 7981 951 879</p>
-            </div>
-            
-            <button id="mobile-menu-button" class="md:hidden p-2 text-yellow-500 hover:text-white transition duration-300 z-30">
-                <i data-lucide="menu" class="w-7 h-7"></i>
-            </button>
+<body class="antialiased">
+    <header class="bg-gray-900 border-b border-gray-800 py-4 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-white oswald tracking-wider">Admin Panel</h1>
+            <button id="logout-button" class="px-4 py-2 text-sm font-semibold bg-red-600 text-white rounded-md hover:bg-red-700 transition">Logout</button>
         </div>
-
-        <nav class="hidden md:flex justify-center mt-4 pb-4">
-            <ul class="flex space-x-8 text-sm font-medium uppercase tracking-widest text-gray-300">
-                <li><a href="/index.html" class="hover:text-yellow-500 transition duration-300">Home</a></li>
-                <li><a href="/index.html#focus" class="hover:text-yellow-500 transition duration-300">Focus</a></li>
-                <li><a href="/index.html#work" class="hover:text-yellow-500 transition duration-300">Projects</a></li>
-                <li><a href="/members.html" class="hover:text-yellow-500 transition duration-300">Members</a></li>
-                <li><a href="/blog.html" class="hover:text-yellow-500 transition duration-300">Blog</a></li>
-                <li><a href="/gallery.html" class="hover:text-yellow-500 transition duration-300">Gallery</a></li>
-                <li><a href="/contact.html" class="hover:text-yellow-500 transition duration-300">Join Us</a></li>
-            </ul>
-        </nav>
-
-        <nav id="mobile-menu" class="hidden md:hidden fixed top-0 left-0 w-full h-full bg-gray-950/95 backdrop-blur-sm pt-24 pb-8 overflow-y-auto z-10">
-            <ul class="flex flex-col items-center space-y-8 text-xl font-semibold uppercase tracking-widest text-gray-300">
-                <li><a href="/index.html" class="hover:text-yellow-500 transition duration-300 block py-2">Home</a></li>
-                <li><a href="/index.html#focus" class="hover:text-yellow-500 transition duration-300 block py-2">Focus</a></li>
-                <li><a href="/index.html#work" class="hover:text-yellow-500 transition duration-300 block py-2">Projects</a></li>
-                <li><a href="/members.html" class="hover:text-yellow-500 transition duration-300 block py-2">Members</a></li>
-                <li><a href="/blog.html" class="hover:text-yellow-500 transition duration-300 block py-2">Blog</a></li>
-                <li><a href="/gallery.html" class="hover:text-yellow-500 transition duration-300 block py-2">Gallery</a></li>
-                <li><a href="/contact.html" class="hover:text-yellow-500 transition duration-300 block py-2">Join Us</a></li>
-            </ul>
-        </nav>
     </header>
 
-    <!-- Main Content -->
-    <main class="flex-grow">
-        <section class="bg-gray-950 py-20 md:py-32 flex flex-col items-center">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-                <h1 class="text-4xl font-bold text-center mb-8 oswald">Member Login</h1>
-                
-                <!-- Styled Form -->
-                <form id="login-form" class="bg-gray-900 p-8 rounded-lg shadow-xl max-w-md w-full mx-auto">
-                    
-                    <div class="mb-6">
-                        <label for="email" class="block text-sm font-medium text-gray-300 mb-2">Email</label>
-                        <input type="email" id="email" required placeholder="you@example.com"
-                               class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md text-white focus:ring-yellow-500 focus:border-yellow-500">
-                    </div>
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="mb-8 border-b border-gray-700">
+            <nav class="flex space-x-1 sm:space-x-4" aria-label="Tabs">
+                <button id="gallery-tab-btn" class="tab-btn active px-3 sm:px-4 py-2 text-sm font-medium rounded-t-md">Manage Gallery</button>
+                <button id="blog-tab-btn" class="tab-btn px-3 sm:px-4 py-2 text-sm font-medium rounded-t-md">Manage Blog</button>
+            </nav>
+        </div>
 
-                    <div class="mb-4">
-                        <label for="password" class="block text-sm font-medium text-gray-300 mb-2">Password</label>
-                        <input type="password" id="password" required placeholder="••••••••"
-                               class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md text-white focus:ring-yellow-500 focus:border-yellow-500">
-                    </div>
-                    
-                    <div class="text-right mb-6">
-                        <a href="forgot-password.html" class="text-sm text-yellow-500 hover:text-yellow-400 transition duration-300">Forgot Password?</a>
-                    </div>
-                    
-                    <button type="submit" 
-                            class="w-full px-10 py-3 bg-yellow-500 text-black font-semibold uppercase tracking-wider text-base rounded-md transition duration-300 hover:bg-yellow-600 shadow-lg hover:shadow-yellow-500/50">
-                        Login
-                    </button>
-                    
-                    <div id="message" class="mt-4 text-center"></div>
+        <div id="loading-message" class="flex flex-col items-center justify-center text-center py-40">
+            <h1 class="text-3xl font-bold oswald text-gray-300">Verifying session...</h1>
+            <p class="text-gray-400 mt-2">Please wait while we log you in.</p>
+        </div>
 
-                    <p class="text-center text-gray-400 mt-6">
-                        Don't have an account? 
-                        <a href="contact.html" class="text-yellow-500 hover:text-yellow-400 font-semibold">Join the Hive</a>
-                    </p>
-                </form>
+        <div id="admin-content-wrapper" class="hidden">
+            <div id="gallery-content" class="tab-content active">
+                 <section class="bg-gray-900 p-6 sm:p-8 rounded-lg border border-gray-800 mb-12 shadow-lg">
+                    <h2 class="text-2xl font-bold text-yellow-500 oswald mb-6">Add New Gallery Item</h2>
+                    <form id="gallery-upload-form" class="space-y-6">
+                        <div><label for="gallery-title" class="block text-sm font-medium text-gray-300 mb-2">Media Title</label><input type="text" id="gallery-title" required class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-yellow-500 focus:border-yellow-500"></div>
+                        <div><label class="block text-sm font-medium text-gray-300 mb-2">Category</label><div class="flex items-center space-x-6"><label class="flex items-center"><input type="radio" name="gallery-category" value="photo" checked class="text-yellow-500 focus:ring-yellow-500"> <span class="ml-2">Photo</span></label><label class="flex items-center"><input type="radio" name="gallery-category" value="video" class="text-yellow-500 focus:ring-yellow-500"> <span class="ml-2">Video</span></label></div></div>
+                        <div>
+                            <label for="gallery-media-file" class="block text-sm font-medium text-gray-300 mb-2">Media File (Image or Video) <a href="https://8mb.video/" target="_blank" class="text-yellow-500 hover:underline">(Compress Video)</a></label>
+                            
+                            <input type="file" id="gallery-media-file" accept="image/*,video/*" required class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-500 file:text-black hover:file:bg-yellow-600 cursor-pointer">
+                        </div>
+                        <div><button type="submit" class="w-full py-3 px-4 font-semibold text-black bg-yellow-500 rounded-md hover:bg-yellow-600 transition disabled:opacity-50 disabled:cursor-not-allowed">Upload Media</button></div>
+                        <div id="gallery-status" class="text-center text-sm h-5 min-h-[1.25rem]"></div>
+                    </form>
+                </section>
+                <section>
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                        <h2 class="text-2xl font-bold text-yellow-500 oswald">Manage Gallery</h2>
+                        <div id="gallery-filter-buttons" class="flex items-center space-x-2 flex-shrink-0">
+                            <button class="filter-btn active px-4 py-1.5 font-semibold uppercase tracking-wider text-xs rounded-full transition duration-300" data-filter="all">All</button>
+                            <button class="filter-btn px-4 py-1.5 font-semibold uppercase tracking-wider text-xs rounded-full transition duration-300" data-filter="photo">Photos</button>
+                            <button class="filter-btn px-4 py-1.5 font-semibold uppercase tracking-wider text-xs rounded-full transition duration-300" data-filter="video">Videos</button>
+                        </div>
+                    </div>
+                    <div id="gallery-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                         <p class="text-gray-400 col-span-full text-center">Loading gallery...</p>
+                    </div>
+                </section>
             </div>
-        </section>
-    </main>
 
-    <!-- Footer (Copied from your other pages) -->
-    <footer class="bg-gray-900 border-t border-gray-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
-                <div>
-                    <h3 class="text-xl font-extrabold tracking-widest text-white oswald mb-4">
-                        <a href="index.html">SIMS Media Hive</a>
-                    </h3>
-                    <p class="text-gray-400 text-sm mb-4 max-w-xs">
-                        Your creative partner in digital media production, storytelling, and impactful content.
-                    </p>
-                    <div class="space-y-2 text-sm text-gray-400">
-                        <p class="flex items-center"><i data-lucide="mail" class="inline w-4 h-4 mr-2 text-yellow-500 shrink-0"></i><span>gds.simshive@gmail.com</span></p>
-                        <p class="flex items-center"><i data-lucide="phone" class="inline w-4 h-4 mr-2 text-yellow-500 shrink-0"></i><span>+91 7981 951 879</span></p>
+            <div id="blog-content" class="tab-content">
+                <section class="bg-gray-900 p-6 sm:p-8 rounded-lg border border-gray-800 mb-12 shadow-lg">
+                    <h2 class="text-2xl font-bold text-yellow-500 oswald mb-6">Create or Edit Blog Post</h2>
+                    <form id="blog-form" class="space-y-6">
+                        <input type="hidden" id="blog-post-id">
+                        <div><label for="blog-title" class="block text-sm font-medium text-gray-300 mb-2">Post Title</label><input type="text" id="blog-title" required class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-yellow-500 focus:border-yellow-500"></div>
+                        <div><label for="blog-author" class="block text-sm font-medium text-gray-300 mb-2">Author</label><input type="text" id="blog-author" required class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-yellow-500 focus:border-yellow-500"></div>
+                        <div>
+                            <label for="blog-content-editor" class="block text-sm font-medium text-gray-300 mb-2">Content (Markdown)</label>
+                            <textarea id="blog-content-editor"></textarea> </div>
+                        <div>
+                            <label for="blog-header-media-file" class="block text-sm font-medium text-gray-300 mb-2">Header Media (Image or Video)</label>
+                            <input type="file" id="blog-header-media-file" accept="image/*,video/*" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-500 file:text-black hover:file:bg-yellow-600 cursor-pointer">
+                            <small class="text-gray-400 mt-1 block">New media required for new posts. Leave empty if editing to keep existing media.</small>
+                        </div>
+                        <div class="flex space-x-4">
+                            <button type="submit" class="w-full py-3 px-4 font-semibold text-black bg-yellow-500 rounded-md hover:bg-yellow-600 transition disabled:opacity-50 disabled:cursor-not-allowed">Save Post</button>
+                            <button type="button" id="clear-blog-form-btn" class="w-full py-3 px-4 font-semibold text-white bg-gray-600 rounded-md hover:bg-gray-700 transition">Clear Form / New Post</button>
+                        </div>
+                        <div id="blog-status" class="text-center text-sm h-5 min-h-[1.25rem]"></div>
+                    </form>
+                </section>
+                <section>
+                    <h2 class="text-2xl font-bold text-yellow-500 oswald mb-6">Manage Blog Posts</h2>
+                    <div id="blog-post-list" class="space-y-4">
+                         <p class="text-gray-400 text-center">Loading posts...</p>
                     </div>
-                </div>
-                <div>
-                    <h4 class="text-lg font-semibold text-white oswald tracking-wider mb-4">Quick Links</h4>
-                    <ul class="space-y-3 text-sm">
-                        <li><a href="/index.html" class="text-gray-400 hover:text-yellow-500 transition duration-300">Home</a></li>
-                        <li><a href="/index.html#work" class="text-gray-400 hover:text-yellow-500 transition duration-300">Projects</a></li>
-                        <li><a href="/members.html" class="text-gray-400 hover:text-yellow-500 transition duration-300">Members</a></li>
-                        <li><a href="/login.html" class="text-gray-400 hover:text-yellow-500 transition duration-300">Member Login</a></li>
-                        <li><a href="/blog.html" class="text-gray-400 hover:text-yellow-500 transition duration-300">Blog</a></li>
-                        <li><a href="/gallery.html" class="text-gray-400 hover:text-yellow-500 transition duration-300">Gallery</a></li>
-                        <li><a href="/contact.html" class="text-gray-400 hover:text-yellow-500 transition duration-300">Join Us</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="text-lg font-semibold text-white oswald tracking-wider mb-4">Follow Us</h4>
-                    <p class="text-sm text-gray-400 mb-4">Stay connected on our social channels.</p>
-                    <div class="flex space-x-4 justify-center md:justify-start">
-                        <a href="#" aria-label="Instagram" class="text-gray-400 hover:text-yellow-500 transition duration-300"><i data-lucide="instagram" class="w-6 h-6"></i></a>
-                        <a href="#" aria-label="YouTube" class="text-gray-400 hover:text-yellow-500 transition duration-300"><i data-lucide="youtube" class="w-6 h-6"></i></a>
-                        <a href="#" aria-label="Facebook" class="text-gray-400 hover:text-yellow-500 transition duration-300"><i data-lucide="facebook" class="w-6 h-6"></i></a>
-                        <a href="#" aria-label="LinkedIn" class="text-gray-400 hover:text-yellow-500 transition duration-3D00"><i data-lucide="linkedin" class="w-6 h-6"></i></a>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-16 pt-8 border-t border-gray-800 text-center text-sm text-gray-500">
-                <p>&copy; 2025 SIMS Media Hive. All Rights Reserved. Designed by <a href="https://dcagency.in" target="_blank" class="hover:text-yellow-500 transition">Darion Creative Agency.</a></p>
+                </section>
             </div>
         </div>
-    </footer>
+    </main>
 
-    <!-- SCRIPT 1: Mobile Menu Logic (Isolated) -->
-    <script>
-        lucide.createIcons();
-        const menuButton = document.getElementById('mobile-menu-button');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const menuIcon = menuButton.querySelector('i');
-        menuButton.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-            document.body.classList.toggle('overflow-hidden');
-            const isMenuOpen = !mobileMenu.classList.contains('hidden');
-            menuIcon.setAttribute('data-lucide', isMenuOpen ? 'x' : 'menu');
-            lucide.createIcons();
-        });
-        document.querySelectorAll('#mobile-menu a').forEach(link => {
-            link.addEventListener('click', () => {
-                mobileMenu.classList.add('hidden');
-                document.body.classList.remove('overflow-hidden');
-                menuIcon.setAttribute('data-lucide', 'menu');
-                lucide.createIcons();
-            });
-        });
-    </script>
+    <input type="file" id="easymde-file-input" style="display: none;" accept="image/*,video/*">
 
-    <!-- SCRIPT 2: Login Logic (Isolated) -->
     <script>
-        // --- 1. Initialize Supabase Client ---
+        // --- CONFIGURATION ---
         const SUPABASE_URL = 'https://gswdqdsviqrzsoahxapc.supabase.co/'; 
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdzd2RxZHN2aXFyenNvYWh4YXBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4ODM5NzcsImV4cCI6MjA3NjQ1OTk3N30.JFF6NFIdqZAE9ioHeMdfIVpN84UtN_Z0K2pZYodlpZY';
+
+        const GALLERY_BUCKET = 'gallery-images';
+        const BLOG_BUCKET = 'blog-images';
+        const defaultPlaceholder = 'https://placehold.co/800x600/1c1917/f59e0b?text=MEDIA';
+
+        // --- INITIALIZATION ---
         const { createClient } = supabase;
         const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // --- 2. Get Form and Message Elements ---
-        const loginForm = document.getElementById('login-form');
-        const messageEl = document.getElementById('message');
+        // --- DOM ELEMENTS ---
+        const logoutButton = document.getElementById('logout-button');
+        const galleryTabBtn = document.getElementById('gallery-tab-btn');
+        const blogTabBtn = document.getElementById('blog-tab-btn');
+        const galleryContent = document.getElementById('gallery-content');
+        const blogContent = document.getElementById('blog-content');
+        const loadingMessage = document.getElementById('loading-message');
+        const adminContentWrapper = document.getElementById('admin-content-wrapper');
+        // Gallery
+        const galleryForm = document.getElementById('gallery-upload-form');
+        const galleryList = document.getElementById('gallery-list');
+        const galleryStatus = document.getElementById('gallery-status');
+        const galleryMediaInput = document.getElementById('gallery-media-file');
+        const galleryTitleInput = document.getElementById('gallery-title');
+        const galleryFilterButtonsContainer = document.getElementById('gallery-filter-buttons');
+        // Blog
+        const blogForm = document.getElementById('blog-form');
+        const blogPostList = document.getElementById('blog-post-list');
+        const blogStatus = document.getElementById('blog-status');
+        const clearBlogFormBtn = document.getElementById('clear-blog-form-btn');
+        const blogPostIdInput = document.getElementById('blog-post-id');
+        const blogTitleInput = document.getElementById('blog-title');
+        const blogAuthorInput = document.getElementById('blog-author');
+        const blogHeaderMediaInput = document.getElementById('blog-header-media-file');
+        const easymdeFileInput = document.getElementById('easymde-file-input');
 
-        // --- 3. Handle Form Submission ---
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            messageEl.textContent = 'Logging in...';
-            messageEl.style.color = 'var(--text-light)'; // White
+        let easymde = null;
 
-            try {
-                // --- 4. Call Supabase Auth Method ---
-                const { data, error } = await _supabase.auth.signInWithPassword({
-                    email: email,
-                    password: password,
-                });
-
-                if (error) {
-                    throw error;
-                }
-
-                // --- 5. Handle Success ---
-                messageEl.textContent = 'Success! Redirecting to admin panel...';
-                messageEl.style.color = '#22c55e'; // Green
-                
-                // Redirect to the members-only area after 1.5 seconds
-                setTimeout(() => {
-                    window.location.href = '/admin.html'; // Or '/dashboard.html'
-                }, 1500);
-
-            } catch (error) {
-                messageEl.textContent = error.message;
-                messageEl.style.color = '#ef4444'; // Red
-                console.error('Error logging in:', error.message);
+        // --- Initialize EasyMDE ---
+        function initializeEasyMDE() {
+            if (!easymde && document.getElementById('blog-content-editor')) {
+                try {
+                    easymde = new EasyMDE({
+                        element: document.getElementById('blog-content-editor'),
+                        spellChecker: false,
+                        placeholder: "Write content using Markdown... Use the paperclip icon to upload images/videos.",
+                        toolbar: ["bold","italic","heading","|","quote","unordered-list","ordered-list","|","link",{name:"upload-media",action:editor=>easymdeFileInput.click(),className:"fa fa-paperclip",title:"Upload Image/Video"},"image","|","preview","side-by-side","fullscreen","|","guide"]
+                    });
+                } catch (error) { console.error("Failed to initialize EasyMDE:", error); blogStatus.textContent = "Error initializing text editor."; blogStatus.style.color = 'red'; }
             }
+        }
+
+        // --- Helper Functions ---
+        function isVideoUrl(url) {
+            if (!url) return false; const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv']; const lowerUrl = url.toLowerCase(); return videoExtensions.some(ext => lowerUrl.endsWith(ext));
+        }
+
+        // --- Video Thumbnail Generation Function ---
+        async function generateVideoThumbnail(videoUrl) {
+            return new Promise((resolve) => {
+                const video = document.createElement('video');
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                let resolved = false;
+
+                video.classList.add('thumbnail-generator-video');
+                video.muted = true; video.playsInline = true; video.preload = 'metadata'; video.crossOrigin = 'anonymous';
+
+                const onError = (e) => { if (resolved) return; console.warn(`Thumb gen failed for ${videoUrl}:`, (e.type || 'Error'), e); cleanup(); resolve(null); };
+                const cleanup = () => { video.removeEventListener('loadeddata', onLoadedData); video.removeEventListener('seeked', onSeeked); video.removeEventListener('error', onError); video.removeEventListener('stalled', onError); video.removeEventListener('abort', onError); clearTimeout(timeoutId); if (video.parentNode === document.body) document.body.removeChild(video); };
+                const timeoutId = setTimeout(() => { if (resolved) return; console.warn(`Thumb gen timed out for ${videoUrl}`); cleanup(); resolve(null); }, 10000);
+
+                const onLoadedData = () => { if (!video.videoWidth || !video.videoHeight) { console.warn(`Invalid dimensions for ${videoUrl}`); cleanup(); resolve(null); return; } canvas.width = video.videoWidth; canvas.height = video.videoHeight; video.currentTime = Math.min(1, (video.duration || 1) / 2); };
+                const onSeeked = () => { if (resolved) return; setTimeout(() => { if (resolved) return; try { context.drawImage(video, 0, 0, canvas.width, canvas.height); const dataUrl = canvas.toDataURL('image/jpeg', 0.7); resolved = true; cleanup(); resolve(dataUrl); } catch (drawError) { onError(drawError); } }, 100); };
+
+                video.addEventListener('loadeddata', onLoadedData); video.addEventListener('seeked', onSeeked); video.addEventListener('error', onError); video.addEventListener('stalled', onError); video.addEventListener('abort', onError);
+                video.src = videoUrl;
+                document.body.appendChild(video);
+                video.load();
+            });
+        }
+
+
+        // --- AUTHENTICATION ---
+        async function checkAuth() {
+            // getSession() AUTOMATICALLY handles the token from magic link URLs
+            const { data: { session }, error: sessionError } = await _supabase.auth.getSession();
+            
+            if (sessionError || !session) { 
+                console.error("Auth check failed or no session:", sessionError); 
+                loadingMessage.textContent = "Authentication failed. Redirecting to login...";
+                setTimeout(() => window.location.href = '/login.html', 1500); 
+            } else { 
+                console.log("User authenticated:", session.user.email);
+                loadingMessage.style.display = 'none'; // Hide loading
+                adminContentWrapper.classList.remove('hidden'); // Show content
+                // Load data for the initially active tab
+                if (galleryContent.classList.contains('active')) {
+                    loadGalleryItems(); 
+                } else { 
+                    initializeEasyMDE(); 
+                    loadBlogPosts(); 
+                }
+            }
+        }
+        
+        logoutButton.addEventListener('click', async () => { 
+            galleryStatus.textContent = 'Logging out...'; 
+            blogStatus.textContent = 'Logging out...'; 
+            const { error } = await _supabase.auth.signOut(); 
+            if (error) { 
+                console.error("Logout error:", error); 
+                alert("Logout failed: " + error.message); 
+                galleryStatus.textContent = ''; 
+                blogStatus.textContent = ''; 
+            } else { 
+                window.location.href = '/login.html'; 
+            } 
+        });
+
+        // --- TAB SWITCHING LOGIC ---
+        function setupTabs() {
+            galleryTabBtn.addEventListener('click', () => { 
+                galleryTabBtn.classList.add('active'); 
+                blogTabBtn.classList.remove('active'); 
+                galleryContent.classList.add('active'); 
+                blogContent.classList.remove('active'); 
+                loadGalleryItems(); // Load gallery data when tab is clicked
+            });
+            blogTabBtn.addEventListener('click', () => { 
+                blogTabBtn.classList.add('active'); 
+                galleryTabBtn.classList.remove('active'); 
+                blogContent.classList.add('active'); 
+                galleryContent.classList.remove('active'); 
+                initializeEasyMDE(); // Initialize editor when blog tab is clicked
+                setTimeout(loadBlogPosts, 50); // Load blog data after a short delay
+            });
+        }
+
+        // --- GALLERY MANAGEMENT ---
+        async function loadGalleryItems() {
+             galleryList.innerHTML = '<p class="text-gray-400 col-span-full text-center">Loading gallery...</p>';
+             try {
+                const { data, error } = await _supabase.from('galleryImages').select('*').order('created_at', { ascending: false });
+                if (error) throw error;
+                galleryList.innerHTML = ''; 
+
+                if (!data || data.length === 0) {
+                    galleryList.innerHTML = '<p class="text-gray-400 col-span-full text-center">No items in the gallery yet.</p>';
+                    initializeGalleryFilter(); 
+                } else {
+                    galleryStatus.textContent = 'Generating video thumbnails (may take time)...'; galleryStatus.style.color='white';
+                    const itemPromises = data.map(async (itemData) => {
+                        const isVideo = itemData.category === 'video' || (itemData.category !== 'photo' && isVideoUrl(itemData.imageUrl));
+                        const itemCategory = isVideo ? 'video' : 'photo';
+                        let previewSrc = defaultPlaceholder;
+
+                        if (isVideo && itemData.imageUrl) {
+                            const thumbnailUrl = await generateVideoThumbnail(itemData.imageUrl);
+                            previewSrc = thumbnailUrl || defaultPlaceholder;
+                        } else if (!isVideo && itemData.imageUrl) {
+                            previewSrc = itemData.imageUrl;
+                        }
+
+                        const filePathMaybe = itemData.imageUrl ? new URL(itemData.imageUrl).pathname.split(`/${GALLERY_BUCKET}/`)[1] : null;
+                        const filePath = filePathMaybe || `missing_path_${itemData.id}`;
+
+                        return `
+                            <div class="gallery-item relative group bg-gray-900 border border-gray-800 rounded-lg overflow-hidden aspect-[4/3]" data-category="${itemCategory}">
+                                <img src="${previewSrc}" alt="Preview: ${itemData.title}" class="absolute inset-0 w-full h-full object-cover bg-gray-800" onerror="this.onerror=null;this.src='${defaultPlaceholder}';">
+                                ${isVideo ? `<div class="video-overlay-icon"><svg data-lucide="play"></svg></div>` : ''}
+                                <div class="p-3 absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent pt-8">
+                                    <p class="font-bold text-white truncate text-base">${itemData.title || 'Untitled'}</p>
+                                    <p class="text-xs text-yellow-400 capitalize">${itemCategory}</p>
+                                </div>
+                                <button data-id="${itemData.id}" data-path="${filePath}" ${!filePathMaybe ? 'disabled title="Cannot delete - path missing"' : 'title="Delete Media"'} class="delete-gallery-btn absolute top-2 right-2 p-1.5 bg-red-600 text-white rounded-full hover:bg-red-700 opacity-0 group-hover:opacity-100 transition-opacity disabled:bg-gray-500 disabled:cursor-not-allowed">
+                                    <svg data-lucide="trash-2" width="14" height="14"></svg>
+                                </button>
+                            </div>`;
+                    });
+
+                    const cardHTMLArray = await Promise.all(itemPromises);
+                    galleryList.innerHTML = cardHTMLArray.join('');
+                    galleryStatus.textContent = ''; 
+
+                    initializeGalleryFilter();
+                    lucide.createIcons(); 
+                }
+             } catch (error) { 
+                 console.error('Error fetching gallery items:', error);
+                 galleryList.innerHTML = `<p class="text-red-500 col-span-full text-center">Could not fetch gallery: ${error.message}</p>`;
+                 galleryStatus.textContent = ''; 
+             }
+        }
+
+        function initializeGalleryFilter() {
+            const filterButtons = galleryFilterButtonsContainer.querySelectorAll('.filter-btn');
+            const galleryItems = galleryList.querySelectorAll('.gallery-item');
+             if ((!galleryItems || galleryItems.length === 0) && filterButtons.length > 0) {
+                 if (!filterButtons[0].classList.contains('active')) {
+                     filterButtons.forEach(btn => btn.classList.remove('active', 'bg-yellow-500', 'text-black'));
+                     filterButtons[0].classList.add('active', 'bg-yellow-500', 'text-black');
+                 }
+                 return; 
+             }
+
+            const activeClasses = ['active', 'bg-yellow-500', 'text-black'];
+            const inactiveClasses = ['bg-gray-800', 'text-gray-400', 'hover:bg-gray-700', 'hover:text-white'];
+
+            filterButtons.forEach(button => {
+                 if (!button.classList.contains('active')) button.classList.add(...inactiveClasses);
+                 else button.classList.add(...activeClasses);
+                button.addEventListener('click', () => {
+                    const filterValue = button.getAttribute('data-filter');
+                    filterButtons.forEach(btn => { btn.classList.remove(...activeClasses); btn.classList.add(...inactiveClasses); });
+                    button.classList.add(...activeClasses); button.classList.remove(...inactiveClasses);
+                    if(galleryItems) {
+                        galleryItems.forEach(item => { const itemCategory = item.getAttribute('data-category'); item.classList.toggle('hidden', !(filterValue === 'all' || itemCategory === filterValue)); });
+                    }
+                });
+            });
+
+             const initialFilter = galleryFilterButtonsContainer.querySelector('.filter-btn.active')?.dataset.filter || 'all';
+             if (galleryItems && galleryItems.length > 0) {
+                 galleryItems.forEach(item => { const itemCategory = item.getAttribute('data-category'); item.classList.toggle('hidden', !(initialFilter === 'all' || itemCategory === initialFilter)); });
+             }
+        }
+
+        galleryForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); const submitBtn = galleryForm.querySelector('button[type="submit"]'); submitBtn.disabled = true; submitBtn.textContent = 'Uploading...'; galleryStatus.textContent = 'Starting...'; galleryStatus.style.color = 'white'; const title = galleryTitleInput.value; const category = galleryForm.querySelector('input[name="gallery-category"]:checked').value; const file = galleryMediaInput.files[0]; if (!file) { galleryStatus.textContent = 'Select a file.'; galleryStatus.style.color = 'red'; submitBtn.disabled = false; submitBtn.textContent = 'Upload Media'; return; } const filePath = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`; try { galleryStatus.textContent = `Uploading ${file.type.split('/')[0]}...`; const { error: uploadError } = await _supabase.storage.from(GALLERY_BUCKET).upload(filePath, file); if (uploadError) throw uploadError; const { data: urlData } = _supabase.storage.from(GALLERY_BUCKET).getPublicUrl(filePath); if (!urlData || !urlData.publicUrl) throw new Error("Could not get public URL."); galleryStatus.textContent = 'Saving details...'; const { error: dbError } = await _supabase.from('galleryImages').insert([{ title, category, imageUrl: urlData.publicUrl }]); if (dbError) throw dbError; galleryStatus.textContent = 'Success!'; galleryStatus.style.color = '#22c55e'; galleryForm.reset(); await loadGalleryItems(); } catch (error) { console.error("Gallery upload failed:", error); galleryStatus.textContent = `Error: ${error.message}`; galleryStatus.style.color = '#ef4444'; } finally { submitBtn.disabled = false; submitBtn.textContent = 'Upload Media'; setTimeout(() => galleryStatus.textContent = '', 4000); }
+        });
+
+        galleryList.addEventListener('click', async (e) => {
+             const deleteButton = e.target.closest('.delete-gallery-btn:not([disabled])'); if (!deleteButton) return; const docId = deleteButton.dataset.id; const filePath = deleteButton.dataset.path; if (confirm('Delete this gallery item permanently?')) { galleryStatus.textContent = 'Deleting...'; galleryStatus.style.color='white'; try { const { error: storageError } = await _supabase.storage.from(GALLERY_BUCKET).remove([filePath]); if (storageError && storageError.message !== 'The resource was not found') throw storageError; const { error: dbError } = await _supabase.from('galleryImages').delete().eq('id', docId); if (dbError) throw dbError; galleryStatus.textContent = 'Item deleted!'; galleryStatus.style.color='#22c55e'; await loadGalleryItems(); } catch (error) { galleryStatus.textContent = `Deletion failed: ${error.message}`; galleryStatus.style.color='#ef4444'; console.error("Gallery delete failed:", error); } finally { setTimeout(() => galleryStatus.textContent = '', 4000); } }
+        });
+
+        // --- BLOG MANAGEMENT ---
+        easymdeFileInput.addEventListener('change', async (e) => {
+             const file = e.target.files[0]; if (!file) return; if (!easymde) { console.error("Editor not initialized"); return; } easymde.codemirror.setOption('readOnly', true); const originalStatus = blogStatus.textContent; blogStatus.textContent = `Uploading ${file.name}...`; blogStatus.style.color = 'white'; const filePath = `content_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`; try { blogStatus.textContent = `Uploading ${file.type}...`; const { error: uploadError } = await _supabase.storage.from(BLOG_BUCKET).upload(filePath, file); if (uploadError) throw uploadError; const { data: urlData } = _supabase.storage.from(BLOG_BUCKET).getPublicUrl(filePath); const publicURL = urlData.publicUrl; const cm = easymde.codemirror; const doc = cm.getDoc(); const cursor = doc.getCursor(); let markdownSyntax = ''; if (file.type.startsWith('image/')) { markdownSyntax = `\n![${file.name || 'image alt text'}](${publicURL})\n`; } else if (file.type.startsWith('video/')) { markdownSyntax = `\n<video controls width="100%" src="${publicURL}"></video>\n`; } else { markdownSyntax = `\n[${file.name}](${publicURL})\n`; } doc.replaceRange(markdownSyntax, cursor); blogStatus.textContent = 'Media inserted!'; blogStatus.style.color = 'green'; } catch (error) { console.error("EasyMDE Upload failed:", error); blogStatus.textContent = `Media upload failed: ${error.message}`; blogStatus.style.color = 'red'; } finally { easymdeFileInput.value = ''; easymde.codemirror.setOption('readOnly', false); setTimeout(() => { if (blogStatus.textContent.includes('inserted') || blogStatus.textContent.includes('failed')) blogStatus.textContent = originalStatus || ''; }, 3000); }
+        });
+
+        async function loadBlogPosts() {
+            blogPostList.innerHTML = '<p class="text-gray-400 text-center">Loading posts...</p>';
+            try {
+                const { data, error } = await _supabase.from('blogPosts').select('id, title, author, imageUrl').order('created_at', { ascending: false });
+                if (error) throw error;
+                blogPostList.innerHTML = '';
+                if (!data || data.length === 0) {
+                    blogPostList.innerHTML = '<p class="text-gray-400 text-center">No blog posts yet.</p>';
+                } else {
+                    data.forEach(post => {
+                        const postEl = document.createElement('div');
+                        postEl.className = 'flex items-center justify-between bg-gray-800 p-4 rounded-md shadow';
+                        postEl.innerHTML = `<div><p class="font-bold text-white">${post.title}</p><p class="text-sm text-gray-400">By ${post.author}</p></div><div class="flex space-x-2"><button class="edit-post-btn p-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm text-white transition">Edit</button><button class="delete-post-btn p-2 bg-red-600 hover:bg-red-700 rounded-md text-sm text-white transition">Delete</button></div>`;
+                        postEl.querySelector('.edit-post-btn').addEventListener('click', () => populateBlogFormForEdit(post.id));
+                        postEl.querySelector('.delete-post-btn').addEventListener('click', () => handleBlogDelete(post.id, post.imageUrl));
+                        blogPostList.appendChild(postEl);
+                    });
+                }
+             } catch (error) {
+                 console.error('Error loading posts:', error); blogPostList.innerHTML = `<p class="text-red-500 text-center">Error loading posts: ${error.message}</p>`;
+             }
+        }
+
+        blogForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); const submitBtn = blogForm.querySelector('button[type="submit"]'); submitBtn.disabled = true; submitBtn.textContent = 'Saving...'; blogStatus.textContent = 'Processing...'; blogStatus.style.color='white'; const postId = blogPostIdInput.value; const title = blogTitleInput.value; const author = blogAuthorInput.value; const content = easymde ? easymde.value() : document.getElementById('blog-content-editor').value; const headerFile = blogHeaderMediaInput.files[0]; let headerMediaUrl = null; try { if (headerFile) { blogStatus.textContent = `Uploading header ${headerFile.type.split('/')[0]}...`; const filePath = `${Date.now()}_header_${headerFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`; const { error: uploadError } = await _supabase.storage.from(BLOG_BUCKET).upload(filePath, headerFile); if (uploadError) throw uploadError; headerMediaUrl = _supabase.storage.from(BLOG_BUCKET).getPublicUrl(filePath).data.publicUrl; } let postData = { title, author, content }; if (headerMediaUrl) postData.imageUrl = headerMediaUrl; // Only add if new file uploaded if (postId) { blogStatus.textContent = 'Updating database record...'; const { error } = await _supabase.from('blogPosts').update(postData).eq('id', postId); if (error) throw error; blogStatus.textContent = 'Post updated successfully!'; } else { blogStatus.textContent = 'Creating database record...'; if (!headerMediaUrl) throw new Error("Header media (image or video) required for new posts."); postData.imageUrl = headerMediaUrl; // Required for new posts const { error } = await _supabase.from('blogPosts').insert([postData]); if (error) throw error; blogStatus.textContent = 'Post created successfully!'; } blogStatus.style.color = 'green'; clearBlogForm(); await loadBlogPosts(); } catch (error) { console.error("Blog save failed:", error); blogStatus.textContent = `Error: ${error.message}`; blogStatus.style.color = 'red'; } finally { submitBtn.disabled = false; submitBtn.textContent = 'Save Post'; setTimeout(() => blogStatus.textContent = '', 4000); }
+        });
+
+        async function handleBlogDelete(postId, postMediaUrl) {
+            if (!confirm('Delete this blog post permanently?')) return; blogStatus.textContent = `Deleting post ${postId}...`; blogStatus.style.color = 'white'; try { if (postMediaUrl) { try { const filePath = new URL(postMediaUrl).pathname.split(`/${BLOG_BUCKET}/`)[1]; if (filePath) await _supabase.storage.from(BLOG_BUCKET).remove([filePath]); } catch (mediaError) { console.warn("Could not delete header media:", mediaError); } } const { error: dbError } = await _supabase.from('blogPosts').delete().eq('id', postId); if (dbError) throw dbError; blogStatus.textContent = 'Post deleted!'; blogStatus.style.color='#22c55e'; await loadBlogPosts(); } catch (error) { console.error('Delete failed:', error); blogStatus.textContent = `Deletion failed: ${error.message}`; blogStatus.style.color = 'red'; } finally { setTimeout(() => blogStatus.textContent = '', 4000); }
+        }
+
+        async function populateBlogFormForEdit(postId) {
+             blogStatus.textContent = "Loading post data..."; blogStatus.style.color='white'; try { const { data: post, error } = await _supabase.from('blogPosts').select('*').eq('id', postId).single(); if (error || !post) throw error || new Error("Post not found"); blogPostIdInput.value = post.id; blogTitleInput.value = post.title; blogAuthorInput.value = post.author; if (easymde) { easymde.value(post.content || ''); } else { document.getElementById('blog-content-editor').value = post.content || ''; console.warn("Populating textarea because EasyMDE not ready."); } blogHeaderMediaInput.value = ''; // Clear file input blogStatus.textContent = "Editing post. Upload new header media to replace existing."; blogStatus.style.color = 'white'; window.scrollTo({ top: blogForm.offsetTop - 100, behavior: 'smooth' }); } catch (error) { console.error("Failed to load post for editing:", error); blogStatus.textContent = "Could not load post data."; blogStatus.style.color='red'; }
+        }
+
+        function clearBlogForm() {
+            blogForm.reset(); blogPostIdInput.value = ''; if (easymde) easymde.value(''); else document.getElementById('blog-content-editor').value = ''; blogStatus.textContent = ''; blogHeaderMediaInput.value = '';
+        }
+        clearBlogFormBtn.addEventListener('click', clearBlogForm);
+
+        // --- INITIAL PAGE LOAD ---
+        document.addEventListener('DOMContentLoaded', () => {
+            setupTabs();
+            checkAuth(); // Checks login and loads initial tab data
+            lucide.createIcons(); // Initial call for static icons
         });
     </script>
 </body>

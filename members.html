@@ -6,7 +6,7 @@
     <title>SIMS Media Hive | Club Members</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> <style>
         /* Custom styles to match the dark theme and font */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Oswald:wght@200..700&display=swap');
 
@@ -24,11 +24,16 @@
             color: var(--text-light);
             overflow-x: hidden;
             /* Ensures space below the fixed header for the content */
-            padding-top: 6rem; 
+            padding-top: 6rem;
         }
 
         .oswald {
             font-family: 'Oswald', sans-serif;
+        }
+        /* Member Card Styles */
+        .member-card img {
+            aspect-ratio: 1 / 1; /* Make images square */
+            object-fit: cover; /* Cover the square area */
         }
     </style>
 </head>
@@ -59,7 +64,7 @@
                 <li><a href="/blog.html" class="hover:text-yellow-500 transition duration-300">Blog</a></li>
                 <li><a href="/gallery.html" class="hover:text-yellow-500 transition duration-300">Gallery</a></li>
                 <li><a href="/contact.html" class="hover:text-yellow-500 transition duration-300">Join Us</a></li>
-                
+
             </ul>
         </nav>
 
@@ -68,9 +73,9 @@
                 <li><a href="/index.html" class="hover:text-yellow-500 transition duration-300 block py-2">Home</a></li>
                 <li><a href="/index.html#focus" class="hover:text-yellow-500 transition duration-300 block py-2">Focus</a></li>
                 <li><a href="/index.html#work" class="hover:text-yellow-500 transition duration-300 block py-2">Projects</a></li>
-                <li><a href="/members.html" class="text-yellow-500 transition duration-300 block py-2">Members</a></li>
+                 <li><a href="/members.html" class="text-yellow-500 transition duration-300 block py-2">Members</a></li>
                 <li><a href="/blog.html" class="hover:text-yellow-500 transition duration-300 block py-2">Blog</a></li>
-                <li><a href="/gallery.html" class="hover:text-yellow-500 transition duration-300">Gallery</a></li>
+                <li><a href="/gallery.html" class="hover:text-yellow-500 transition duration-300 block py-2">Gallery</a></li>
                 <li><a href="/contact.html" class="hover:text-yellow-500 transition duration-300 block py-2">Join Us</a></li>
             </ul>
         </nav>
@@ -82,64 +87,10 @@
             <h1 class="text-4xl font-bold text-center mb-16 oswald">
                 Meet the Hive Crew
             </h1>
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8">
-                
-                <div class="flex flex-col items-center text-center bg-gray-900 p-4 rounded-lg shadow-xl hover:shadow-yellow-500/10 transition duration-300">
-                    <img src="/src/sankarpr1.jpg" onerror="this.onerror=null;this.src='https://placehold.co/200x200/292524/eab308?text=DIRECTOR';" alt="Lead Director" class="w-full h-auto aspect-square object-cover rounded-md mb-4 border-2 border-yellow-500">
-                    <h3 class="text-2xl font-bold text-white oswald leading-none">Sankar Gongati</h3>
-                    <p class="text-sm text-yellow-500 uppercase tracking-widest mt-1 mb-2">Director & Club Head</p>
-                    <p class="text-xs text-gray-400">Visionary leader of all campus productions.</p>
-                </div>
 
-                <div class="flex flex-col items-center text-center bg-gray-900 p-4 rounded-lg shadow-xl hover:shadow-yellow-500/10 transition duration-300">
-                    <img src="/src/ekalavyapr1.jpg" onerror="this.onerror=null;this.src='https://placehold.co/200x200/292524/eab308?text=CINEMA';" alt="Lead Cinematographer" class="w-full h-auto aspect-square object-cover rounded-md mb-4 border-2 border-yellow-500">
-                    <h3 class="text-2xl font-bold text-white oswald leading-none">Ekalavya Sri</h3>
-                    <p class="text-sm text-yellow-500 uppercase tracking-widest mt-1 mb-2">Vice-President</p>
-                    <p class="text-xs text-gray-400">Responsible for all visual and camera aesthetics.</p>
+            <div id="member-list-container" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8">
+                <p id="loading-members" class="text-gray-400 col-span-full text-center">Loading members...</p>
                 </div>
-                <div class="flex flex-col items-center text-center bg-gray-900 p-4 rounded-lg shadow-xl hover:shadow-yellow-500/10 transition duration-300">
-                    <img src="/src/prasastha.jpg" onerror="this.onerror=null;this.src='https://placehold.co/200x200/292524/eab308?text=DESIGN';" alt="Lead Designer" class="w-full h-auto aspect-square object-cover rounded-md mb-4 border-2 border-yellow-500">
-                    <h3 class="text-2xl font-bold text-white oswald leading-none">Prasastha</h3>
-                    <p class="text-sm text-yellow-500 uppercase tracking-widest mt-1 mb-2">Secretary & Graphic Designer</p>
-                    <p class="text-xs text-gray-400">Handles all posters, logos, and visual branding.</p>
-                </div>
-                <div class="flex flex-col items-center text-center bg-gray-900 p-4 rounded-lg shadow-xl hover:shadow-yellow-500/10 transition duration-300">
-                    <img src="/src/franky.jpg" onerror="this.onerror=null;this.src='https://placehold.co/200x200/292524/eab308?text=EDITOR';" alt="Lead Editor" class="w-full h-auto aspect-square object-cover rounded-md mb-4 border-2 border-yellow-500">
-                    <h3 class="text-2xl font-bold text-white oswald leading-none">Franky</h3>
-                    <p class="text-sm text-yellow-500 uppercase tracking-widest mt-1 mb-2">Creative Content Head </p>
-                    <p class="text-xs text-gray-400">Architect of Narrative, Driver of Engagement.</p>
-                </div>
-
-                
-
-                <div class="flex flex-col items-center text-center bg-gray-900 p-4 rounded-lg shadow-xl hover:shadow-yellow-500/10 transition duration-300">
-                    <img src="/src/bhagavan1.jpg" onerror="this.onerror=null;this.src='https://placehold.co/200x200/292524/eab308?text=TREASURER';" alt="Treasurer" class="w-full h-auto aspect-square object-cover rounded-md mb-4 border-2 border-yellow-500">
-                    <h3 class="text-2xl font-bold text-white oswald leading-none">Bhagavan</h3>
-                    <p class="text-sm text-yellow-500 uppercase tracking-widest mt-1 mb-2">Treasurer</p>
-                    <p class="text-xs text-gray-400">Manages club finances and equipment purchases.</p>
-                </div>
-
-                <div class="flex flex-col items-center text-center bg-gray-900 p-4 rounded-lg shadow-xl hover:shadow-yellow-500/10 transition duration-300">
-                    <img src="/src/rajya2.jpg" onerror="this.onerror=null;this.src='https://placehold.co/200x200/292524/eab308?text=MEMBER';" alt="Member" class="w-full h-auto aspect-square object-cover rounded-md mb-4 border-2 border-yellow-500">
-                    <h3 class="text-2xl font-bold text-white oswald leading-none">Rajiya</h3>
-                    <p class="text-sm text-yellow-500 uppercase tracking-widest mt-1 mb-2">PRO & Anchor</p>
-                    <p class="text-xs text-gray-400">Public face, informs, manages media.</p>
-                </div>
-
-                <div class="flex flex-col items-center text-center bg-gray-900 p-4 rounded-lg shadow-xl hover:shadow-yellow-500/10 transition duration-300">
-                    <img src="/src/jesty.jpg" onerror="this.onerror=null;this.src='https://placehold.co/200x200/292524/eab308?text=MEMBER';" alt="Member" class="w-full h-auto aspect-square object-cover rounded-md mb-4 border-2 border-yellow-500">
-                    <h3 class="text-2xl font-bold text-white oswald leading-none">Jesty</h3>
-                    <p class="text-sm text-yellow-500 uppercase tracking-widest mt-1 mb-2">Assistant Creater & Photography </p>
-                    <p class="text-xs text-gray-400">Framing visions, crafting stunning visuals.</p>
-                </div>
-
-                <div class="flex flex-col items-center text-center bg-gray-900 p-4 rounded-lg shadow-xl hover:shadow-yellow-500/10 transition duration-300">
-                    <img src="/src/thirupathi.png" onerror="this.onerror=null;this.src='https://placehold.co/200x200/292524/eab308?text=MEMBER';" alt="Member" class="w-full h-auto aspect-square object-cover rounded-md mb-4 border-2 border-yellow-500">
-                    <h3 class="text-2xl font-bold text-white oswald leading-none">Thirupathi</h3>
-                    <p class="text-sm text-yellow-500 uppercase tracking-widest mt-1 mb-2">Field Manager</p>
-                    <p class="text-xs text-gray-400">Leading, coordinating, delivering results..</p>
-                </div>
-            </div>
 
             <div class="text-center mt-20">
                 <p class="text-xl text-gray-300 mb-6">Want to join this creative team?</p>
@@ -150,11 +101,9 @@
         </div>
     </section>
 
-<footer class="bg-gray-900 border-t border-gray-800">
+    <footer class="bg-gray-900 border-t border-gray-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-            
             <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
-                
                 <div>
                     <h3 class="text-xl font-extrabold tracking-widest text-white oswald mb-4">
                         <a href="index.html">SIMS Media Hive</a>
@@ -163,101 +112,125 @@
                         Your creative partner in digital media production, storytelling, and impactful content.
                     </p>
                     <div class="space-y-2 text-sm text-gray-400">
-                        <p class="flex items-center">
-                            <i data-lucide="mail" class="inline w-4 h-4 mr-2 text-yellow-500 shrink-0"></i>
-                            <span>gds.simshive@gmail.com</span>
-                        </p>
-                        <p class="flex items-center">
-                            <i data-lucide="phone" class="inline w-4 h-4 mr-2 text-yellow-500 shrink-0"></i>
-                            <span>+91 7981 951 879</span>
-                        </p>
+                        <p class="flex items-center"><i data-lucide="mail" class="inline w-4 h-4 mr-2 text-yellow-500 shrink-0"></i><span>gds.simshive@gmail.com</span></p>
+                        <p class="flex items-center"><i data-lucide="phone" class="inline w-4 h-4 mr-2 text-yellow-500 shrink-0"></i><span>+91 7981 951 879</span></p>
                     </div>
                 </div>
-
                 <div>
                     <h4 class="text-lg font-semibold text-white oswald tracking-wider mb-4">Quick Links</h4>
                     <ul class="space-y-3 text-sm">
                         <li><a href="/index.html" class="text-gray-400 hover:text-yellow-500 transition duration-300">Home</a></li>
-<li><a href="/index.html#work" class="text-gray-400 hover:text-yellow-500 transition duration-300">Projects</a></li>
+                        <li><a href="/index.html#work" class="text-gray-400 hover:text-yellow-500 transition duration-300">Projects</a></li>
                         <li><a href="/members.html" class="text-gray-400 hover:text-yellow-500 transition duration-300">Members</a></li>
-                        
                         <li><a href="/login.html" class="text-gray-400 hover:text-yellow-500 transition duration-300">Member Login</a></li>
-                        
                         <li><a href="/blog.html" class="text-gray-400 hover:text-yellow-500 transition duration-300">Blog</a></li>
                         <li><a href="/gallery.html" class="text-gray-400 hover:text-yellow-500 transition duration-300">Gallery</a></li>
                         <li><a href="/contact.html" class="text-gray-400 hover:text-yellow-500 transition duration-300">Join Us</a></li>
                     </ul>
                 </div>
-
                 <div>
                     <h4 class="text-lg font-semibold text-white oswald tracking-wider mb-4">Follow Us</h4>
                     <p class="text-sm text-gray-400 mb-4">Stay connected on our social channels.</p>
-                    
                     <div class="flex space-x-4 justify-center md:justify-start">
-                        <a href="#" aria-label="Instagram" class="text-gray-400 hover:text-yellow-500 transition duration-300">
-                            <i data-lucide="instagram" class="w-6 h-6"></i>
-                        </a>
-                        <a href="#" aria-label="YouTube" class="text-gray-400 hover:text-yellow-500 transition duration-300">
-                            <i data-lucide="youtube" class="w-6 h-6"></i>
-                        </a>
-                        <a href="#" aria-label="Facebook" class="text-gray-400 hover:text-yellow-500 transition duration-300">
-                            <i data-lucide="facebook" class="w-6 h-6"></i>
-                        </a>
-                        <a href="#" aria-label="LinkedIn" class="text-gray-400 hover:text-yellow-500 transition duration-3D00">
-                            <i data-lucide="linkedin" class="w-6 h-6"></i>
-                        </a>
+                        <a href="#" aria-label="Instagram" class="text-gray-400 hover:text-yellow-500 transition duration-300"><i data-lucide="instagram" class="w-6 h-6"></i></a>
+                        <a href="#" aria-label="YouTube" class="text-gray-400 hover:text-yellow-500 transition duration-300"><i data-lucide="youtube" class="w-6 h-6"></i></a>
+                        <a href="#" aria-label="Facebook" class="text-gray-400 hover:text-yellow-500 transition duration-300"><i data-lucide="facebook" class="w-6 h-6"></i></a>
+                        <a href="#" aria-label="LinkedIn" class="text-gray-400 hover:text-yellow-500 transition duration-3D00"><i data-lucide="linkedin" class="w-6 h-6"></i></a>
                     </div>
                 </div>
-
             </div>
-
             <div class="mt-16 pt-8 border-t border-gray-800 text-center text-sm text-gray-500">
                 <p>&copy; 2025 SIMS Media Hive. All Rights Reserved. Designed by <a href="https://dcagency.in" target="_blank" class="hover:text-yellow-500 transition">Darion Creative Agency.</a></p>
             </div>
-
         </div>
     </footer>
 
     <script>
-        // Initialize Lucide icons
         lucide.createIcons();
-
-        // --- Mobile Menu Toggle Logic ---
         const menuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
         const menuIcon = menuButton.querySelector('i');
 
         menuButton.addEventListener('click', () => {
-            // Toggle the 'hidden' class on the mobile menu
             mobileMenu.classList.toggle('hidden');
-            
-            // Toggle the visibility of the main body content (to prevent scrolling behind the menu)
             document.body.classList.toggle('overflow-hidden');
-
-            // Toggle the icon (Menu <-> X)
             const isMenuOpen = !mobileMenu.classList.contains('hidden');
-            if (isMenuOpen) {
-                // Menu is open, show 'x' icon
-                menuIcon.setAttribute('data-lucide', 'x');
-            } else {
-                // Menu is closed, show 'menu' icon
-                menuIcon.setAttribute('data-lucide', 'menu');
-            }
-            lucide.createIcons(); // Re-render the icon
+            menuIcon.setAttribute('data-lucide', isMenuOpen ? 'x' : 'menu');
+            lucide.createIcons();
         });
-
-        // Close the mobile menu when a link is clicked
         document.querySelectorAll('#mobile-menu a').forEach(link => {
             link.addEventListener('click', () => {
-                // Close the menu
                 mobileMenu.classList.add('hidden');
                 document.body.classList.remove('overflow-hidden');
-                
-                // Reset the icon
                 menuIcon.setAttribute('data-lucide', 'menu');
                 lucide.createIcons();
             });
         });
     </script>
+
+    <script>
+        // --- Supabase Config ---
+        const SUPABASE_URL = 'https://gswdqdsviqrzsoahxapc.supabase.co/';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdzd2RxZHN2aXFyenNvYWh4YXBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4ODM5NzcsImV4cCI6MjA3NjQ1OTk3N30.JFF6NFIdqZAE9ioHeMdfIVpN84UtN_Z0K2pZYodlpZY';
+        const { createClient } = supabase;
+        const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // --- DOM Elements ---
+        const memberListContainer = document.getElementById('member-list-container');
+        const loadingMessage = document.getElementById('loading-members');
+        const memberPlaceholder = 'https://placehold.co/200x200/292524/eab308?text=MEMBER'; // Default image
+
+        // --- Load Members Function ---
+        async function loadMembers() {
+            try {
+                // Fetch members data from Supabase
+                const { data, error } = await _supabase
+                    .from('members') // Use your table name
+                    .select('name, role, description, imageUrl') // Select columns needed for display
+                    .order('created_at', { ascending: true }); // Or order by name, role, etc.
+
+                if (error) {
+                    throw error; // Handle Supabase errors
+                }
+
+                memberListContainer.innerHTML = ''; // Clear loading message
+
+                if (!data || data.length === 0) {
+                    memberListContainer.innerHTML = '<p class="text-gray-400 col-span-full text-center">No members found.</p>';
+                    return;
+                }
+
+                // Generate HTML for each member
+                data.forEach(member => {
+                    const memberCard = `
+                        <div class="member-card flex flex-col items-center text-center bg-gray-900 p-4 rounded-lg shadow-xl hover:shadow-yellow-500/10 transition duration-300 border border-gray-800">
+                            <img src="${member.imageUrl || memberPlaceholder}"
+                                 onerror="this.onerror=null;this.src='${memberPlaceholder}';"
+                                 alt="${member.name}"
+                                 class="w-full h-auto aspect-square object-cover rounded-md mb-4 border-2 border-yellow-500">
+                            <h3 class="text-2xl font-bold text-white oswald leading-none">${member.name || 'Unnamed Member'}</h3>
+                            <p class="text-sm text-yellow-500 uppercase tracking-widest mt-1 mb-2">${member.role || 'Member Role'}</p>
+                            ${member.description ? `<p class="text-xs text-gray-400">${member.description}</p>` : ''}
+                        </div>
+                    `;
+                    memberListContainer.innerHTML += memberCard;
+                });
+
+            } catch (error) {
+                console.error("Error loading members:", error);
+                // Display error message in the container
+                memberListContainer.innerHTML = `<p class="text-red-500 col-span-full text-center">Could not load members: ${error.message}</p>`;
+            } finally {
+                 // You might remove the explicit loading message element instead
+                 if(loadingMessage) loadingMessage.remove();
+            }
+        }
+
+        // --- Run Load Members on Page Load ---
+        // Since this script is at the end, DOMContentLoaded isn't strictly needed,
+        // but it's good practice.
+        document.addEventListener('DOMContentLoaded', loadMembers);
+    </script>
+
 </body>
 </html>

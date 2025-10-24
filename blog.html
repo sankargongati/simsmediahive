@@ -14,7 +14,7 @@
         body { font-family: 'Inter', sans-serif; background-color: var(--dark-bg); color: var(--text-light); overflow-x: hidden; padding-top: 6rem; }
         .oswald { font-family: 'Oswald', sans-serif; }
         
-        /* Corrected CSS path (removed leading slash) */
+        /* Corrected CSS path */
         #blog-hero { background-image: url('src/pretty.jpg'); background-size: cover; background-position: center; }
         
         .post-card { background-color: #1a1a1a; }
@@ -46,7 +46,9 @@
                 <li><a href="/index.html#focus" class="hover:text-yellow-500 transition duration-300">Focus</a></li>
                 <li><a href="/index.html#work" class="hover:text-yellow-500 transition duration-300">Projects</a></li>
                 <li><a href="/members.html" class="hover:text-yellow-500 transition duration-300">Members</a></li>
-                <li><a href="/blog.html" class="hover:text-yellow-500 transition duration-300">Blog</a></li>
+                
+                <li><a href="/blog.html" class="text-yellow-500 transition duration-300">Blog</a></li>
+                
                 <li><a href="/gallery.html" class="hover:text-yellow-500 transition duration-300">Gallery</a></li>
                 <li><a href="/contact.html" class="hover:text-yellow-500 transition duration-300">Join Us</a></li>
             
@@ -59,7 +61,9 @@
                 <li><a href="/index.html#focus" class="hover:text-yellow-500 transition duration-300 block py-2">Focus</a></li>
                 <li><a href="/index.html#work" class="hover:text-yellow-500 transition duration-300 block py-2">Projects</a></li>
                 <li><a href="/members.html" class="hover:text-yellow-500 transition duration-300 block py-2">Members</a></li>
-                <li><a href="/blog.html" class="hover:text-yellow-500 transition duration-300 block py-2">Blog</a></li>
+                
+                <li><a href="/blog.html" class="text-yellow-500 transition duration-300 block py-2">Blog</a></li>
+                
                 <li><a href="/gallery.html" class="hover:text-yellow-500 transition duration-300 block py-2">Gallery</a></li>
                 <li><a href="/contact.html" class="hover:text-yellow-500 transition duration-300 block py-2">Join Us</a></li>
             </ul>
@@ -195,7 +199,7 @@
     <script>
         // --- CONFIGURATION ---
         const SUPABASE_URL = 'https://gswdqdsviqrzsoahxapc.supabase.co/'; 
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdzd2RxZHN2aXFyenNvYWh4YXBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4ODM5NzcsImV4cCI6MjA3NjQ1OTk3N30.JFF6NFIdqZAE9ioHeMdfIVpN84UtN_Z0K2pZYodlpZY';
+        const SUPABASE_KEY = 'eyJhbGciOiJIZ0UzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdzd2RxZHN2aXFyenNvYWh4YXBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4ODM5NzcsImV4cCI6MjA3NjQ1OTk3N30.JFF6NFIdqZAE9ioHeMdfIVpN84UtN_Z0K2pZYodlpZY';
 
         // --- INITIALIZATION ---
         const { createClient } = supabase;

@@ -130,9 +130,9 @@
 
     <input type="file" id="easymde-file-input" style="display: none;" accept="image/*,video/*">
 
-    <script>
+<script>
         // --- CONFIGURATION ---
-        const SUPABASE_URL = 'https://gswdqdsviqrzsoahxapc.supabase.co/'; 
+        const SUPABASE_URL = 'https://gswdqdsviqrzsoahxapc.supabase.co/';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdzd2RxZHN2aXFyenNvYWh4YXBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4ODM5NzcsImV4cCI6MjA3NjQ1OTk3N30.JFF6NFIdqZAE9ioHeMdfIVpN84UtN_Z0K2pZYodlpZY';
 
         const GALLERY_BUCKET = 'gallery-images';
@@ -142,6 +142,7 @@
         // --- INITIALIZATION ---
         const { createClient } = supabase;
         const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+        lucide.createIcons(); // Initialize static icons early
 
         // --- DOM ELEMENTS ---
         const logoutButton = document.getElementById('logout-button');
@@ -169,7 +170,7 @@
         const blogHeaderMediaInput = document.getElementById('blog-header-media-file');
         const easymdeFileInput = document.getElementById('easymde-file-input');
 
-        let easymde = null;
+        let easymde = null; // To hold the EasyMDE instance
 
         // --- Initialize EasyMDE ---
         function initializeEasyMDE() {
@@ -179,9 +180,24 @@
                         element: document.getElementById('blog-content-editor'),
                         spellChecker: false,
                         placeholder: "Write content using Markdown... Use the paperclip icon to upload images/videos.",
-                        toolbar: ["bold","italic","heading","|","quote","unordered-list","ordered-list","|","link",{name:"upload-media",action:editor=>easymdeFileInput.click(),className:"fa fa-paperclip",title:"Upload Image/Video"},"image","|","preview","side-by-side","fullscreen","|","guide"]
+                        toolbar: [
+                            "bold", "italic", "heading", "|",
+                            "quote", "unordered-list", "ordered-list", "|",
+                            "link",
+                            { name: "upload-media", action: (editor) => easymdeFileInput.click(), className: "fa fa-paperclip", title: "Upload Image/Video" },
+                            "image", "|",
+                            "preview", "side-by-side", "fullscreen", "|",
+                            "guide"
+                        ]
                     });
-                } catch (error) { console.error("Failed to initialize EasyMDE:", error); blogStatus.textContent = "Error initializing text editor."; blogStatus.style.color = 'red'; }
+                    console.log("EasyMDE initialized.");
+                } catch (error) {
+                    console.error("Failed to initialize EasyMDE:", error);
+                    if(blogStatus) { // Check if blogStatus exists
+                        blogStatus.textContent = "Error initializing text editor.";
+                        blogStatus.style.color = 'red';
+                    }
+                }
             }
         }
 
@@ -203,12 +219,36 @@
 
                 const onError = (e) => { if (resolved) return; console.warn(`Thumb gen failed for ${videoUrl}:`, (e.type || 'Error'), e); cleanup(); resolve(null); };
                 const cleanup = () => { video.removeEventListener('loadeddata', onLoadedData); video.removeEventListener('seeked', onSeeked); video.removeEventListener('error', onError); video.removeEventListener('stalled', onError); video.removeEventListener('abort', onError); clearTimeout(timeoutId); if (video.parentNode === document.body) document.body.removeChild(video); };
-                const timeoutId = setTimeout(() => { if (resolved) return; console.warn(`Thumb gen timed out for ${videoUrl}`); cleanup(); resolve(null); }, 10000);
+                const timeoutId = setTimeout(() => { if (resolved) return; console.warn(`Thumb gen timed out for ${videoUrl}`); cleanup(); resolve(null); }, 15000);
 
-                const onLoadedData = () => { if (!video.videoWidth || !video.videoHeight) { console.warn(`Invalid dimensions for ${videoUrl}`); cleanup(); resolve(null); return; } canvas.width = video.videoWidth; canvas.height = video.videoHeight; video.currentTime = Math.min(1, (video.duration || 1) / 2); };
-                const onSeeked = () => { if (resolved) return; setTimeout(() => { if (resolved) return; try { context.drawImage(video, 0, 0, canvas.width, canvas.height); const dataUrl = canvas.toDataURL('image/jpeg', 0.7); resolved = true; cleanup(); resolve(dataUrl); } catch (drawError) { onError(drawError); } }, 100); };
+                const onLoadedData = () => {
+                    if (!video.videoWidth || !video.videoHeight) { console.warn(`Invalid dimensions for ${videoUrl} on loadeddata`); cleanup(); resolve(null); return; }
+                    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+                    video.currentTime = Math.min(1, (video.duration || 2) / 2);
+                 };
+                const onSeeked = () => {
+                    if (resolved) return;
+                    setTimeout(() => {
+                        if (resolved) return;
+                        try {
+                             if (!video.videoWidth || !video.videoHeight) { console.warn(`Invalid dimensions for ${videoUrl} on seeked`); cleanup(); resolve(null); return; }
+                            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                            const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                            resolved = true;
+                            cleanup();
+                            resolve(dataUrl);
+                        } catch (drawError) {
+                            onError(drawError);
+                        }
+                    }, 150);
+                };
 
-                video.addEventListener('loadeddata', onLoadedData); video.addEventListener('seeked', onSeeked); video.addEventListener('error', onError); video.addEventListener('stalled', onError); video.addEventListener('abort', onError);
+                video.addEventListener('loadeddata', onLoadedData);
+                video.addEventListener('seeked', onSeeked);
+                video.addEventListener('error', onError);
+                video.addEventListener('stalled', onError);
+                video.addEventListener('abort', onError);
+
                 video.src = videoUrl;
                 document.body.appendChild(video);
                 video.load();
@@ -218,207 +258,440 @@
 
         // --- AUTHENTICATION ---
         async function checkAuth() {
-            // getSession() AUTOMATICALLY handles the token from magic link URLs
-            const { data: { session }, error: sessionError } = await _supabase.auth.getSession();
-            
-            if (sessionError || !session) { 
-                console.error("Auth check failed or no session:", sessionError); 
-                loadingMessage.textContent = "Authentication failed. Redirecting to login...";
-                setTimeout(() => window.location.href = '/login.html', 1500); 
-            } else { 
-                console.log("User authenticated:", session.user.email);
-                loadingMessage.style.display = 'none'; // Hide loading
-                adminContentWrapper.classList.remove('hidden'); // Show content
-                // Load data for the initially active tab
-                if (galleryContent.classList.contains('active')) {
-                    loadGalleryItems(); 
-                } else { 
-                    initializeEasyMDE(); 
-                    loadBlogPosts(); 
+            console.log("Checking authentication...");
+            try {
+                const { data: { session }, error: sessionError } = await _supabase.auth.getSession();
+
+                if (sessionError) throw sessionError; // Throw error to be caught below
+
+                if (!session) {
+                    console.log("No active session found.");
+                    loadingMessage.textContent = "Authentication required. Redirecting to login...";
+                    setTimeout(() => window.location.href = '/login.html', 1500);
+                } else {
+                    console.log("User authenticated:", session.user.email);
+                    loadingMessage.style.display = 'none';
+                    adminContentWrapper.classList.remove('hidden');
+                    // Load initial tab data after showing content
+                    if (galleryContent.classList.contains('active')) {
+                        await loadGalleryItems();
+                    } else {
+                        initializeEasyMDE();
+                        await loadBlogPosts();
+                    }
                 }
+            } catch (error) { // Catch errors during session retrieval
+                 console.error("Auth check failed:", error);
+                 loadingMessage.textContent = "Error verifying session. Redirecting to login...";
+                 setTimeout(() => window.location.href = '/login.html', 2000);
             }
         }
-        
-        logoutButton.addEventListener('click', async () => { 
-            galleryStatus.textContent = 'Logging out...'; 
-            blogStatus.textContent = 'Logging out...'; 
-            const { error } = await _supabase.auth.signOut(); 
-            if (error) { 
-                console.error("Logout error:", error); 
-                alert("Logout failed: " + error.message); 
-                galleryStatus.textContent = ''; 
-                blogStatus.textContent = ''; 
-            } else { 
-                window.location.href = '/login.html'; 
-            } 
+
+
+        logoutButton.addEventListener('click', async () => {
+            galleryStatus.textContent = 'Logging out...';
+            blogStatus.textContent = 'Logging out...';
+            logoutButton.disabled = true;
+            try { // Wrap signout in try...catch
+                const { error } = await _supabase.auth.signOut();
+                if (error) throw error; // Throw error to be caught below
+                window.location.href = '/login.html'; // Redirect on success
+            } catch(error) { // Catch signout errors
+                console.error("Logout error:", error);
+                alert("Logout failed: " + error.message);
+                galleryStatus.textContent = '';
+                blogStatus.textContent = '';
+                logoutButton.disabled = false;
+            }
         });
 
         // --- TAB SWITCHING LOGIC ---
         function setupTabs() {
-            galleryTabBtn.addEventListener('click', () => { 
-                galleryTabBtn.classList.add('active'); 
-                blogTabBtn.classList.remove('active'); 
-                galleryContent.classList.add('active'); 
-                blogContent.classList.remove('active'); 
-                loadGalleryItems(); // Load gallery data when tab is clicked
+            galleryTabBtn.addEventListener('click', async () => {
+                if (galleryContent.classList.contains('active')) return;
+                galleryTabBtn.classList.add('active');
+                blogTabBtn.classList.remove('active');
+                galleryContent.classList.add('active');
+                blogContent.classList.remove('active');
+                await loadGalleryItems();
             });
-            blogTabBtn.addEventListener('click', () => { 
-                blogTabBtn.classList.add('active'); 
-                galleryTabBtn.classList.remove('active'); 
-                blogContent.classList.add('active'); 
-                galleryContent.classList.remove('active'); 
-                initializeEasyMDE(); // Initialize editor when blog tab is clicked
-                setTimeout(loadBlogPosts, 50); // Load blog data after a short delay
+            blogTabBtn.addEventListener('click', async () => {
+                if (blogContent.classList.contains('active')) return;
+                blogTabBtn.classList.add('active');
+                galleryTabBtn.classList.remove('active');
+                blogContent.classList.add('active');
+                galleryContent.classList.remove('active');
+                initializeEasyMDE();
+                setTimeout(async () => {
+                   await loadBlogPosts();
+                }, 50);
             });
         }
 
         // --- GALLERY MANAGEMENT ---
         async function loadGalleryItems() {
              galleryList.innerHTML = '<p class="text-gray-400 col-span-full text-center">Loading gallery...</p>';
+             let thumbnailStatus = '';
              try {
                 const { data, error } = await _supabase.from('galleryImages').select('*').order('created_at', { ascending: false });
                 if (error) throw error;
-                galleryList.innerHTML = ''; 
+                galleryList.innerHTML = '';
 
                 if (!data || data.length === 0) {
                     galleryList.innerHTML = '<p class="text-gray-400 col-span-full text-center">No items in the gallery yet.</p>';
-                    initializeGalleryFilter(); 
-                } else {
-                    galleryStatus.textContent = 'Generating video thumbnails (may take time)...'; galleryStatus.style.color='white';
-                    const itemPromises = data.map(async (itemData) => {
-                        const isVideo = itemData.category === 'video' || (itemData.category !== 'photo' && isVideoUrl(itemData.imageUrl));
-                        const itemCategory = isVideo ? 'video' : 'photo';
-                        let previewSrc = defaultPlaceholder;
+                    initializeGalleryFilter();
+                    return;
+                }
 
+                const videosPresent = data.some(item => item.category === 'video' || (item.category !== 'photo' && isVideoUrl(item.imageUrl)));
+                if (videosPresent) {
+                     thumbnailStatus = 'Generating video thumbnails (may take time)...';
+                     galleryStatus.textContent = thumbnailStatus;
+                     galleryStatus.style.color = 'white';
+                }
+
+                const itemPromises = data.map(async (itemData) => {
+                    const isVideo = itemData.category === 'video' || (itemData.category !== 'photo' && isVideoUrl(itemData.imageUrl));
+                    const itemCategory = isVideo ? 'video' : 'photo';
+                    let previewSrc = defaultPlaceholder;
+
+                    try {
                         if (isVideo && itemData.imageUrl) {
                             const thumbnailUrl = await generateVideoThumbnail(itemData.imageUrl);
                             previewSrc = thumbnailUrl || defaultPlaceholder;
                         } else if (!isVideo && itemData.imageUrl) {
                             previewSrc = itemData.imageUrl;
                         }
+                    } catch (thumbError) {
+                        console.error(`Error generating thumbnail for ${itemData.imageUrl}:`, thumbError);
+                        previewSrc = defaultPlaceholder;
+                    }
 
-                        const filePathMaybe = itemData.imageUrl ? new URL(itemData.imageUrl).pathname.split(`/${GALLERY_BUCKET}/`)[1] : null;
-                        const filePath = filePathMaybe || `missing_path_${itemData.id}`;
+                    let filePath = `missing_path_${itemData.id}`;
+                    if (itemData.imageUrl) {
+                        try {
+                            const url = new URL(itemData.imageUrl);
+                            const pathParts = url.pathname.split('/');
+                            const bucketIndex = pathParts.indexOf(GALLERY_BUCKET);
+                            if (bucketIndex !== -1 && bucketIndex < pathParts.length - 1) {
+                                filePath = decodeURIComponent(pathParts.slice(bucketIndex + 1).join('/'));
+                            } else {
+                                console.warn(`Could not extract file path from URL: ${itemData.imageUrl}`);
+                            }
+                        } catch (urlError) {
+                            console.warn(`Invalid URL for gallery item ${itemData.id}: ${itemData.imageUrl}`, urlError);
+                        }
+                    }
 
-                        return `
-                            <div class="gallery-item relative group bg-gray-900 border border-gray-800 rounded-lg overflow-hidden aspect-[4/3]" data-category="${itemCategory}">
-                                <img src="${previewSrc}" alt="Preview: ${itemData.title}" class="absolute inset-0 w-full h-full object-cover bg-gray-800" onerror="this.onerror=null;this.src='${defaultPlaceholder}';">
-                                ${isVideo ? `<div class="video-overlay-icon"><svg data-lucide="play"></svg></div>` : ''}
-                                <div class="p-3 absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent pt-8">
-                                    <p class="font-bold text-white truncate text-base">${itemData.title || 'Untitled'}</p>
-                                    <p class="text-xs text-yellow-400 capitalize">${itemCategory}</p>
-                                </div>
-                                <button data-id="${itemData.id}" data-path="${filePath}" ${!filePathMaybe ? 'disabled title="Cannot delete - path missing"' : 'title="Delete Media"'} class="delete-gallery-btn absolute top-2 right-2 p-1.5 bg-red-600 text-white rounded-full hover:bg-red-700 opacity-0 group-hover:opacity-100 transition-opacity disabled:bg-gray-500 disabled:cursor-not-allowed">
-                                    <svg data-lucide="trash-2" width="14" height="14"></svg>
-                                </button>
-                            </div>`;
-                    });
+                    return `
+                        <div class="gallery-item relative group bg-gray-900 border border-gray-800 rounded-lg overflow-hidden aspect-[4/3]" data-category="${itemCategory}">
+                            <img src="${previewSrc}" alt="Preview: ${itemData.title || 'Untitled'}" class="absolute inset-0 w-full h-full object-cover bg-gray-800" onerror="this.onerror=null;this.src='${defaultPlaceholder}';">
+                            ${isVideo ? `<div class="video-overlay-icon"><svg data-lucide="play"></svg></div>` : ''}
+                            <div class="p-3 absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent pt-8">
+                                <p class="font-bold text-white truncate text-base">${itemData.title || 'Untitled'}</p>
+                                <p class="text-xs text-yellow-400 capitalize">${itemCategory}</p>
+                            </div>
+                            <button data-id="${itemData.id}" data-path="${filePath}" ${filePath.startsWith('missing_path_') ? 'disabled title="Cannot delete - path missing"' : 'title="Delete Media"'} class="delete-gallery-btn absolute top-2 right-2 p-1.5 bg-red-600 text-white rounded-full hover:bg-red-700 opacity-0 group-hover:opacity-100 transition-opacity disabled:bg-gray-500 disabled:cursor-not-allowed">
+                                <svg data-lucide="trash-2" width="14" height="14"></svg>
+                            </button>
+                        </div>`;
+                });
 
-                    const cardHTMLArray = await Promise.all(itemPromises);
-                    galleryList.innerHTML = cardHTMLArray.join('');
-                    galleryStatus.textContent = ''; 
+                const cardHTMLArray = await Promise.all(itemPromises);
+                galleryList.innerHTML = cardHTMLArray.join('');
 
-                    initializeGalleryFilter();
-                    lucide.createIcons(); 
+                if (galleryStatus.textContent === thumbnailStatus) {
+                    galleryStatus.textContent = '';
                 }
-             } catch (error) { 
+
+                initializeGalleryFilter();
+                lucide.createIcons();
+
+             } catch (error) {
                  console.error('Error fetching gallery items:', error);
                  galleryList.innerHTML = `<p class="text-red-500 col-span-full text-center">Could not fetch gallery: ${error.message}</p>`;
-                 galleryStatus.textContent = ''; 
+                 if(galleryStatus) galleryStatus.textContent = ''; // Clear status on error
              }
         }
 
         function initializeGalleryFilter() {
             const filterButtons = galleryFilterButtonsContainer.querySelectorAll('.filter-btn');
             const galleryItems = galleryList.querySelectorAll('.gallery-item');
+
              if ((!galleryItems || galleryItems.length === 0) && filterButtons.length > 0) {
-                 if (!filterButtons[0].classList.contains('active')) {
-                     filterButtons.forEach(btn => btn.classList.remove('active', 'bg-yellow-500', 'text-black'));
-                     filterButtons[0].classList.add('active', 'bg-yellow-500', 'text-black');
-                 }
-                 return; 
+                 filterButtons.forEach((btn, index) => {
+                     btn.classList.toggle('active', index === 0);
+                     btn.classList.toggle('bg-yellow-500', index === 0);
+                     btn.classList.toggle('text-black', index === 0);
+                     btn.classList.toggle('bg-gray-800', index !== 0); // Corrected inactive bg color
+                     btn.classList.toggle('text-gray-400', index !== 0); // Corrected inactive text color
+                 });
+                 return;
              }
 
             const activeClasses = ['active', 'bg-yellow-500', 'text-black'];
+            // Corrected inactive classes to match filter button styles
             const inactiveClasses = ['bg-gray-800', 'text-gray-400', 'hover:bg-gray-700', 'hover:text-white'];
 
+            // Clear existing listeners before adding new ones
             filterButtons.forEach(button => {
-                 if (!button.classList.contains('active')) button.classList.add(...inactiveClasses);
-                 else button.classList.add(...activeClasses);
-                button.addEventListener('click', () => {
-                    const filterValue = button.getAttribute('data-filter');
-                    filterButtons.forEach(btn => { btn.classList.remove(...activeClasses); btn.classList.add(...inactiveClasses); });
-                    button.classList.add(...activeClasses); button.classList.remove(...inactiveClasses);
-                    if(galleryItems) {
-                        galleryItems.forEach(item => { const itemCategory = item.getAttribute('data-category'); item.classList.toggle('hidden', !(filterValue === 'all' || itemCategory === filterValue)); });
-                    }
-                });
+                const newButton = button.cloneNode(true);
+                button.parentNode.replaceChild(newButton, button);
             });
 
+            // Re-query buttons and add listeners
+             galleryFilterButtonsContainer.querySelectorAll('.filter-btn').forEach(button => {
+                 // Set initial styles correctly
+                 if (button.classList.contains('active')) {
+                     button.classList.add(...activeClasses);
+                     button.classList.remove(...inactiveClasses.filter(c => !c.startsWith('hover:'))); // Keep hover classes
+                 } else {
+                     button.classList.add(...inactiveClasses);
+                     button.classList.remove(...activeClasses);
+                 }
+
+                 button.addEventListener('click', () => {
+                     const filterValue = button.getAttribute('data-filter');
+                     // Update button styles
+                     galleryFilterButtonsContainer.querySelectorAll('.filter-btn').forEach(btn => {
+                         btn.classList.remove(...activeClasses);
+                         btn.classList.add(...inactiveClasses);
+                     });
+                     button.classList.add(...activeClasses);
+                     button.classList.remove(...inactiveClasses.filter(c => !c.startsWith('hover:')));
+
+                     // Filter items
+                     if(galleryItems) {
+                         galleryItems.forEach(item => {
+                             const itemCategory = item.getAttribute('data-category');
+                             item.classList.toggle('hidden', !(filterValue === 'all' || itemCategory === filterValue));
+                         });
+                     }
+                 });
+             });
+
+
+             // Apply initial filter based on the currently active button
              const initialFilter = galleryFilterButtonsContainer.querySelector('.filter-btn.active')?.dataset.filter || 'all';
              if (galleryItems && galleryItems.length > 0) {
-                 galleryItems.forEach(item => { const itemCategory = item.getAttribute('data-category'); item.classList.toggle('hidden', !(initialFilter === 'all' || itemCategory === initialFilter)); });
+                 galleryItems.forEach(item => {
+                     const itemCategory = item.getAttribute('data-category');
+                     item.classList.toggle('hidden', !(initialFilter === 'all' || itemCategory === initialFilter));
+                 });
              }
         }
 
+
         galleryForm.addEventListener('submit', async (e) => {
-            e.preventDefault(); const submitBtn = galleryForm.querySelector('button[type="submit"]'); submitBtn.disabled = true; submitBtn.textContent = 'Uploading...'; galleryStatus.textContent = 'Starting...'; galleryStatus.style.color = 'white'; const title = galleryTitleInput.value; const category = galleryForm.querySelector('input[name="gallery-category"]:checked').value; const file = galleryMediaInput.files[0]; if (!file) { galleryStatus.textContent = 'Select a file.'; galleryStatus.style.color = 'red'; submitBtn.disabled = false; submitBtn.textContent = 'Upload Media'; return; } const filePath = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`; try { galleryStatus.textContent = `Uploading ${file.type.split('/')[0]}...`; const { error: uploadError } = await _supabase.storage.from(GALLERY_BUCKET).upload(filePath, file); if (uploadError) throw uploadError; const { data: urlData } = _supabase.storage.from(GALLERY_BUCKET).getPublicUrl(filePath); if (!urlData || !urlData.publicUrl) throw new Error("Could not get public URL."); galleryStatus.textContent = 'Saving details...'; const { error: dbError } = await _supabase.from('galleryImages').insert([{ title, category, imageUrl: urlData.publicUrl }]); if (dbError) throw dbError; galleryStatus.textContent = 'Success!'; galleryStatus.style.color = '#22c55e'; galleryForm.reset(); await loadGalleryItems(); } catch (error) { console.error("Gallery upload failed:", error); galleryStatus.textContent = `Error: ${error.message}`; galleryStatus.style.color = '#ef4444'; } finally { submitBtn.disabled = false; submitBtn.textContent = 'Upload Media'; setTimeout(() => galleryStatus.textContent = '', 4000); }
+            e.preventDefault();
+            const submitBtn = galleryForm.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Uploading...';
+            galleryStatus.textContent = 'Starting...';
+            galleryStatus.style.color = 'white';
+
+            const title = galleryTitleInput.value;
+            const category = galleryForm.querySelector('input[name="gallery-category"]:checked').value;
+            const file = galleryMediaInput.files[0];
+            let imageUrl = null; // To potentially store URL for cleanup
+
+            if (!file) {
+                galleryStatus.textContent = 'Please select a file to upload.';
+                galleryStatus.style.color = 'red';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Upload Media';
+                return;
+            }
+
+            const cleanFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+            const filePath = `${Date.now()}_${cleanFileName}`;
+
+            try { // Ensure the whole process is wrapped
+                galleryStatus.textContent = `Uploading ${file.type.split('/')[0]}...`;
+                const { error: uploadError } = await _supabase.storage
+                    .from(GALLERY_BUCKET)
+                    .upload(filePath, file);
+                if (uploadError) throw uploadError;
+
+                const { data: urlData } = _supabase.storage
+                    .from(GALLERY_BUCKET)
+                    .getPublicUrl(filePath);
+                if (!urlData || !urlData.publicUrl) throw new Error("Could not retrieve public URL after upload.");
+                imageUrl = urlData.publicUrl; // Store for potential cleanup
+
+                galleryStatus.textContent = 'Saving gallery item details...';
+                const { error: dbError } = await _supabase
+                    .from('galleryImages')
+                    .insert([{ title, category, imageUrl }]);
+                if (dbError) throw dbError;
+
+                galleryStatus.textContent = 'Upload successful!';
+                galleryStatus.style.color = '#22c55e';
+                galleryForm.reset();
+                await loadGalleryItems();
+
+            } catch (error) { // CATCH block is essential
+                console.error("Gallery upload failed:", error);
+                galleryStatus.textContent = `Error: ${error.message}`;
+                galleryStatus.style.color = '#ef4444';
+                 // Attempt cleanup ONLY if upload might have succeeded but DB failed
+                 if (imageUrl && error.message !== "Could not retrieve public URL after upload.") {
+                    console.log("Attempting to remove orphaned file:", filePath);
+                    try { // Nested try...catch for cleanup
+                       await _supabase.storage.from(GALLERY_BUCKET).remove([filePath]);
+                    } catch (cleanupError) {
+                       console.warn("Failed to cleanup orphaned file:", cleanupError)
+                    }
+                } else if (!imageUrl && !error.message.includes("Could not retrieve public URL")){
+                     // If upload itself failed before URL generation, might not need removal
+                     console.log("Upload likely failed before URL generation, skipping removal attempt for:", filePath);
+                 }
+            } finally { // FINALLY block ensures this runs regardless of success/error
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Upload Media';
+                setTimeout(() => { if(galleryStatus && galleryStatus.textContent !== 'Generating video thumbnails (may take time)...') galleryStatus.textContent = ''; }, 4000);
+            }
         });
 
+
         galleryList.addEventListener('click', async (e) => {
-             const deleteButton = e.target.closest('.delete-gallery-btn:not([disabled])'); if (!deleteButton) return; const docId = deleteButton.dataset.id; const filePath = deleteButton.dataset.path; if (confirm('Delete this gallery item permanently?')) { galleryStatus.textContent = 'Deleting...'; galleryStatus.style.color='white'; try { const { error: storageError } = await _supabase.storage.from(GALLERY_BUCKET).remove([filePath]); if (storageError && storageError.message !== 'The resource was not found') throw storageError; const { error: dbError } = await _supabase.from('galleryImages').delete().eq('id', docId); if (dbError) throw dbError; galleryStatus.textContent = 'Item deleted!'; galleryStatus.style.color='#22c55e'; await loadGalleryItems(); } catch (error) { galleryStatus.textContent = `Deletion failed: ${error.message}`; galleryStatus.style.color='#ef4444'; console.error("Gallery delete failed:", error); } finally { setTimeout(() => galleryStatus.textContent = '', 4000); } }
+             const deleteButton = e.target.closest('.delete-gallery-btn:not([disabled])');
+             if (!deleteButton) return;
+
+             const docId = deleteButton.dataset.id;
+             const filePath = deleteButton.dataset.path;
+
+             if (!filePath || filePath.startsWith('missing_path_')) {
+                 alert('Error: Cannot delete item because its file path is missing.');
+                 return;
+             }
+
+             if (confirm(`Are you sure you want to delete "${filePath}" permanently? This cannot be undone.`)) {
+                 galleryStatus.textContent = 'Deleting item...';
+                 galleryStatus.style.color = 'white';
+                 deleteButton.disabled = true;
+
+                 try { // Wrap deletion logic in try...catch
+                     const { error: storageError } = await _supabase.storage
+                         .from(GALLERY_BUCKET)
+                         .remove([filePath]);
+                     if (storageError && storageError.message !== 'The resource was not found') throw new Error(`Storage error: ${storageError.message}`);
+
+                     const { error: dbError } = await _supabase
+                         .from('galleryImages')
+                         .delete()
+                         .eq('id', docId);
+                     if (dbError) throw new Error(`Database error: ${dbError.message}`);
+
+                     galleryStatus.textContent = 'Item deleted successfully!';
+                     galleryStatus.style.color = '#22c55e';
+                     await loadGalleryItems();
+
+                 } catch (error) { // CATCH deletion errors
+                     galleryStatus.textContent = `Deletion failed: ${error.message}`;
+                     galleryStatus.style.color = '#ef4444';
+                     console.error("Gallery delete failed:", error);
+                     // Only re-enable if deletion failed, not if it succeeded
+                     deleteButton.disabled = false;
+                 } finally { // FINALLY block
+                     setTimeout(() => { if(galleryStatus && galleryStatus.textContent !== 'Generating video thumbnails (may take time)...') galleryStatus.textContent = ''; }, 4000);
+                 }
+             }
         });
 
         // --- BLOG MANAGEMENT ---
         easymdeFileInput.addEventListener('change', async (e) => {
-             const file = e.target.files[0]; if (!file) return; if (!easymde) { console.error("Editor not initialized"); return; } easymde.codemirror.setOption('readOnly', true); const originalStatus = blogStatus.textContent; blogStatus.textContent = `Uploading ${file.name}...`; blogStatus.style.color = 'white'; const filePath = `content_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`; try { blogStatus.textContent = `Uploading ${file.type}...`; const { error: uploadError } = await _supabase.storage.from(BLOG_BUCKET).upload(filePath, file); if (uploadError) throw uploadError; const { data: urlData } = _supabase.storage.from(BLOG_BUCKET).getPublicUrl(filePath); const publicURL = urlData.publicUrl; const cm = easymde.codemirror; const doc = cm.getDoc(); const cursor = doc.getCursor(); let markdownSyntax = ''; if (file.type.startsWith('image/')) { markdownSyntax = `\n![${file.name || 'image alt text'}](${publicURL})\n`; } else if (file.type.startsWith('video/')) { markdownSyntax = `\n<video controls width="100%" src="${publicURL}"></video>\n`; } else { markdownSyntax = `\n[${file.name}](${publicURL})\n`; } doc.replaceRange(markdownSyntax, cursor); blogStatus.textContent = 'Media inserted!'; blogStatus.style.color = 'green'; } catch (error) { console.error("EasyMDE Upload failed:", error); blogStatus.textContent = `Media upload failed: ${error.message}`; blogStatus.style.color = 'red'; } finally { easymdeFileInput.value = ''; easymde.codemirror.setOption('readOnly', false); setTimeout(() => { if (blogStatus.textContent.includes('inserted') || blogStatus.textContent.includes('failed')) blogStatus.textContent = originalStatus || ''; }, 3000); }
+             const file = e.target.files[0]; if (!file) return; if (!easymde) { console.error("Editor not initialized for upload."); return; }
+             easymde.codemirror.setOption('readOnly', true); const originalStatus = blogStatus.textContent; blogStatus.textContent = `Uploading ${file.name}...`; blogStatus.style.color = 'white'; const cleanFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_'); const filePath = `content_${Date.now()}_${cleanFileName}`;
+             try { // Wrap upload logic
+                 blogStatus.textContent = `Uploading ${file.type}...`;
+                 const { error: uploadError } = await _supabase.storage.from(BLOG_BUCKET).upload(filePath, file); if (uploadError) throw uploadError;
+                 const { data: urlData } = _supabase.storage.from(BLOG_BUCKET).getPublicUrl(filePath); const publicURL = urlData.publicUrl; if(!publicURL) throw new Error("Could not get public URL for uploaded media.");
+                 const cm = easymde.codemirror; const doc = cm.getDoc(); const cursor = doc.getCursor(); let markdownSyntax = '';
+                 if (file.type.startsWith('image/')) { markdownSyntax = `\n![${file.name || 'image alt text'}](${publicURL})\n`; }
+                 else if (file.type.startsWith('video/')) { markdownSyntax = `\n<video controls width="100%" src="${publicURL}">Your browser does not support the video tag.</video>\n`; }
+                 else { markdownSyntax = `\n[${file.name}](${publicURL})\n`; }
+                 doc.replaceRange(markdownSyntax, cursor);
+                 blogStatus.textContent = 'Media inserted into content!'; blogStatus.style.color = 'green';
+             } catch (error) { // CATCH upload errors
+                 console.error("EasyMDE Upload failed:", error); blogStatus.textContent = `Media upload failed: ${error.message}`; blogStatus.style.color = 'red';
+             } finally { // FINALLY block
+                 easymdeFileInput.value = ''; easymde.codemirror.setOption('readOnly', false);
+                 setTimeout(() => { if (blogStatus && (blogStatus.textContent.includes('inserted') || blogStatus.textContent.includes('failed'))) { blogStatus.textContent = originalStatus || ''; } }, 3000);
+             }
         });
 
         async function loadBlogPosts() {
             blogPostList.innerHTML = '<p class="text-gray-400 text-center">Loading posts...</p>';
-            try {
-                const { data, error } = await _supabase.from('blogPosts').select('id, title, author, imageUrl').order('created_at', { ascending: false });
-                if (error) throw error;
+            try { // Wrap fetch logic
+                const { data, error } = await _supabase.from('blogPosts').select('id, title, author, imageUrl').order('created_at', { ascending: false }); if (error) throw error;
                 blogPostList.innerHTML = '';
-                if (!data || data.length === 0) {
-                    blogPostList.innerHTML = '<p class="text-gray-400 text-center">No blog posts yet.</p>';
-                } else {
-                    data.forEach(post => {
-                        const postEl = document.createElement('div');
-                        postEl.className = 'flex items-center justify-between bg-gray-800 p-4 rounded-md shadow';
-                        postEl.innerHTML = `<div><p class="font-bold text-white">${post.title}</p><p class="text-sm text-gray-400">By ${post.author}</p></div><div class="flex space-x-2"><button class="edit-post-btn p-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm text-white transition">Edit</button><button class="delete-post-btn p-2 bg-red-600 hover:bg-red-700 rounded-md text-sm text-white transition">Delete</button></div>`;
-                        postEl.querySelector('.edit-post-btn').addEventListener('click', () => populateBlogFormForEdit(post.id));
-                        postEl.querySelector('.delete-post-btn').addEventListener('click', () => handleBlogDelete(post.id, post.imageUrl));
-                        blogPostList.appendChild(postEl);
-                    });
-                }
-             } catch (error) {
+                if (!data || data.length === 0) { blogPostList.innerHTML = '<p class="text-gray-400 text-center">No blog posts yet.</p>'; }
+                else { data.forEach(post => { const postEl = document.createElement('div'); postEl.className = 'flex items-center justify-between bg-gray-800 p-4 rounded-md shadow'; postEl.innerHTML = `<div><p class="font-bold text-white">${post.title || 'Untitled Post'}</p><p class="text-sm text-gray-400">By ${post.author || 'Unknown Author'}</p></div><div class="flex space-x-2 flex-shrink-0"><button class="edit-post-btn p-2 bg-blue-600 hover:bg-blue-700 rounded-md text-xs font-semibold text-white transition">EDIT</button><button class="delete-post-btn p-2 bg-red-600 hover:bg-red-700 rounded-md text-xs font-semibold text-white transition">DELETE</button></div>`; postEl.querySelector('.edit-post-btn').addEventListener('click', () => populateBlogFormForEdit(post.id)); postEl.querySelector('.delete-post-btn').addEventListener('click', () => handleBlogDelete(post.id, post.imageUrl)); blogPostList.appendChild(postEl); }); }
+             } catch (error) { // CATCH fetch errors
                  console.error('Error loading posts:', error); blogPostList.innerHTML = `<p class="text-red-500 text-center">Error loading posts: ${error.message}</p>`;
              }
         }
 
         blogForm.addEventListener('submit', async (e) => {
-            e.preventDefault(); const submitBtn = blogForm.querySelector('button[type="submit"]'); submitBtn.disabled = true; submitBtn.textContent = 'Saving...'; blogStatus.textContent = 'Processing...'; blogStatus.style.color='white'; const postId = blogPostIdInput.value; const title = blogTitleInput.value; const author = blogAuthorInput.value; const content = easymde ? easymde.value() : document.getElementById('blog-content-editor').value; const headerFile = blogHeaderMediaInput.files[0]; let headerMediaUrl = null; try { if (headerFile) { blogStatus.textContent = `Uploading header ${headerFile.type.split('/')[0]}...`; const filePath = `${Date.now()}_header_${headerFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`; const { error: uploadError } = await _supabase.storage.from(BLOG_BUCKET).upload(filePath, headerFile); if (uploadError) throw uploadError; headerMediaUrl = _supabase.storage.from(BLOG_BUCKET).getPublicUrl(filePath).data.publicUrl; } let postData = { title, author, content }; if (headerMediaUrl) postData.imageUrl = headerMediaUrl; // Only add if new file uploaded if (postId) { blogStatus.textContent = 'Updating database record...'; const { error } = await _supabase.from('blogPosts').update(postData).eq('id', postId); if (error) throw error; blogStatus.textContent = 'Post updated successfully!'; } else { blogStatus.textContent = 'Creating database record...'; if (!headerMediaUrl) throw new Error("Header media (image or video) required for new posts."); postData.imageUrl = headerMediaUrl; // Required for new posts const { error } = await _supabase.from('blogPosts').insert([postData]); if (error) throw error; blogStatus.textContent = 'Post created successfully!'; } blogStatus.style.color = 'green'; clearBlogForm(); await loadBlogPosts(); } catch (error) { console.error("Blog save failed:", error); blogStatus.textContent = `Error: ${error.message}`; blogStatus.style.color = 'red'; } finally { submitBtn.disabled = false; submitBtn.textContent = 'Save Post'; setTimeout(() => blogStatus.textContent = '', 4000); }
+            e.preventDefault(); const submitBtn = blogForm.querySelector('button[type="submit"]'); submitBtn.disabled = true; submitBtn.textContent = 'Saving...'; blogStatus.textContent = 'Processing...'; blogStatus.style.color='white'; const postId = blogPostIdInput.value; const title = blogTitleInput.value; const author = blogAuthorInput.value; const content = easymde ? easymde.value() : document.getElementById('blog-content-editor').value; const headerFile = blogHeaderMediaInput.files[0]; let headerMediaUrl = null; let newlyUploadedPath = null;
+            try { // Wrap entire submission logic
+                if (headerFile) { blogStatus.textContent = `Uploading header ${headerFile.type.split('/')[0]}...`; const cleanFileName = headerFile.name.replace(/[^a-zA-Z0-9._-]/g, '_'); const filePath = `${Date.now()}_header_${cleanFileName}`; newlyUploadedPath = filePath; const { error: uploadError } = await _supabase.storage.from(BLOG_BUCKET).upload(filePath, headerFile); if (uploadError) throw uploadError; headerMediaUrl = _supabase.storage.from(BLOG_BUCKET).getPublicUrl(filePath).data.publicUrl; if (!headerMediaUrl) throw new Error("Could not get header media URL after upload."); }
+                let postData = { title, author, content }; if (headerMediaUrl) postData.imageUrl = headerMediaUrl;
+                if (postId) { blogStatus.textContent = 'Updating database record...'; const { error } = await _supabase.from('blogPosts').update(postData).eq('id', postId); if (error) throw error; blogStatus.textContent = 'Post updated successfully!'; }
+                else { blogStatus.textContent = 'Creating database record...'; if (!headerMediaUrl) throw new Error("Header media (image or video) is required for creating new posts."); postData.imageUrl = headerMediaUrl; const { error } = await _supabase.from('blogPosts').insert([postData]); if (error) throw error; blogStatus.textContent = 'Post created successfully!'; }
+                blogStatus.style.color = 'green'; clearBlogForm(); await loadBlogPosts();
+            } catch (error) { // CATCH block is crucial
+                console.error("Blog save failed:", error); blogStatus.textContent = `Error: ${error.message}`; blogStatus.style.color = 'red';
+                // Cleanup orphaned header file if needed
+                if (newlyUploadedPath && error.message !== "Header media (image or video) is required for creating new posts.") {
+                    console.log("Attempting cleanup of failed upload:", newlyUploadedPath);
+                    try { await _supabase.storage.from(BLOG_BUCKET).remove([newlyUploadedPath]); }
+                    catch(cleanupErr){ console.warn("Cleanup failed:", cleanupErr); }
+                }
+            } finally { // FINALLY block
+                submitBtn.disabled = false; submitBtn.textContent = 'Save Post'; setTimeout(() => { if(blogStatus) blogStatus.textContent = ''; }, 4000);
+            }
         });
 
         async function handleBlogDelete(postId, postMediaUrl) {
-            if (!confirm('Delete this blog post permanently?')) return; blogStatus.textContent = `Deleting post ${postId}...`; blogStatus.style.color = 'white'; try { if (postMediaUrl) { try { const filePath = new URL(postMediaUrl).pathname.split(`/${BLOG_BUCKET}/`)[1]; if (filePath) await _supabase.storage.from(BLOG_BUCKET).remove([filePath]); } catch (mediaError) { console.warn("Could not delete header media:", mediaError); } } const { error: dbError } = await _supabase.from('blogPosts').delete().eq('id', postId); if (dbError) throw dbError; blogStatus.textContent = 'Post deleted!'; blogStatus.style.color='#22c55e'; await loadBlogPosts(); } catch (error) { console.error('Delete failed:', error); blogStatus.textContent = `Deletion failed: ${error.message}`; blogStatus.style.color = 'red'; } finally { setTimeout(() => blogStatus.textContent = '', 4000); }
+            if (!confirm(`Are you sure you want to delete blog post ID ${postId} permanently?`)) return; blogStatus.textContent = `Deleting post ${postId}...`; blogStatus.style.color = 'white'; const deleteButtonInList = blogPostList.querySelector(`.delete-post-btn[data-id="${postId}"]`); if(deleteButtonInList) deleteButtonInList.disabled = true;
+            try { // Wrap deletion logic
+                if (postMediaUrl) { try { const url = new URL(postMediaUrl); const pathParts = url.pathname.split('/'); const bucketIndex = pathParts.indexOf(BLOG_BUCKET); if (bucketIndex !== -1 && bucketIndex < pathParts.length - 1) { const filePath = decodeURIComponent(pathParts.slice(bucketIndex + 1).join('/')); console.log("Attempting to delete header media:", filePath); const { error: storageError } = await _supabase.storage.from(BLOG_BUCKET).remove([filePath]); if (storageError && storageError.message !== 'The resource was not found') console.warn("Could not delete header media:", storageError.message); else if (!storageError) console.log("Header media deleted successfully."); } } catch (mediaError) { console.warn("Could not process or delete header media URL:", postMediaUrl, mediaError); } } else { console.log("No header media URL found for post, skipping storage delete."); }
+                const { error: dbError } = await _supabase.from('blogPosts').delete().eq('id', postId); if (dbError) throw dbError; blogStatus.textContent = 'Post deleted successfully!'; blogStatus.style.color = '#22c55e'; await loadBlogPosts(); if(blogPostIdInput.value === postId.toString()) clearBlogForm();
+            } catch (error) { // CATCH deletion errors
+                console.error('Delete failed:', error); blogStatus.textContent = `Deletion failed: ${error.message}`; blogStatus.style.color = 'red'; if(deleteButtonInList) deleteButtonInList.disabled = false;
+            } finally { // FINALLY block
+                setTimeout(() => { if(blogStatus) blogStatus.textContent = ''; }, 4000);
+            }
         }
 
         async function populateBlogFormForEdit(postId) {
-             blogStatus.textContent = "Loading post data..."; blogStatus.style.color='white'; try { const { data: post, error } = await _supabase.from('blogPosts').select('*').eq('id', postId).single(); if (error || !post) throw error || new Error("Post not found"); blogPostIdInput.value = post.id; blogTitleInput.value = post.title; blogAuthorInput.value = post.author; if (easymde) { easymde.value(post.content || ''); } else { document.getElementById('blog-content-editor').value = post.content || ''; console.warn("Populating textarea because EasyMDE not ready."); } blogHeaderMediaInput.value = ''; // Clear file input blogStatus.textContent = "Editing post. Upload new header media to replace existing."; blogStatus.style.color = 'white'; window.scrollTo({ top: blogForm.offsetTop - 100, behavior: 'smooth' }); } catch (error) { console.error("Failed to load post for editing:", error); blogStatus.textContent = "Could not load post data."; blogStatus.style.color='red'; }
+             blogStatus.textContent = "Loading post data for editing..."; blogStatus.style.color = 'white'; clearBlogForm();
+             try { // Wrap fetch logic
+                 const { data: post, error } = await _supabase.from('blogPosts').select('*').eq('id', postId).single(); if (error || !post) throw error || new Error("Post not found");
+                 blogPostIdInput.value = post.id; blogTitleInput.value = post.title || ''; blogAuthorInput.value = post.author || '';
+                 initializeEasyMDE(); if (easymde) easymde.value(post.content || ''); else { document.getElementById('blog-content-editor').value = post.content || ''; console.warn("Populating textarea because EasyMDE instance is not available."); }
+                 blogHeaderMediaInput.value = ''; blogStatus.textContent = "Editing post. Upload new header media only if you want to replace the current one."; blogStatus.style.color = 'white';
+                 window.scrollTo({ top: blogForm.offsetTop - 100, behavior: 'smooth' });
+             } catch (error) { // CATCH fetch errors
+                 console.error("Failed to load post for editing:", error); blogStatus.textContent = "Could not load post data for editing."; blogStatus.style.color = 'red';
+             }
         }
 
         function clearBlogForm() {
-            blogForm.reset(); blogPostIdInput.value = ''; if (easymde) easymde.value(''); else document.getElementById('blog-content-editor').value = ''; blogStatus.textContent = ''; blogHeaderMediaInput.value = '';
+            blogForm.reset(); blogPostIdInput.value = ''; if (easymde) easymde.value(''); else if (document.getElementById('blog-content-editor')) document.getElementById('blog-content-editor').value = ''; blogStatus.textContent = ''; blogHeaderMediaInput.value = ''; console.log("Blog form cleared.");
         }
         clearBlogFormBtn.addEventListener('click', clearBlogForm);
 
         // --- INITIAL PAGE LOAD ---
         document.addEventListener('DOMContentLoaded', () => {
-            setupTabs();
-            checkAuth(); // Checks login and loads initial tab data
-            lucide.createIcons(); // Initial call for static icons
+            console.log("DOM Loaded. Setting up page...");
+            setupTabs(); // Setup tab switching listeners first
+            checkAuth(); // Checks login status and loads initial data
+            // Lucide icons render might be needed again if dynamic content has icons
+            // Call it here or within load functions (like loadGalleryItems)
+            // lucide.createIcons();
         });
     </script>
 </body>

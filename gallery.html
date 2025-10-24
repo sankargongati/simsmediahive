@@ -33,7 +33,6 @@
 </head>
 <body class="antialiased">
 
-    <!-- Header -->
     <header class="bg-transparent absolute top-0 left-0 w-full z-20 pt-6">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-start">
             <div class="text-xl font-extrabold tracking-widest text-white oswald">
@@ -52,12 +51,14 @@
 
         <nav class="hidden md:flex justify-center mt-4">
             <ul class="flex space-x-8 text-sm font-medium uppercase tracking-widest text-gray-300">
-                <li><a href="#" class="hover:text-yellow-500 transition duration-300">Home</a></li>
-                <li><a href="#focus" class="hover:text-yellow-500 transition duration-300">Focus</a></li>
-                <li><a href="#work" class="hover:text-yellow-500 transition duration-300">Projects</a></li>
+                <li><a href="/index.html" class="hover:text-yellow-500 transition duration-300">Home</a></li>
+                <li><a href="/index.html#focus" class="hover:text-yellow-500 transition duration-300">Focus</a></li>
+                <li><a href="/index.html#work" class="hover:text-yellow-500 transition duration-300">Projects</a></li>
                 <li><a href="/members.html" class="hover:text-yellow-500 transition duration-300">Members</a></li>
                 <li><a href="/blog.html" class="hover:text-yellow-500 transition duration-300">Blog</a></li>
-                <li><a href="/gallery.html" class="hover:text-yellow-500 transition duration-300">Gallery</a></li>
+                
+                <li><a href="/gallery.html" class="text-yellow-500 transition duration-300">Gallery</a></li>
+                
                 <li><a href="/contact.html" class="hover:text-yellow-500 transition duration-300">Join Us</a></li>
             
             </ul>
@@ -65,23 +66,23 @@
 
         <nav id="mobile-menu" class="hidden md:hidden fixed top-0 left-0 w-full h-full bg-gray-950/95 backdrop-blur-sm pt-24 pb-8 overflow-y-auto z-10">
             <ul class="flex flex-col items-center space-y-8 text-xl font-semibold uppercase tracking-widest text-gray-300">
-                <li><a href="#" class="hover:text-yellow-500 transition duration-300 block py-2">Home</a></li>
-                <li><a href="#focus" class="hover:text-yellow-500 transition duration-300 block py-2">Focus</a></li>
-                <li><a href="#work" class="hover:text-yellow-500 transition duration-300 block py-2">Projects</a></li>
+                <li><a href="/index.html" class="hover:text-yellow-500 transition duration-300 block py-2">Home</a></li>
+                <li><a href="/index.html#focus" class="hover:text-yellow-500 transition duration-300 block py-2">Focus</a></li>
+                <li><a href="/index.html#work" class="hover:text-yellow-500 transition duration-300 block py-2">Projects</a></li>
                 <li><a href="/members.html" class="hover:text-yellow-500 transition duration-300 block py-2">Members</a></li>
                 <li><a href="/blog.html" class="hover:text-yellow-500 transition duration-300 block py-2">Blog</a></li>
-                <li><a href="/gallery.html" class="hover:text-yellow-500 transition duration-300">Gallery</a></li>
+                
+                <li><a href="/gallery.html" class="text-yellow-500 transition duration-300 block py-2">Gallery</a></li>
+                
                 <li><a href="/contact.html" class="hover:text-yellow-500 transition duration-300 block py-2">Join Us</a></li>
             </ul>
         </nav>
     </header>
 
-    <!-- Page Header Section -->
     <section class="bg-black pt-40 pb-20 md:pb-32 border-b border-gray-800">
          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center"><p class="text-sm text-yellow-500 uppercase tracking-widest mb-2">Our Work</p><h1 class="text-4xl sm:text-6xl font-bold text-white oswald">Creative Gallery</h1><p class="text-lg text-gray-400 max-w-3xl mx-auto mt-6">A visual journey through our projects.</p></div>
     </section>
 
-    <!-- Gallery Grid Section -->
     <section id="gallery-grid-section" class="bg-gray-950 py-20 md:py-32">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div id="filter-buttons" class="flex justify-center items-center space-x-4 mb-12">
@@ -95,8 +96,7 @@
         </div>
     </section>
 
-    <!-- Footer -->
-<footer class="bg-gray-900 border-t border-gray-800">
+    <footer class="bg-gray-900 border-t border-gray-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
@@ -124,7 +124,7 @@
                     <h4 class="text-lg font-semibold text-white oswald tracking-wider mb-4">Quick Links</h4>
                     <ul class="space-y-3 text-sm">
                         <li><a href="/index.html" class="text-gray-400 hover:text-yellow-500 transition duration-300">Home</a></li>
-<li><a href="/index.html#work" class="text-gray-400 hover:text-yellow-500 transition duration-300">Projects</a></li>
+                        <li><a href="/index.html#work" class="text-gray-400 hover:text-yellow-500 transition duration-300">Projects</a></li>
                         <li><a href="/members.html" class="text-gray-400 hover:text-yellow-500 transition duration-300">Members</a></li>
                         
                         <li><a href="/login.html" class="text-gray-400 hover:text-yellow-500 transition duration-300">Member Login</a></li>
@@ -164,24 +164,58 @@
         </div>
     </footer>
 
-    <!-- Lightbox Modal Structure -->
     <div id="lightbox-modal" class="cursor-pointer">
         <span id="lightbox-close">&times;</span>
         <div id="lightbox-media-content" class="lightbox-content">
-            <!-- Image or Video will be loaded here -->
-        </div>
+            </div>
         <div id="lightbox-caption"></div>
     </div>
 
 
-    <!-- SCRIPT (Updated for Video Thumbnails) -->
-    <script type="module">
+    <script>
+        // Initialize Lucide icons
         lucide.createIcons();
-        // --- Mobile Menu Logic ---
-        const menuButton = document.getElementById('mobile-menu-button'); const mobileMenu = document.getElementById('mobile-menu'); if (menuButton) { const menuIcon = menuButton.querySelector('i'); if (mobileMenu && menuIcon) { menuButton.addEventListener('click', () => { mobileMenu.classList.toggle('hidden'); document.body.classList.toggle('overflow-hidden'); const isOpen = !mobileMenu.classList.contains('hidden'); menuIcon.setAttribute('data-lucide', isOpen ? 'x' : 'menu'); lucide.createIcons(); }); document.querySelectorAll('#mobile-menu a').forEach(link => { link.addEventListener('click', () => { mobileMenu.classList.add('hidden'); document.body.classList.remove('overflow-hidden'); menuIcon.setAttribute('data-lucide', 'menu'); lucide.createIcons(); }); }); } }
 
+        // --- Mobile Menu Toggle Logic ---
+        const menuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIcon = menuButton.querySelector('i');
+
+        menuButton.addEventListener('click', () => {
+            // Toggle the 'hidden' class on the mobile menu
+            mobileMenu.classList.toggle('hidden');
+            
+            // Toggle the visibility of the main body content (to prevent scrolling behind the menu)
+            document.body.classList.toggle('overflow-hidden');
+
+            // Toggle the icon (Menu <-> X)
+            const isMenuOpen = !mobileMenu.classList.contains('hidden');
+            if (isMenuOpen) {
+                // Menu is open, show 'x' icon
+                menuIcon.setAttribute('data-lucide', 'x');
+            } else {
+                // Menu is closed, show 'menu' icon
+                menuIcon.setAttribute('data-lucide', 'menu');
+            }
+            lucide.createIcons(); // Re-render the icon
+        });
+
+        // Close the mobile menu when a link is clicked
+        document.querySelectorAll('#mobile-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                // Close the menu
+                mobileMenu.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+                
+                // Reset the icon
+                menuIcon.setAttribute('data-lucide', 'menu');
+                lucide.createIcons();
+            });
+        });
+    </script>
+
+    <script>
         // --- Supabase & Gallery Logic ---
-        // REPLACE WITH YOUR ACTUAL SUPABASE KEYS
         const SUPABASE_URL = 'https://gswdqdsviqrzsoahxapc.supabase.co/'; 
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdzd2RxZHN2aXFyenNvYWh4YXBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4ODM5NzcsImV4cCI6MjA3NjQ1OTk3N30.JFF6NFIdqZAE9ioHeMdfIVpN84UtN_Z0K2pZYodlpZY';
 
@@ -207,7 +241,6 @@
 
         // --- Video Thumbnail Generation Function (Copied from working implementation) ---
         async function generateVideoThumbnail(videoUrl) {
-            console.log(`Attempting thumbnail for: ${videoUrl}`); // Log start
             return new Promise((resolve) => {
                 const video = document.createElement('video');
                 const canvas = document.createElement('canvas');
@@ -281,8 +314,7 @@
                                  class="absolute inset-0 w-full h-full object-cover transition duration-500 group-hover:scale-105">
                             ${isVideo ? `
                                 <div class="video-overlay-icon">
-                                    <svg data-lucide="play"></svg> <!-- Use Lucide icon -->
-                                </div>
+                                    <svg data-lucide="play"></svg> </div>
                             ` : ''}
                             <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
                             <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent pt-10">
@@ -314,7 +346,7 @@
             const filterButtons = document.querySelectorAll('#filter-buttons .filter-btn');
             const galleryItems = document.querySelectorAll('#gallery-container .gallery-item');
              // Check if galleryItems exists AND has length > 0
-            if ((!galleryItems || galleryItems.length === 0) && filterButtons.length > 0) {
+             if ((!galleryItems || galleryItems.length === 0) && filterButtons.length > 0) {
                  if (!filterButtons[0].classList.contains('active')) { /* ... ensure 'All' active style ... */ }
                  filterButtons.forEach((btn, index) => { if (index !== 0 && !btn.classList.contains('bg-gray-800')) { /* ... ensure inactive styles ... */ }});
                  return;
@@ -330,7 +362,7 @@
                      // Check galleryItems exists before iterating
                      if(galleryItems) { galleryItems.forEach(item => { const itemCategory = item.getAttribute('data-category'); item.classList.toggle('hidden', !(filterValue === 'all' || itemCategory === filterValue)); }); }
                  });
-            });
+             });
              const initialFilter = document.querySelector('#filter-buttons .filter-btn.active')?.dataset.filter || 'all';
              // Check galleryItems exists before filtering
              if (galleryItems && galleryItems.length > 0) { galleryItems.forEach(item => { const itemCategory = item.getAttribute('data-category'); item.classList.toggle('hidden', !(initialFilter === 'all' || itemCategory === initialFilter)); }); }
@@ -379,9 +411,9 @@
         }
 
         // --- Initial Load ---
-        document.addEventListener('DOMContentLoaded', loadGallery);
+        // FIXED: Call the function directly, no DOMContentLoaded
+        loadGallery();
 
     </script>
 </body>
 </html>
-

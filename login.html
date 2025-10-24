@@ -3,103 +3,219 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login | SIMS Media Hive</title>
+    <title>SIMS Media Hive | Member Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- We need to include the Supabase JS library -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Using a simplified version of the main site's dark theme */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Oswald:wght@700&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0d0d0d;
-            color: #f3f4f6;
-        }
+        /* Your existing styles */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Oswald:wght@200..700&display=swap');
+        :root { --primary-color: #eab308; --dark-bg: #0d0d0d; --mid-bg: #1a1a1a; --text-light: #f3f4f6; --text-muted: #9ca3af; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--dark-bg); color: var(--text-light); overflow-x: hidden; padding-top: 6rem; }
         .oswald { font-family: 'Oswald', sans-serif; }
     </style>
 </head>
-<body class="antialiased flex items-center justify-center min-h-screen">
+<body class="antialiased flex flex-col min-h-screen">
 
-    <div class="w-full max-w-md p-8 space-y-8 bg-gray-900 rounded-lg shadow-lg border border-gray-800">
-        <div>
-            <h1 class="text-2xl font-bold text-center text-white oswald tracking-wider">SIMS Media Hive</h1>
-            <h2 class="mt-2 text-xl font-bold text-center text-yellow-500">
-                Admin Panel Login
-            </h2>
+    <!-- Header (Copied from your other pages) -->
+    <header class="bg-black fixed top-0 left-0 w-full z-20 pt-6 shadow-xl border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-start">
+            <div class="text-xl font-extrabold tracking-widest text-white oswald">
+                <a href="index.html">SIMS Media Hive</a>
+            </div>
+
+            <div class="hidden md:block text-right text-xs text-gray-400">
+                <p>gds.simshive@gmail.com</p>
+                <p>+91 7981 951 879</p>
+            </div>
+            
+            <button id="mobile-menu-button" class="md:hidden p-2 text-yellow-500 hover:text-white transition duration-300 z-30">
+                <i data-lucide="menu" class="w-7 h-7"></i>
+            </button>
         </div>
-        <form id="login-form" class="mt-8 space-y-6">
-            <div class="rounded-md shadow-sm -space-y-px">
+
+        <nav class="hidden md:flex justify-center mt-4 pb-4">
+            <ul class="flex space-x-8 text-sm font-medium uppercase tracking-widest text-gray-300">
+                <li><a href="/index.html" class="hover:text-yellow-500 transition duration-300">Home</a></li>
+                <li><a href="/index.html#focus" class="hover:text-yellow-500 transition duration-300">Focus</a></li>
+                <li><a href="/index.html#work" class="hover:text-yellow-500 transition duration-300">Projects</a></li>
+                <li><a href="/members.html" class="hover:text-yellow-500 transition duration-300">Members</a></li>
+                <li><a href="/blog.html" class="hover:text-yellow-500 transition duration-300">Blog</a></li>
+                <li><a href="/gallery.html" class="hover:text-yellow-500 transition duration-300">Gallery</a></li>
+                <li><a href="/contact.html" class="hover:text-yellow-500 transition duration-300">Join Us</a></li>
+            </ul>
+        </nav>
+
+        <nav id="mobile-menu" class="hidden md:hidden fixed top-0 left-0 w-full h-full bg-gray-950/95 backdrop-blur-sm pt-24 pb-8 overflow-y-auto z-10">
+            <ul class="flex flex-col items-center space-y-8 text-xl font-semibold uppercase tracking-widest text-gray-300">
+                <li><a href="/index.html" class="hover:text-yellow-500 transition duration-300 block py-2">Home</a></li>
+                <li><a href="/index.html#focus" class="hover:text-yellow-500 transition duration-300 block py-2">Focus</a></li>
+                <li><a href="/index.html#work" class="hover:text-yellow-500 transition duration-300 block py-2">Projects</a></li>
+                <li><a href="/members.html" class="hover:text-yellow-500 transition duration-300 block py-2">Members</a></li>
+                <li><a href="/blog.html" class="hover:text-yellow-500 transition duration-300 block py-2">Blog</a></li>
+                <li><a href="/gallery.html" class="hover:text-yellow-500 transition duration-300 block py-2">Gallery</a></li>
+                <li><a href="/contact.html" class="hover:text-yellow-500 transition duration-300 block py-2">Join Us</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow">
+        <section class="bg-gray-950 py-20 md:py-32 flex flex-col items-center">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+                <h1 class="text-4xl font-bold text-center mb-8 oswald">Member Login</h1>
+                
+                <!-- Styled Form -->
+                <form id="login-form" class="bg-gray-900 p-8 rounded-lg shadow-xl max-w-md w-full mx-auto">
+                    
+                    <div class="mb-6">
+                        <label for="email" class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                        <input type="email" id="email" required placeholder="you@example.com"
+                               class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md text-white focus:ring-yellow-500 focus:border-yellow-500">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="password" class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                        <input type="password" id="password" required placeholder="••••••••"
+                               class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md text-white focus:ring-yellow-500 focus:border-yellow-500">
+                    </div>
+                    
+                    <div class="text-right mb-6">
+                        <a href="forgot-password.html" class="text-sm text-yellow-500 hover:text-yellow-400 transition duration-300">Forgot Password?</a>
+                    </div>
+                    
+                    <button type="submit" 
+                            class="w-full px-10 py-3 bg-yellow-500 text-black font-semibold uppercase tracking-wider text-base rounded-md transition duration-300 hover:bg-yellow-600 shadow-lg hover:shadow-yellow-500/50">
+                        Login
+                    </button>
+                    
+                    <div id="message" class="mt-4 text-center"></div>
+
+                    <p class="text-center text-gray-400 mt-6">
+                        Don't have an account? 
+                        <a href="contact.html" class="text-yellow-500 hover:text-yellow-400 font-semibold">Join the Hive</a>
+                    </p>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer (Copied from your other pages) -->
+    <footer class="bg-gray-900 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
                 <div>
-                    <label for="email-address" class="sr-only">Email address</label>
-                    <input id="email-address" name="email" type="email" autocomplete="email" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-700 bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 focus:z-10 sm:text-sm rounded-t-md" placeholder="Email address">
+                    <h3 class="text-xl font-extrabold tracking-widest text-white oswald mb-4">
+                        <a href="index.html">SIMS Media Hive</a>
+                    </h3>
+                    <p class="text-gray-400 text-sm mb-4 max-w-xs">
+                        Your creative partner in digital media production, storytelling, and impactful content.
+                    </p>
+                    <div class="space-y-2 text-sm text-gray-400">
+                        <p class="flex items-center"><i data-lucide="mail" class="inline w-4 h-4 mr-2 text-yellow-500 shrink-0"></i><span>gds.simshive@gmail.com</span></p>
+                        <p class="flex items-center"><i data-lucide="phone" class="inline w-4 h-4 mr-2 text-yellow-500 shrink-0"></i><span>+91 7981 951 879</span></p>
+                    </div>
                 </div>
                 <div>
-                    <label for="password" class="sr-only">Password</label>
-                    <input id="password" name="password" type="password" autocomplete="current-password" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-700 bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 focus:z-10 sm:text-sm rounded-b-md" placeholder="Password">
+                    <h4 class="text-lg font-semibold text-white oswald tracking-wider mb-4">Quick Links</h4>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="/index.html" class="text-gray-400 hover:text-yellow-500 transition duration-300">Home</a></li>
+                        <li><a href="/index.html#work" class="text-gray-400 hover:text-yellow-500 transition duration-300">Projects</a></li>
+                        <li><a href="/members.html" class="text-gray-400 hover:text-yellow-500 transition duration-300">Members</a></li>
+                        <li><a href="/login.html" class="text-gray-400 hover:text-yellow-500 transition duration-300">Member Login</a></li>
+                        <li><a href="/blog.html" class="text-gray-400 hover:text-yellow-500 transition duration-300">Blog</a></li>
+                        <li><a href="/gallery.html" class="text-gray-400 hover:text-yellow-500 transition duration-300">Gallery</a></li>
+                        <li><a href="/contact.html" class="text-gray-400 hover:text-yellow-500 transition duration-300">Join Us</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold text-white oswald tracking-wider mb-4">Follow Us</h4>
+                    <p class="text-sm text-gray-400 mb-4">Stay connected on our social channels.</p>
+                    <div class="flex space-x-4 justify-center md:justify-start">
+                        <a href="#" aria-label="Instagram" class="text-gray-400 hover:text-yellow-500 transition duration-300"><i data-lucide="instagram" class="w-6 h-6"></i></a>
+                        <a href="#" aria-label="YouTube" class="text-gray-400 hover:text-yellow-500 transition duration-300"><i data-lucide="youtube" class="w-6 h-6"></i></a>
+                        <a href="#" aria-label="Facebook" class="text-gray-400 hover:text-yellow-500 transition duration-300"><i data-lucide="facebook" class="w-6 h-6"></i></a>
+                        <a href="#" aria-label="LinkedIn" class="text-gray-400 hover:text-yellow-500 transition duration-3D00"><i data-lucide="linkedin" class="w-6 h-6"></i></a>
+                    </div>
                 </div>
             </div>
-
-            <div>
-                <button type="submit" id="submit-button" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-black bg-yellow-500 hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-yellow-500 disabled:bg-gray-500">
-                    Sign in
-                </button>
+            <div class="mt-16 pt-8 border-t border-gray-800 text-center text-sm text-gray-500">
+                <p>&copy; 2025 SIMS Media Hive. All Rights Reserved. Designed by <a href="https://dcagency.in" target="_blank" class="hover:text-yellow-500 transition">Darion Creative Agency.</a></p>
             </div>
-            <p id="error-message" class="text-center text-red-500 text-sm mt-2 h-5"></p>
-        </form>
-    </div>
+        </div>
+    </footer>
 
-    <!-- This script block is the Supabase version. -->
-    <script type="module">
-        // --- CONFIGURATION ---
-        // PASTE YOUR KEYS FROM THE SUPABASE DASHBOARD HERE
+    <!-- SCRIPT 1: Mobile Menu Logic (Isolated) -->
+    <script>
+        lucide.createIcons();
+        const menuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIcon = menuButton.querySelector('i');
+        menuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            document.body.classList.toggle('overflow-hidden');
+            const isMenuOpen = !mobileMenu.classList.contains('hidden');
+            menuIcon.setAttribute('data-lucide', isMenuOpen ? 'x' : 'menu');
+            lucide.createIcons();
+        });
+        document.querySelectorAll('#mobile-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+                menuIcon.setAttribute('data-lucide', 'menu');
+                lucide.createIcons();
+            });
+        });
+    </script>
+
+    <!-- SCRIPT 2: Login Logic (Isolated) -->
+    <script>
+        // --- 1. Initialize Supabase Client ---
         const SUPABASE_URL = 'https://gswdqdsviqrzsoahxapc.supabase.co/'; 
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdzd2RxZHN2aXFyenNvYWh4YXBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4ODM5NzcsImV4cCI6MjA3NjQ1OTk3N30.JFF6NFIdqZAE9ioHeMdfIVpN84UtN_Z0K2pZYodlpZY';
-
-        // --- INITIALIZATION ---
         const { createClient } = supabase;
         const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // --- 2. Get Form and Message Elements ---
         const loginForm = document.getElementById('login-form');
-        const errorMessage = document.getElementById('error-message');
-        const submitButton = document.getElementById('submit-button');
+        const messageEl = document.getElementById('message');
 
+        // --- 3. Handle Form Submission ---
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const email = document.getElementById('email-address').value;
+            const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             
-            errorMessage.textContent = ''; // Clear previous errors
-            submitButton.disabled = true;
-            submitButton.textContent = 'Signing in...';
+            messageEl.textContent = 'Logging in...';
+            messageEl.style.color = 'var(--text-light)'; // White
 
             try {
-                // Use the Supabase auth function to sign in
+                // --- 4. Call Supabase Auth Method ---
                 const { data, error } = await _supabase.auth.signInWithPassword({
                     email: email,
                     password: password,
                 });
 
                 if (error) {
-                    // If Supabase returns an error, throw it to the catch block
                     throw error;
                 }
 
-                // If login is successful, redirect to the admin panel
-                console.log('Login successful:', data.user);
-                window.location.href = '/admin.html';
+                // --- 5. Handle Success ---
+                messageEl.textContent = 'Success! Redirecting to admin panel...';
+                messageEl.style.color = '#22c55e'; // Green
+                
+                // Redirect to the members-only area after 1.5 seconds
+                setTimeout(() => {
+                    window.location.href = '/admin.html'; // Or '/dashboard.html'
+                }, 1500);
 
             } catch (error) {
-                console.error('Login failed:', error);
-                // Display the specific error message from Supabase
-                errorMessage.textContent = error.message || 'An unknown error occurred.';
-            } finally {
-                // Re-enable the button whether login succeeded or failed
-                submitButton.disabled = false;
-                submitButton.textContent = 'Sign in';
+                messageEl.textContent = error.message;
+                messageEl.style.color = '#ef4444'; // Red
+                console.error('Error logging in:', error.message);
             }
         });
     </script>
 </body>
 </html>
-

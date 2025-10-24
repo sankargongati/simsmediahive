@@ -6,7 +6,6 @@
     <title>SIMS Media Hive | Blog & Insights</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- ADDED: Supabase JS Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         /* Your existing styles */
@@ -20,9 +19,8 @@
         .thumbnail-generator-video { position: absolute; top: -9999px; left: -9999px; width: 320px; height: auto; }
     </style>
 </head>
-<body class="antialiased">
+<body class="antialiased flex flex-col min-h-screen">
 
-    <!-- Header (Your UI) -->
     <header class="bg-transparent absolute top-0 left-0 w-full z-20 pt-6">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-start">
             <div class="text-xl font-extrabold tracking-widest text-white oswald">
@@ -59,34 +57,32 @@
                 <li><a href="/index.html#work" class="hover:text-yellow-500 transition duration-300 block py-2">Projects</a></li>
                 <li><a href="/members.html" class="hover:text-yellow-500 transition duration-300 block py-2">Members</a></li>
                 <li><a href="/blog.html" class="hover:text-yellow-500 transition duration-300 block py-2">Blog</a></li>
-                <li><a href="/gallery.html" class="hover:text-yellow-500 transition duration-300">Gallery</a></li>
+                <li><a href="/gallery.html" class="hover:text-yellow-500 transition duration-300 block py-2">Gallery</a></li>
                 <li><a href="/contact.html" class="hover:text-yellow-500 transition duration-300 block py-2">Join Us</a></li>
             </ul>
         </nav>
     </header>
 
-    <!-- Hero Section (Your UI) -->
-    <section id="blog-hero" class="relative py-24 md:py-40 flex items-center">
-        <div class="absolute inset-0 bg-black bg-opacity-70"></div>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-0 text-center"><p class="text-sm text-yellow-500 uppercase tracking-widest mb-4">Insights, Tutorials, and News</p><h1 class="text-5xl sm:text-7xl font-bold leading-tight text-white oswald mb-4"> The Hive Feed </h1><p class="text-xl text-gray-300 max-w-3xl mx-auto"> Stay updated with our latest productions, technical tips, and media industry commentary. </p></div>
-    </section>
+    <main class="flex-grow">
+        <section id="blog-hero" class="relative py-24 md:py-40 flex items-center">
+            <div class="absolute inset-0 bg-black bg-opacity-70"></div>
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-0 text-center"><p class="text-sm text-yellow-500 uppercase tracking-widest mb-4">Insights, Tutorials, and News</p><h1 class="text-5xl sm:text-7xl font-bold leading-tight text-white oswald mb-4"> The Hive Feed </h1><p class="text-xl text-gray-300 max-w-3xl mx-auto"> Stay updated with our latest productions, technical tips, and media industry commentary. </p></div>
+        </section>
 
-    <!-- Blog Posts Section -->
-    <section class="bg-gray-950 py-20 md:py-32">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl font-bold text-white oswald mb-12">Latest Articles</h2>
-            <div id="blog-posts-container" class="grid grid-cols-1 md:grid-cols-3 gap-10">
-                <p class="text-gray-400 col-span-full text-center">Loading articles...</p>
+        <section class="bg-gray-950 py-20 md:py-32">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl font-bold text-white oswald mb-12">Latest Articles</h2>
+                <div id="blog-posts-container" class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                    <p class="text-gray-400 col-span-full text-center">Loading articles...</p>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
+    </main>
 
-    <!-- Footer (Your UI) -->
     <footer class="bg-gray-900 py-10 border-t border-gray-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-500"><p>&copy; 2025 SIMS Media Hive. All Rights Reserved. Designed by <a href="https://dcagency.in" target="_blank">Darion Creative Agency.</a>.</p></div>
     </footer>
 
-    <!-- SCRIPT SECTION (UPDATED FOR VIDEO THUMBNAIL GENERATION) -->
     <script type="module">
         // --- CONFIGURATION ---
         const SUPABASE_URL = 'https://gswdqdsviqrzsoahxapc.supabase.co/'; 
@@ -238,8 +234,7 @@
                         <a href="post.html?id=${post.id}" class="block post-card rounded-lg overflow-hidden transition duration-300 hover:shadow-yellow-500/20 shadow-xl">
                             <img src="${imageSource}"
                                  onerror="this.onerror=null;this.src='${defaultPlaceholder}';"
-                                 alt="Preview for ${post.title}" class="w-full h-48 object-cover bg-gray-700"> <!-- Added bg color -->
-                            <div class="p-6">
+                                 alt="Preview for ${post.title}" class="w-full h-48 object-cover bg-gray-700"> <div class="p-6">
                                 <h3 class="text-xl font-bold text-white oswald mb-2 hover:text-yellow-400 transition duration-200">
                                     ${post.title}
                                 </h3>
@@ -283,4 +278,3 @@
     </script>
 </body>
 </html>
-

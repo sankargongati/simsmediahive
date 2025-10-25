@@ -18,17 +18,18 @@
         :root { 
             --primary-color: #eab308; /* Yellow */
             --secondary-color: #f59e0b; /* Amber */
-            --dark-bg: #0a0a0a; /* Slightly darker */
-            --mid-bg: #1a1a1a; 
-            --card-bg: #1f2937; 
-            --border-color: #374151;
-            --text-light: #f3f4f6; 
+            --dark-bg: #111827; /* Dark Blue-Gray */
+            --mid-bg: #1f2937; 
+            --card-bg: #1f2937; /* Consistent card bg */
+            --border-color: #374151; /* Slightly lighter border */
+            --text-light: #f9fafb; /* Lighter text */
             --text-muted: #9ca3af; 
         }
         body { 
             font-family: 'Inter', sans-serif; 
             background-color: var(--dark-bg); 
             color: var(--text-light); 
+            overflow-x: hidden; /* Prevent body scroll from marquee */
         }
         .oswald { font-family: 'Oswald', sans-serif; }
 
@@ -43,30 +44,37 @@
                         border-color 0.3s ease-out;
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
+            border-radius: 0.75rem; 
         }
         .content-card:hover {
-            transform: translateY(-8px) scale(1.03); /* More lift */
-            box-shadow: 0 15px 30px -5px rgba(234, 179, 8, 0.2), /* Softer, larger glow */
-                        0 8px 10px -6px rgba(234, 179, 8, 0.1);
+            transform: translateY(-6px) scale(1.02); 
+            box-shadow: 0 12px 24px -4px rgba(234, 179, 8, 0.15),
+                        0 6px 8px -5px rgba(234, 179, 8, 0.1);
             border-color: var(--primary-color);
         }
         
         /* Featured Card */
         .featured-card:hover .featured-title { color: var(--primary-color); }
-        .featured-card:hover .featured-arrow { transform: translateX(6px); }
+        .featured-card:hover .featured-arrow { transform: translateX(5px); } 
         .featured-title { transition: color 0.2s ease-out; }
         .featured-arrow { transition: transform 0.2s ease-out; }
         .line-clamp-3 {
             overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3;
         }
+        .featured-image-overlay::after { 
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 50%); /* Darker overlay */
+            border-radius: 0.75rem 0 0 0.75rem; 
+        }
+
 
         /* Member Card */
         .member-card img {
             transition: filter 0.4s ease-out, transform 0.4s ease-out;
-            filter: grayscale(60%); /* Slightly less grayscale */
+            filter: grayscale(50%); 
         }
-        .member-card:hover img { filter: grayscale(0%); transform: scale(1.08); }
-        .member-card .member-img-container { overflow: hidden; }
+        .member-card:hover img { filter: grayscale(0%); transform: scale(1.05); } 
+        .member-card .member-img-container { overflow: hidden; border-radius: 0.75rem 0.75rem 0 0; } 
 
         /* Modal Markdown Styles (Unchanged) */
         .markdown-body h1, .markdown-body h2, .markdown-body h3 { font-family: 'Oswald', sans-serif; color: var(--primary-color); margin-top: 1.25em; margin-bottom: 0.5em; border-bottom: 1px solid var(--border-color); padding-bottom: 0.25em; }
@@ -81,56 +89,93 @@
         .markdown-body pre code { background-color: transparent; padding: 0; }
         .markdown-body img, .markdown-body video { max-width: 100%; height: auto; border-radius: 8px; margin: 0.5em 0; }
 
-        /* Animated Gradient Header */
-        @keyframes gradientShift {
+        /* Animated Gradient Header (Unchanged) */
+        @keyframes gradientShift { 
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
-        }
-        .animated-gradient-header {
-            background: linear-gradient(-45deg, #1f2937, #374151, #111827, #0a0a0a);
+         }
+        .animated-gradient-header { 
+            background: linear-gradient(-45deg, var(--dark-bg), var(--mid-bg), #374151, var(--dark-bg)); /* Adjusted colors */
             background-size: 400% 400%;
-            animation: gradientShift 15s ease infinite;
+            animation: gradientShift 18s ease infinite; /* Slower animation */
             border-bottom: 1px solid var(--border-color);
-        }
+         }
 
-        /* Gradient Text */
-        .gradient-text {
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        /* Gradient Text (Unchanged) */
+        .gradient-text { 
+             background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-        }
+         }
 
         /* Entry Animations (Unchanged) */
-        @keyframes fadeInEntry {
-            from { opacity: 0; transform: translateY(20px); }
+        @keyframes fadeInEntry { 
+             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
-        }
-        .fade-in-section {
+         }
+        .fade-in-section { 
             opacity: 0; /* Start hidden */
             animation: fadeInEntry 0.6s ease-out forwards;
-        }
+         }
         
-        /* --- NEW: Analytics Card Styles --- */
-        .stat-card {
+        /* Analytics Card Styles (Unchanged) */
+        .stat-card { 
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
             transition: border-color 0.3s ease-out, box-shadow 0.3s ease-out;
-        }
-        .stat-card:hover {
+            border-radius: 0.75rem; /* Match card rounding */
+         }
+        .stat-card:hover { 
             border-color: var(--primary-color);
-            box-shadow: 0 0 15px rgba(234, 179, 8, 0.2);
-        }
-        .stat-number {
-             font-family: 'Oswald', sans-serif;
-             font-size: 3rem; /* Larger number */
+            box-shadow: 0 0 18px rgba(234, 179, 8, 0.25); /* Slightly larger glow */
+         }
+        .stat-number { 
+              font-family: 'Oswald', sans-serif;
+             font-size: 2.75rem; /* Slightly smaller number */
              line-height: 1;
              color: var(--primary-color);
              transition: color 0.3s ease-out;
-        }
-        .stat-card:hover .stat-number {
+         }
+        .stat-card:hover .stat-number { 
             color: var(--secondary-color);
+         }
+        .stat-label { 
+             color: var(--text-muted); /* Use muted text color */
+             font-size: 0.875rem; /* Smaller label */
+         }
+
+        /* --- Auto-Scroll Animation for Team --- */
+        @keyframes scrollTeam {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); } /* Translate by half width for loop */
+        }
+        .team-scroll-container {
+            overflow: hidden; /* Hide the non-visible part */
+            width: 100%;
+            -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%); /* Add fading effect at edges */
+             mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+        }
+        .team-scroll-track {
+            display: flex;
+            width: fit-content; /* Adjust width based on content */
+            animation: scrollTeam 40s linear infinite; /* Adjust duration as needed */
+            will-change: transform; /* Optimize animation performance */
+        }
+        /* Pause animation on hover */
+        .team-scroll-container:hover .team-scroll-track {
+            animation-play-state: paused;
+        }
+        /* Make member cards slightly smaller for better fit */
+        .member-card-scroll {
+             width: 14rem; /* 224px */
+             flex-shrink: 0; /* Prevent shrinking */
+             margin-right: 1.5rem; /* Space between cards */
+             cursor: pointer; /* Ensure cursor indicates interactivity */
+        }
+        .member-card-scroll img {
+            height: 14rem; /* Make image square */
         }
 
     </style>
@@ -161,60 +206,90 @@
                 <p class="text-xl text-gray-400 mt-3">Discover the latest updates and creations from the community.</p>
             </section>
 
-            <!-- *** NEW: Realtime Stats Section *** -->
+            <!-- Realtime Stats Section (Unchanged) -->
             <section id="realtime-stats-section">
-                <h2 class="text-3xl font-bold oswald mb-8"><span class="gradient-text">Community Stats</span></h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <!-- Stat Card: Blog Posts -->
-                    <div class="stat-card rounded-lg p-6 text-center">
-                        <div class="flex justify-center items-center mb-4">
-                             <svg data-lucide="notebook-pen" class="w-8 h-8 text-yellow-500 mr-3"></svg>
-                             <h3 class="text-lg font-semibold text-gray-300 uppercase tracking-wider">Blog Posts</h3>
+                <h2 class="text-3xl font-bold oswald mb-8 flex items-center">
+                    <svg data-lucide="bar-chart-3" class="w-7 h-7 mr-3 gradient-text"></svg>
+                    <span class="gradient-text">Community Stats</span>
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Stat Cards remain the same -->
+                    <div class="stat-card p-6 flex items-center space-x-4">
+                        <div class="bg-yellow-500/10 p-3 rounded-full">
+                             <svg data-lucide="notebook-pen" class="w-8 h-8 text-yellow-500"></svg>
                         </div>
-                        <p id="stat-blog-posts" class="stat-number">0</p>
+                         <div>
+                            <p id="stat-blog-posts" class="stat-number">0</p>
+                            <h3 class="stat-label uppercase tracking-wider">Blog Posts</h3>
+                         </div>
                     </div>
-                    <!-- Stat Card: Gallery Items -->
-                    <div class="stat-card rounded-lg p-6 text-center">
-                         <div class="flex justify-center items-center mb-4">
-                             <svg data-lucide="image" class="w-8 h-8 text-yellow-500 mr-3"></svg>
-                             <h3 class="text-lg font-semibold text-gray-300 uppercase tracking-wider">Gallery Items</h3>
+                    <div class="stat-card p-6 flex items-center space-x-4">
+                        <div class="bg-yellow-500/10 p-3 rounded-full">
+                             <svg data-lucide="image" class="w-8 h-8 text-yellow-500"></svg>
                         </div>
-                        <p id="stat-gallery-items" class="stat-number">0</p>
+                         <div>
+                            <p id="stat-gallery-items" class="stat-number">0</p>
+                             <h3 class="stat-label uppercase tracking-wider">Gallery Items</h3>
+                        </div>
                     </div>
-                    <!-- Stat Card: Team Members -->
-                    <div class="stat-card rounded-lg p-6 text-center">
-                         <div class="flex justify-center items-center mb-4">
-                             <svg data-lucide="users" class="w-8 h-8 text-yellow-500 mr-3"></svg>
-                            <h3 class="text-lg font-semibold text-gray-300 uppercase tracking-wider">Team Members</h3>
+                    <div class="stat-card p-6 flex items-center space-x-4">
+                        <div class="bg-yellow-500/10 p-3 rounded-full">
+                             <svg data-lucide="users" class="w-8 h-8 text-yellow-500"></svg>
                         </div>
-                        <p id="stat-team-members" class="stat-number">0</p>
+                         <div>
+                            <p id="stat-team-members" class="stat-number">0</p>
+                            <h3 class="stat-label uppercase tracking-wider">Team Members</h3>
+                        </div>
                     </div>
                 </div>
             </section>
-            <!-- *** END: Realtime Stats Section *** -->
 
             <!-- Section: Featured Post (Unchanged) -->
             <section id="featured-post-section" style="display: none;">
-                <h2 class="text-3xl font-bold oswald mb-8"><span class="gradient-text">Featured Post</span></h2>
-                <div id="featured-post-container"></div>
+                <h2 class="text-3xl font-bold oswald mb-8 flex items-center">
+                     <svg data-lucide="star" class="w-7 h-7 mr-3 gradient-text"></svg>
+                     <span class="gradient-text">Featured Post</span>
+                </h2>
+                <div id="featured-post-container">
+                    {/* Featured Post loaded via JS */}
+                </div>
             </section>
 
             <!-- Section: More Blog Posts (Unchanged) -->
             <section>
-                <h2 class="text-3xl font-bold oswald mb-8"><span class="gradient-text">More from the Blog</span></h2>
-                <div id="blog-list-container" class="flex space-x-6 overflow-x-auto pb-6 hide-scrollbar"></div>
+                 <h2 class="text-3xl font-bold oswald mb-8 flex items-center">
+                     <svg data-lucide="newspaper" class="w-7 h-7 mr-3 gradient-text"></svg>
+                     <span class="gradient-text">More from the Blog</span>
+                 </h2>
+                <div id="blog-list-container" class="flex space-x-8 overflow-x-auto pb-6 hide-scrollbar">
+                     {/* Blog cards loaded via JS */}
+                </div>
             </section>
 
             <!-- Section: Media Gallery (Unchanged) -->
             <section>
-                 <h2 class="text-3xl font-bold oswald mb-8"><span class="gradient-text">Recent Gallery Additions</span></h2>
-                <div id="gallery-list-container" class="grid grid-cols-2 md:grid-cols-4 gap-6"></div>
+                  <h2 class="text-3xl font-bold oswald mb-8 flex items-center">
+                      <svg data-lucide="gallery-thumbnails" class="w-7 h-7 mr-3 gradient-text"></svg>
+                     <span class="gradient-text">Recent Gallery Additions</span>
+                 </h2>
+                <div id="gallery-list-container" class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                    {/* Gallery cards loaded via JS */}
+                </div>
             </section>
             
-            <!-- Section: Meet the Team (Unchanged) -->
+            <!-- Section: Meet the Team (UPDATED Structure for Scrolling) -->
             <section>
-                 <h2 class="text-3xl font-bold oswald mb-8"><span class="gradient-text">Meet the Team</span></h2>
-                <div id="member-list-container" class="flex space-x-6 overflow-x-auto pb-6 hide-scrollbar"></div>
+                 <h2 class="text-3xl font-bold oswald mb-8 flex items-center">
+                    <svg data-lucide="contact-2" class="w-7 h-7 mr-3 gradient-text"></svg>
+                     <span class="gradient-text">Meet the Team</span>
+                 </h2>
+                 <!-- Outer container to hide overflow and apply mask -->
+                 <div class="team-scroll-container">
+                     <!-- Inner track that moves -->
+                    <div id="member-list-container" class="team-scroll-track py-2"> {/* Added py-2 for vertical spacing */}
+                        {/* <!-- Members loaded via JS (will be duplicated) --> */}
+                    </div>
+                 </div>
             </section>
 
         </div> <!-- End Dashboard Content Wrapper -->
@@ -230,7 +305,7 @@
                 </button>
             </header>
             <section id="modal-body" class="p-6 overflow-y-auto">
-                <!-- Content will be injected here -->
+                {/* <!-- Content will be injected here --> */}
             </section>
         </div>
     </div>
@@ -240,41 +315,31 @@
     // --- CONFIGURATION (Unchanged) ---
     const SUPABASE_URL = 'https://gswdqdsviqrzsoahxapc.supabase.co/';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdzd2RxZHN2aXFyenNvYWh4YXBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4ODM5NzcsImV4cCI6MjA3NjQ1OTk3N30.JFF6NFIdqZAE9ioHeMdfIVpN84UtN_Z0K2pZYodlpZY';
-    const photoPlaceholder = 'https://placehold.co/800x600/1a1a1a/eab308?text=PHOTO';
-    const videoPlaceholder = 'https://placehold.co/800x600/1a1a1a/eab308?text=VIDEO';
-    const blogPlaceholder = 'https://placehold.co/800x450/1a1a1a/eab308?text=BLOG+POST';
-    const memberPlaceholder = 'https://placehold.co/400x400/1a1a1a/eab308?text=MEMBER';
+    const photoPlaceholder = 'https://placehold.co/800x600/1f2937/eab308?text=PHOTO'; 
+    const videoPlaceholder = 'https://placehold.co/800x600/1f2937/eab308?text=VIDEO'; 
+    const blogPlaceholder = 'https://placehold.co/800x450/1f2937/eab308?text=BLOG+POST'; 
+    const memberPlaceholder = 'https://placehold.co/400x400/1f2937/eab308?text=MEMBER'; 
 
     // --- INITIALIZATION (Unchanged) ---
     const { createClient } = supabase;
     const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
     
-
-    // --- DOM ELEMENTS ---
+    // --- DOM ELEMENTS (Unchanged) ---
     let logoutButton, loadingMessage, dashboardContentWrapper, modalOverlay, modalContent, modalTitle, modalBody, modalCloseBtn, featuredPostContainer, blogListContainer, galleryListContainer, memberListContainer;
-    // NEW Analytics Elements
     let statBlogPostsEl, statGalleryItemsEl, statTeamMembersEl;
-    
-    // NEW: Realtime Subscription Channels
-    let blogChannel = null;
-    let galleryChannel = null;
-    let memberChannel = null;
+    let blogChannel = null, galleryChannel = null, memberChannel = null;
 
     function initDom() {
         logoutButton = document.getElementById('logout-button');
         loadingMessage = document.getElementById('loading-message');
         dashboardContentWrapper = document.getElementById('dashboard-content-wrapper');
-        
         featuredPostContainer = document.getElementById('featured-post-container');
         blogListContainer = document.getElementById('blog-list-container');
         galleryListContainer = document.getElementById('gallery-list-container');
-        memberListContainer = document.getElementById('member-list-container');
-        
-        // NEW Analytics Elements
+        memberListContainer = document.getElementById('member-list-container'); // Scrolling track
         statBlogPostsEl = document.getElementById('stat-blog-posts');
         statGalleryItemsEl = document.getElementById('stat-gallery-items');
         statTeamMembersEl = document.getElementById('stat-team-members');
-        
         modalOverlay = document.getElementById('modal-overlay');
         modalContent = document.getElementById('modal-content'); 
         modalTitle = document.getElementById('modal-title');
@@ -283,16 +348,15 @@
     }
 
     // --- Helper Function (Unchanged) ---
-    function isVideoUrl(url) {
+    function isVideoUrl(url) { 
         if (!url) return false;
         const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
         const lowerUrl = url.toLowerCase();
         return videoExtensions.some(ext => lowerUrl.endsWith(ext));
-    }
+     }
     
     // --- AUTHENTICATION & ROLE CHECK (Unchanged) ---
-    async function checkAuth() {
-        // ... (This function remains identical) ...
+    async function checkAuth() { 
         console.log("Checking authentication...");
         try {
             const { data: { session }, error: sessionError } = await _supabase.auth.getSession();
@@ -327,7 +391,7 @@
                 console.log("Access Granted: User is a 'member'.");
                 loadingMessage.style.display = 'none';
                 dashboardContentWrapper.classList.remove('hidden');
-                return true; // Allow dashboard to load
+                return true; 
             } else if (userRole === 'editor' || userRole === 'admin' || userRole === 'super_admin') {
                 console.warn("User is an admin. Redirecting to /admin.html");
                 loadingMessage.textContent = "Redirecting to admin panel...";
@@ -347,18 +411,16 @@
              setTimeout(() => window.location.href = '/login.html', 2000);
              return false;
         }
-    }
+     }
 
     // --- AUTH LISTENERS (Unchanged) ---
-    function initAuthListeners() {
+    function initAuthListeners() { 
         logoutButton.addEventListener('click', async () => {
-            // ... (Logout logic remains identical) ...
             loadingMessage.textContent = 'Logging out...';
             loadingMessage.style.display = 'flex';
             dashboardContentWrapper.classList.add('hidden');
             logoutButton.disabled = true;
             try {
-                // IMPORTANT: Unsubscribe from realtime channels on logout
                 await unsubscribeRealtime(); 
                 const { error } = await _supabase.auth.signOut();
                 if (error) throw error;
@@ -369,36 +431,33 @@
                 logoutButton.disabled = false;
             }
         });
-    }
+     }
 
     // --- MODAL LOGIC (Unchanged) ---
-    function openModal(title, contentHtml, size = '3xl') {
+    function openModal(title, contentHtml, size = '3xl') { 
         modalTitle.textContent = title;
         modalBody.innerHTML = contentHtml;
         modalContent.classList.remove('max-w-md', 'max-w-3xl', 'max-w-5xl'); 
         modalContent.classList.add(`max-w-${size}`); 
         modalOverlay.classList.remove('hidden');
         lucide.createIcons();
-    }
-
-    function closeModal() {
+     }
+    function closeModal() { 
         modalOverlay.classList.add('hidden');
         modalTitle.textContent = '';
         modalBody.innerHTML = '';
-    }
-
-    function initModalListeners() {
+     }
+    function initModalListeners() { 
         modalCloseBtn.addEventListener('click', closeModal);
         modalOverlay.addEventListener('click', (e) => {
             if (e.target === modalOverlay) closeModal();
         });
-    }
+     }
 
     // --- DATA LOADING ---
 
     // showBlogModal (Unchanged)
-    function showBlogModal(post) {
-        // ... (remains identical) ...
+    function showBlogModal(post) { 
         const contentHtml = marked.parse(post.content || "*This post has no content.*");
         const isVideo = isVideoUrl(post.imageUrl);
         const headerMediaHtml = isVideo 
@@ -406,11 +465,10 @@
             : `<img src="${post.imageUrl || blogPlaceholder}" alt="${post.title}" class="w-full h-auto rounded-lg mb-4 object-cover" onerror="this.onerror=null;this.src='${blogPlaceholder}';">`;
         
         openModal(post.title, `<div class="markdown-body text-gray-300">${headerMediaHtml}${contentHtml}</div>`, '3xl');
-    }
+     }
 
     // loadBlogPosts (Unchanged)
-    async function loadBlogPosts() {
-        // ... (remains identical) ...
+    async function loadBlogPosts() { 
         featuredPostContainer.innerHTML = '';
         blogListContainer.innerHTML = '<p class="text-gray-400 text-center">Loading posts...</p>';
         try {
@@ -429,12 +487,12 @@
             document.getElementById('featured-post-section').style.display = 'block';
             const featuredIsVideo = isVideoUrl(featuredPost.imageUrl);
             const featuredMediaTag = featuredIsVideo 
-                ? `<div class="w-full h-full bg-black flex items-center justify-center rounded-l-lg"><svg data-lucide="play-circle" class="w-20 h-20 text-gray-500"></svg></div>`
-                : `<img src="${featuredPost.imageUrl || blogPlaceholder}" alt="${featuredPost.title}" class="w-full h-full object-cover rounded-l-lg" onerror="this.onerror=null;this.src='${blogPlaceholder}';">`;
+                ? `<div class="absolute inset-0 bg-black flex items-center justify-center rounded-l-lg"><svg data-lucide="play-circle" class="w-20 h-20 text-gray-500"></svg></div>`
+                : `<img src="${featuredPost.imageUrl || blogPlaceholder}" alt="${featuredPost.title}" class="absolute inset-0 w-full h-full object-cover rounded-l-lg" onerror="this.onerror=null;this.src='${blogPlaceholder}';">`;
             
             featuredPostContainer.innerHTML = `
                 <div class="content-card featured-card flex flex-col md:flex-row rounded-lg overflow-hidden shadow-lg cursor-pointer w-full">
-                    <div class="md:w-3/5 h-64 md:h-auto min-h-[300px] relative overflow-hidden rounded-l-lg">
+                    <div class="md:w-3/5 h-64 md:h-auto min-h-[350px] relative overflow-hidden rounded-l-lg featured-image-overlay"> 
                         ${featuredMediaTag}
                     </div>
                     <div class="md:w-2/5 p-8 flex flex-col justify-center">
@@ -454,16 +512,16 @@
             if (otherPosts.length === 0) {
                 blogListContainer.innerHTML = '<p class="text-gray-400 text-center">No other posts available.</p>';
             } else {
-                blogListContainer.innerHTML = ''; // Clear loading
+                blogListContainer.innerHTML = ''; 
                 otherPosts.forEach(post => {
                     const postCard = document.createElement('div');
-                    postCard.className = 'content-card flex-shrink-0 w-80 rounded-lg overflow-hidden shadow-lg cursor-pointer';
+                    postCard.className = 'content-card flex-shrink-0 w-80 rounded-lg overflow-hidden shadow-lg cursor-pointer'; 
                     const postDate = new Date(post.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
                     
                     const isVideo = isVideoUrl(post.imageUrl);
                     const mediaTag = isVideo 
-                        ? `<div class="w-full aspect-video bg-black flex items-center justify-center"><svg data-lucide="play-circle" class="w-12 h-12 text-gray-500"></svg></div>`
-                        : `<img src="${post.imageUrl || blogPlaceholder}" alt="${post.title}" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='${blogPlaceholder}';">`;
+                        ? `<div class="w-full aspect-video bg-black flex items-center justify-center rounded-t-lg"><svg data-lucide="play-circle" class="w-12 h-12 text-gray-500"></svg></div>`
+                        : `<img src="${post.imageUrl || blogPlaceholder}" alt="${post.title}" class="w-full h-48 object-cover rounded-t-lg" onerror="this.onerror=null;this.src='${blogPlaceholder}';">`;
 
                     postCard.innerHTML = `
                         ${mediaTag}
@@ -483,11 +541,10 @@
             console.error('Error fetching blog posts:', error);
             blogListContainer.innerHTML = `<p class="text-red-500 text-center">Could not fetch blog posts: ${error.message}</p>`;
         }
-    }
+     }
 
     // loadGalleryItems (Unchanged)
-    async function loadGalleryItems() {
-        // ... (remains identical) ...
+    async function loadGalleryItems() { 
         galleryListContainer.innerHTML = '<p class="text-gray-400 col-span-full text-center">Loading gallery...</p>';
         try {
             const { data, error } = await _supabase.from('galleryImages')
@@ -534,12 +591,11 @@
             console.error('Error fetching gallery items:', error);
             galleryListContainer.innerHTML = `<p class="text-red-500 col-span-full text-center">Could not fetch gallery: ${error.message}</p>`;
         }
-    }
+     }
 
-    // loadMembers (Unchanged)
-    async function loadMembers() {
-        // ... (remains identical) ...
-        memberListContainer.innerHTML = '<p class="text-gray-400 text-center">Loading team...</p>';
+    // loadMembers (Unchanged - already updated for scrolling)
+    async function loadMembers() { 
+        memberListContainer.innerHTML = '<p class="text-gray-400 text-center w-screen py-10">Loading team...</p>'; 
         try {
             const { data, error } = await _supabase.from('members')
                 .select('name, role, description, imageUrl')
@@ -547,22 +603,24 @@
             if (error) throw error;
 
             if (!data || data.length === 0) {
-                memberListContainer.innerHTML = '<p class="text-gray-400 text-center">Team members will be shown here.</p>';
+                memberListContainer.innerHTML = '<p class="text-gray-400 text-center w-screen py-10">Team members will be shown here.</p>';
+                 memberListContainer.style.animation = 'none'; 
                 return;
             }
 
-            memberListContainer.innerHTML = '';
-            data.forEach(member => {
-                const memberCard = document.createElement('div');
-                memberCard.className = 'content-card member-card flex-shrink-0 w-64 rounded-lg overflow-hidden text-center cursor-pointer';
+            memberListContainer.innerHTML = ''; 
+            
+            const createMemberCard = (member) => {
+                 const memberCard = document.createElement('div');
+                memberCard.className = 'content-card member-card member-card-scroll rounded-lg overflow-hidden text-center cursor-pointer'; 
                 
                 memberCard.innerHTML = `
                     <div class="member-img-container rounded-t-lg overflow-hidden">
-                        <img src="${member.imageUrl || memberPlaceholder}" alt="${member.name}" class="w-full h-64 object-cover" onerror="this.onerror=null;this.src='${memberPlaceholder}';">
+                        <img src="${member.imageUrl || memberPlaceholder}" alt="${member.name}" class="w-full h-56 object-cover" onerror="this.onerror=null;this.src='${memberPlaceholder}';">
                     </div>
                     <div class="p-5">
-                        <h3 class="text-xl font-bold oswald text-white truncate">${member.name}</h3>
-                        <p class="text-sm text-yellow-500 uppercase tracking-wider">${member.role}</p>
+                        <h3 class="text-lg font-bold oswald text-white truncate">${member.name}</h3>
+                        <p class="text-xs text-yellow-500 uppercase tracking-wider mt-1">${member.role}</p>
                         ${member.description ? `<p class="text-xs text-gray-400 mt-2 line-clamp-3">${member.description}</p>` : ''}
                     </div>
                 `;
@@ -575,40 +633,48 @@
                     `;
                     openModal(member.name, modalHtml, 'md'); 
                 });
+                return memberCard;
+            };
 
-                memberListContainer.appendChild(memberCard);
+            data.forEach(member => {
+                memberListContainer.appendChild(createMemberCard(member));
             });
+
+             if (data.length > 3) { 
+                 data.forEach(member => {
+                     const clone = createMemberCard(member); 
+                     memberListContainer.appendChild(clone);
+                 });
+                 const numItems = data.length;
+                 const scrollSpeedFactor = 6; // SLIGHTLY SLOWER SCROLL
+                 const duration = numItems * scrollSpeedFactor;
+                 memberListContainer.style.animationDuration = `${duration}s`;
+                 memberListContainer.style.animationPlayState = 'running'; 
+             } else {
+                 memberListContainer.style.animation = 'none'; 
+             }
 
         } catch (error) {
             console.error('Error fetching members:', error);
-            memberListContainer.innerHTML = `<p class="text-red-500 text-center">Could not fetch team: ${error.message}</p>`;
+            memberListContainer.innerHTML = `<p class="text-red-500 text-center w-screen py-10">Could not fetch team: ${error.message}</p>`;
+             memberListContainer.style.animation = 'none'; 
         }
-    }
+     }
     
-    // --- NEW: REALTIME ANALYTICS ---
-
-    /**
-     * Fetches the initial count for a table.
-     * @param {string} tableName - The name of the table (e.g., 'blogPosts').
-     * @returns {Promise<number>} - The count of rows.
-     */
-    async function getInitialCount(tableName) {
+    // --- REALTIME ANALYTICS (Unchanged) ---
+    async function getInitialCount(tableName) { 
         try {
             const { count, error } = await _supabase
                 .from(tableName)
-                .select('*', { count: 'exact', head: true }); // head:true makes it faster
+                .select('*', { count: 'exact', head: true }); 
             if (error) throw error;
             return count || 0;
         } catch (error) {
             console.error(`Error fetching initial count for ${tableName}:`, error);
-            return 0; // Return 0 on error
+            return 0; 
         }
-    }
-
-    /**
-     * Loads the initial values for the analytics cards.
-     */
-    async function loadAnalytics() {
+     }
+    async function loadAnalytics() { 
         if (!statBlogPostsEl || !statGalleryItemsEl || !statTeamMembersEl) return;
         
         console.log("Loading initial analytics...");
@@ -622,85 +688,59 @@
         statGalleryItemsEl.textContent = galleryCount;
         statTeamMembersEl.textContent = memberCount;
         console.log("Initial analytics loaded:", { blogCount, galleryCount, memberCount });
-    }
-
-    /**
-     * Sets up Supabase Realtime subscriptions to update counts.
-     * NOTE: Requires Realtime to be enabled on blogPosts, galleryImages, and members tables in Supabase Dashboard.
-     */
-    function setupRealtimeSubscriptions() {
+     }
+    function setupRealtimeSubscriptions() { 
         console.log("Setting up realtime subscriptions...");
 
-        // Blog Posts
         blogChannel = _supabase.channel('public:blogPosts')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'blogPosts' }, 
-                () => { 
-                    console.log('Blog post inserted, updating count.');
-                    statBlogPostsEl.textContent = parseInt(statBlogPostsEl.textContent) + 1;
-                })
-            .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'blogPosts' }, 
-                () => { 
-                    console.log('Blog post deleted, updating count.');
-                    statBlogPostsEl.textContent = Math.max(0, parseInt(statBlogPostsEl.textContent) - 1); // Prevent negative
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'blogPosts' }, 
+                async () => { // Use * and recount on any change
+                    console.log('Blog change detected, recounting.');
+                    statBlogPostsEl.textContent = await getInitialCount('blogPosts');
                 })
             .subscribe((status, err) => {
                 if (status === 'SUBSCRIBED') console.log('Subscribed to blogPosts changes.');
                 if (err) console.error('Blog subscription error:', err);
             });
 
-        // Gallery Items
         galleryChannel = _supabase.channel('public:galleryImages')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'galleryImages' }, 
-                () => { 
-                    console.log('Gallery item inserted, updating count.');
-                    statGalleryItemsEl.textContent = parseInt(statGalleryItemsEl.textContent) + 1;
-                })
-            .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'galleryImages' }, 
-                () => { 
-                    console.log('Gallery item deleted, updating count.');
-                    statGalleryItemsEl.textContent = Math.max(0, parseInt(statGalleryItemsEl.textContent) - 1);
+             .on('postgres_changes', { event: '*', schema: 'public', table: 'galleryImages' }, 
+                async () => { 
+                    console.log('Gallery change detected, recounting.');
+                    statGalleryItemsEl.textContent = await getInitialCount('galleryImages');
                 })
             .subscribe((status, err) => {
                 if (status === 'SUBSCRIBED') console.log('Subscribed to galleryImages changes.');
                  if (err) console.error('Gallery subscription error:', err);
             });
 
-        // Members
         memberChannel = _supabase.channel('public:members')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'members' }, 
-                () => { 
-                    console.log('Member inserted, updating count.');
-                    statTeamMembersEl.textContent = parseInt(statTeamMembersEl.textContent) + 1;
-                })
-            .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'members' }, 
-                () => { 
-                    console.log('Member deleted, updating count.');
-                    statTeamMembersEl.textContent = Math.max(0, parseInt(statTeamMembersEl.textContent) - 1);
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'members' }, 
+                async () => { 
+                    console.log('Member change detected, recounting.');
+                    statTeamMembersEl.textContent = await getInitialCount('members');
+                    // Optionally, reload the member list for visual update (might cause jump)
+                    // loadMembers(); 
                 })
             .subscribe((status, err) => {
                  if (status === 'SUBSCRIBED') console.log('Subscribed to members changes.');
                  if (err) console.error('Member subscription error:', err);
             });
-    }
-
-    /**
-     * Unsubscribes from all active Supabase Realtime channels.
-     */
-    async function unsubscribeRealtime() {
+     }
+    async function unsubscribeRealtime() { 
         console.log("Unsubscribing from realtime channels...");
         if (blogChannel) await _supabase.removeChannel(blogChannel);
         if (galleryChannel) await _supabase.removeChannel(galleryChannel);
         if (memberChannel) await _supabase.removeChannel(memberChannel);
         blogChannel = galleryChannel = memberChannel = null;
         console.log("Unsubscribed.");
-    }
+     }
 
     // --- INITIAL PAGE LOAD ---
     document.addEventListener('DOMContentLoaded', async () => {
         console.log("DOM Loaded. Setting up page...");
         initDom();
-        // Render static icons initially
-        lucide.createIcons(); 
+        lucide.createIcons(); // Render static icons immediately
         
         initAuthListeners();
         initModalListeners();
@@ -708,25 +748,21 @@
         const isMember = await checkAuth(); 
         
         if (isMember) {
-            // Load all dynamic content
-            loadAnalytics(); // Load initial counts
+            loadAnalytics(); 
             loadBlogPosts();
             loadGalleryItems();
-            loadMembers();
-            
-            // Setup realtime listeners AFTER initial load
+            loadMembers(); 
             setupRealtimeSubscriptions(); 
             
             // Staggered entry animations
             const sections = document.querySelectorAll('#dashboard-content-wrapper section');
             sections.forEach((section, index) => {
-                section.style.animationDelay = `${index * 100}ms`; // Faster delay
+                section.style.animationDelay = `${100 + index * 150}ms`; // Added initial delay, slightly slower stagger
                 section.classList.add('fade-in-section');
             });
         }
     });
 
-    // Clean up realtime subscriptions when the page is unloaded (e.g., navigation, closing tab)
     window.addEventListener('beforeunload', unsubscribeRealtime);
 
 </script>

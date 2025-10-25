@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Member Dashboard | SIMS Media Hive</title>
+    <!-- Tailwind & Supabase -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Markdown Parser -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <style>
+        /* Shared Styles */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Oswald:wght@700&display=swap');
+        :root { 
+            --primary-color: #eab308; /* Yellow */
+            --secondary-color: #f59e0b; /* Amber */
+            --dark-bg: #0a0a0a; /* Slightly darker */
+            --mid-bg: #1a1a1a; 
+            --card-bg: #1f2937; 
+            --border-color: #374151;
+            --text-light: #f3f4f6; 
+            --text-muted: #9ca3af; 
+        }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--dark-bg); 
+            color: var(--text-light); 
+        }
+        .oswald { font-family: 'Oswald', sans-serif; }
+
+        /* Hide scrollbars */
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+
+        /* Card Styles */
+        .content-card {
+            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), 
+                        box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), 
+                        border-color 0.3s ease-out;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+        }
+        .content-card:hover {
+            transform: translateY(-8px) scale(1.03); /* More lift */
+            box-shadow: 0 15px 30px -5px rgba(234, 179, 8, 0.2), /* Softer, larger glow */
+                        0 8px 10px -6px rgba(234, 179, 8, 0.1);
+            border-color: var(--primary-color);
+        }
+        
+        /* Featured Card */
+        .featured-card:hover .featured-title { color: var(--primary-color); }
+        .featured-card:hover .featured-arrow { transform: translateX(6px); }
+        .featured-title { transition: color 0.2s ease-out; }
+        .featured-arrow { transition: transform 0.2s ease-out; }
+        .line-clamp-3 {
+            overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3;
+        }
+
+        /* Member Card */
+        .member-card img {
+            transition: filter 0.4s ease-out, transform 0.4s ease-out;
+            filter: grayscale(60%); /* Slightly less grayscale */
+        }
+        .member-card:hover img { filter: grayscale(0%); transform: scale(1.08); }
+        .member-card .member-img-container { overflow: hidden; }
+
+        /* Modal Markdown Styles (Unchanged) */
+        .markdown-body h1, .markdown-body h2, .markdown-body h3 { font-family: 'Oswald', sans-serif; color: var(--primary-color); margin-top: 1.25em; margin-bottom: 0.5em; border-bottom: 1px solid var(--border-color); padding-bottom: 0.25em; }
+        .markdown-body h1 { font-size: 2em; } .markdown-body h2 { font-size: 1.6em; } .markdown-body h3 { font-size: 1.3em; }
+        .markdown-body p { margin-bottom: 1em; line-height: 1.6; }
+        .markdown-body a { color: var(--secondary-color); text-decoration: underline; }
+        .markdown-body ul, .markdown-body ol { margin-left: 1.5em; margin-bottom: 1em; }
+        .markdown-body li { margin-bottom: 0.25em; }
+        .markdown-body blockquote { border-left: 4px solid var(--primary-color); padding-left: 1em; margin-left: 0; font-style: italic; color: var(--text-muted); }
+        .markdown-body pre { background-color: var(--mid-bg); padding: 1em; border-radius: 8px; overflow-x: auto; margin-bottom: 1em; }
+        .markdown-body code { font-family: monospace; background-color: var(--border-color); padding: 0.2em 0.4em; border-radius: 4px; }
+        .markdown-body pre code { background-color: transparent; padding: 0; }
+        .markdown-body img, .markdown-body video { max-width: 100%; height: auto; border-radius: 8px; margin: 0.5em 0; }
+
+        /* Animated Gradient Header */
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .animated-gradient-header {
+            background: linear-gradient(-45deg, #1f2937, #374151, #111827, #0a0a0a);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Gradient Text */
+        .gradient-text {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* Entry Animations (Unchanged) */
+        @keyframes fadeInEntry {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in-section {
+            opacity: 0; /* Start hidden */
+            animation: fadeInEntry 0.6s ease-out forwards;
+        }
+        
+        /* --- NEW: Analytics Card Styles --- */
+        .stat-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            transition: border-color 0.3s ease-out, box-shadow 0.3s ease-out;
+        }
+        .stat-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 15px rgba(234, 179, 8, 0.2);
+        }
+        .stat-number {
+             font-family: 'Oswald', sans-serif;
+             font-size: 3rem; /* Larger number */
+             line-height: 1;
+             color: var(--primary-color);
+             transition: color 0.3s ease-out;
+        }
+        .stat-card:hover .stat-number {
+            color: var(--secondary-color);
+        }
+
+    </style>
+</head>
+<body class="antialiased">
+    <!-- Header with Animated Gradient -->
+    <header class="animated-gradient-header py-4 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-white oswald tracking-wider">Member Dashboard</h1>
+            <button id="logout-button" class="px-4 py-2 text-sm font-semibold bg-red-600 text-white rounded-md hover:bg-red-700 transition">Logout</button>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        
+        <!-- Loading Message (Unchanged) -->
+        <div id="loading-message" class="flex flex-col items-center justify-center text-center py-40">
+            <h1 class="text-3xl font-bold oswald text-gray-300">Verifying session...</h1>
+            <p class="text-gray-400 mt-2">Please wait while we load your dashboard.</p>
+        </div>
+
+        <!-- Container for Dashboard Content -->
+        <div id="dashboard-content-wrapper" class="hidden space-y-20">
+            
+            <!-- Welcome Message (Unchanged) -->
+            <section>
+                <h1 class="text-5xl font-bold oswald text-white">Welcome to the <span class="gradient-text">SIMS Media Hub</span></h1>
+                <p class="text-xl text-gray-400 mt-3">Discover the latest updates and creations from the community.</p>
+            </section>
+
+            <!-- *** NEW: Realtime Stats Section *** -->
+            <section id="realtime-stats-section">
+                <h2 class="text-3xl font-bold oswald mb-8"><span class="gradient-text">Community Stats</span></h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Stat Card: Blog Posts -->
+                    <div class="stat-card rounded-lg p-6 text-center">
+                        <div class="flex justify-center items-center mb-4">
+                             <svg data-lucide="notebook-pen" class="w-8 h-8 text-yellow-500 mr-3"></svg>
+                             <h3 class="text-lg font-semibold text-gray-300 uppercase tracking-wider">Blog Posts</h3>
+                        </div>
+                        <p id="stat-blog-posts" class="stat-number">0</p>
+                    </div>
+                    <!-- Stat Card: Gallery Items -->
+                    <div class="stat-card rounded-lg p-6 text-center">
+                         <div class="flex justify-center items-center mb-4">
+                             <svg data-lucide="image" class="w-8 h-8 text-yellow-500 mr-3"></svg>
+                             <h3 class="text-lg font-semibold text-gray-300 uppercase tracking-wider">Gallery Items</h3>
+                        </div>
+                        <p id="stat-gallery-items" class="stat-number">0</p>
+                    </div>
+                    <!-- Stat Card: Team Members -->
+                    <div class="stat-card rounded-lg p-6 text-center">
+                         <div class="flex justify-center items-center mb-4">
+                             <svg data-lucide="users" class="w-8 h-8 text-yellow-500 mr-3"></svg>
+                            <h3 class="text-lg font-semibold text-gray-300 uppercase tracking-wider">Team Members</h3>
+                        </div>
+                        <p id="stat-team-members" class="stat-number">0</p>
+                    </div>
+                </div>
+            </section>
+            <!-- *** END: Realtime Stats Section *** -->
+
+            <!-- Section: Featured Post (Unchanged) -->
+            <section id="featured-post-section" style="display: none;">
+                <h2 class="text-3xl font-bold oswald mb-8"><span class="gradient-text">Featured Post</span></h2>
+                <div id="featured-post-container"></div>
+            </section>
+
+            <!-- Section: More Blog Posts (Unchanged) -->
+            <section>
+                <h2 class="text-3xl font-bold oswald mb-8"><span class="gradient-text">More from the Blog</span></h2>
+                <div id="blog-list-container" class="flex space-x-6 overflow-x-auto pb-6 hide-scrollbar"></div>
+            </section>
+
+            <!-- Section: Media Gallery (Unchanged) -->
+            <section>
+                 <h2 class="text-3xl font-bold oswald mb-8"><span class="gradient-text">Recent Gallery Additions</span></h2>
+                <div id="gallery-list-container" class="grid grid-cols-2 md:grid-cols-4 gap-6"></div>
+            </section>
+            
+            <!-- Section: Meet the Team (Unchanged) -->
+            <section>
+                 <h2 class="text-3xl font-bold oswald mb-8"><span class="gradient-text">Meet the Team</span></h2>
+                <div id="member-list-container" class="flex space-x-6 overflow-x-auto pb-6 hide-scrollbar"></div>
+            </section>
+
+        </div> <!-- End Dashboard Content Wrapper -->
+    </main>
+
+    <!-- Reusable Modal (Unchanged) -->
+    <div id="modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden" style="animation: fadeIn 0.2s ease-out;">
+        <div id="modal-content" class="bg-gray-900 border border-gray-700 rounded-lg shadow-2xl w-full max-h-[90vh] flex flex-col">
+            <header class="flex items-center justify-between p-4 border-b border-gray-700">
+                <h3 id="modal-title" class="text-xl font-bold text-yellow-500 oswald">Modal Title</h3>
+                <button id="modal-close-btn" class="text-gray-400 hover:text-white transition-colors">
+                    <svg data-lucide="x" width="24" height="24"></svg>
+                </button>
+            </header>
+            <section id="modal-body" class="p-6 overflow-y-auto">
+                <!-- Content will be injected here -->
+            </section>
+        </div>
+    </div>
+
+
+ <script type="module">
+    // --- CONFIGURATION (Unchanged) ---
+    const SUPABASE_URL = 'https://gswdqdsviqrzsoahxapc.supabase.co/';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdzd2RxZHN2aXFyenNvYWh4YXBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4ODM5NzcsImV4cCI6MjA3NjQ1OTk3N30.JFF6NFIdqZAE9ioHeMdfIVpN84UtN_Z0K2pZYodlpZY';
+    const photoPlaceholder = 'https://placehold.co/800x600/1a1a1a/eab308?text=PHOTO';
+    const videoPlaceholder = 'https://placehold.co/800x600/1a1a1a/eab308?text=VIDEO';
+    const blogPlaceholder = 'https://placehold.co/800x450/1a1a1a/eab308?text=BLOG+POST';
+    const memberPlaceholder = 'https://placehold.co/400x400/1a1a1a/eab308?text=MEMBER';
+
+    // --- INITIALIZATION (Unchanged) ---
+    const { createClient } = supabase;
+    const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+    
+
+    // --- DOM ELEMENTS ---
+    let logoutButton, loadingMessage, dashboardContentWrapper, modalOverlay, modalContent, modalTitle, modalBody, modalCloseBtn, featuredPostContainer, blogListContainer, galleryListContainer, memberListContainer;
+    // NEW Analytics Elements
+    let statBlogPostsEl, statGalleryItemsEl, statTeamMembersEl;
+    
+    // NEW: Realtime Subscription Channels
+    let blogChannel = null;
+    let galleryChannel = null;
+    let memberChannel = null;
+
+    function initDom() {
+        logoutButton = document.getElementById('logout-button');
+        loadingMessage = document.getElementById('loading-message');
+        dashboardContentWrapper = document.getElementById('dashboard-content-wrapper');
+        
+        featuredPostContainer = document.getElementById('featured-post-container');
+        blogListContainer = document.getElementById('blog-list-container');
+        galleryListContainer = document.getElementById('gallery-list-container');
+        memberListContainer = document.getElementById('member-list-container');
+        
+        // NEW Analytics Elements
+        statBlogPostsEl = document.getElementById('stat-blog-posts');
+        statGalleryItemsEl = document.getElementById('stat-gallery-items');
+        statTeamMembersEl = document.getElementById('stat-team-members');
+        
+        modalOverlay = document.getElementById('modal-overlay');
+        modalContent = document.getElementById('modal-content'); 
+        modalTitle = document.getElementById('modal-title');
+        modalBody = document.getElementById('modal-body');
+        modalCloseBtn = document.getElementById('modal-close-btn');
+    }
+
+    // --- Helper Function (Unchanged) ---
+    function isVideoUrl(url) {
+        if (!url) return false;
+        const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
+        const lowerUrl = url.toLowerCase();
+        return videoExtensions.some(ext => lowerUrl.endsWith(ext));
+    }
+    
+    // --- AUTHENTICATION & ROLE CHECK (Unchanged) ---
+    async function checkAuth() {
+        // ... (This function remains identical) ...
+        console.log("Checking authentication...");
+        try {
+            const { data: { session }, error: sessionError } = await _supabase.auth.getSession();
+            if (sessionError) throw sessionError;
+
+            if (!session) {
+                console.log("No active session. Redirecting to login...");
+                window.location.href = '/login.html';
+                return false;
+            }
+            
+            console.log("User authenticated:", session.user.email);
+            let userRole = null;
+            try {
+                const { data: profile, error: profileError } = await _supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', session.user.id)
+                    .single(); 
+                
+                if (profileError && profileError.code !== 'PGRST116') throw profileError;
+                if (profile) userRole = profile.role;
+                console.log("User role:", userRole);
+
+            } catch (roleError) {
+                console.error("Error fetching user role:", roleError.message);
+                loadingMessage.textContent = `Error fetching permissions: ${roleError.message}`;
+                return false;
+            }
+            
+            if (userRole === 'member') {
+                console.log("Access Granted: User is a 'member'.");
+                loadingMessage.style.display = 'none';
+                dashboardContentWrapper.classList.remove('hidden');
+                return true; // Allow dashboard to load
+            } else if (userRole === 'editor' || userRole === 'admin' || userRole === 'super_admin') {
+                console.warn("User is an admin. Redirecting to /admin.html");
+                loadingMessage.textContent = "Redirecting to admin panel...";
+                window.location.href = '/admin.html';
+                return false;
+            } else {
+                 console.error("Access Denied: User role is not 'member'.");
+                 loadingMessage.innerHTML = `<h1 class="text-3xl font-bold oswald text-red-500">Access Denied</h1><p class="text-gray-400 mt-2">You do not have permission to view this page.</p>`;
+                loadingMessage.style.display = 'flex';
+                dashboardContentWrapper.classList.add('hidden');
+                return false;
+            }
+
+        } catch (error) {
+             console.error("Auth check failed:", error);
+             loadingMessage.textContent = "Error verifying session. Redirecting to login...";
+             setTimeout(() => window.location.href = '/login.html', 2000);
+             return false;
+        }
+    }
+
+    // --- AUTH LISTENERS (Unchanged) ---
+    function initAuthListeners() {
+        logoutButton.addEventListener('click', async () => {
+            // ... (Logout logic remains identical) ...
+            loadingMessage.textContent = 'Logging out...';
+            loadingMessage.style.display = 'flex';
+            dashboardContentWrapper.classList.add('hidden');
+            logoutButton.disabled = true;
+            try {
+                // IMPORTANT: Unsubscribe from realtime channels on logout
+                await unsubscribeRealtime(); 
+                const { error } = await _supabase.auth.signOut();
+                if (error) throw error;
+                window.location.href = '/login.html';
+            } catch(error) {
+                console.error("Logout error:", error);
+                alert("Logout failed: " + error.message);
+                logoutButton.disabled = false;
+            }
+        });
+    }
+
+    // --- MODAL LOGIC (Unchanged) ---
+    function openModal(title, contentHtml, size = '3xl') {
+        modalTitle.textContent = title;
+        modalBody.innerHTML = contentHtml;
+        modalContent.classList.remove('max-w-md', 'max-w-3xl', 'max-w-5xl'); 
+        modalContent.classList.add(`max-w-${size}`); 
+        modalOverlay.classList.remove('hidden');
+        lucide.createIcons();
+    }
+
+    function closeModal() {
+        modalOverlay.classList.add('hidden');
+        modalTitle.textContent = '';
+        modalBody.innerHTML = '';
+    }
+
+    function initModalListeners() {
+        modalCloseBtn.addEventListener('click', closeModal);
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) closeModal();
+        });
+    }
+
+    // --- DATA LOADING ---
+
+    // showBlogModal (Unchanged)
+    function showBlogModal(post) {
+        // ... (remains identical) ...
+        const contentHtml = marked.parse(post.content || "*This post has no content.*");
+        const isVideo = isVideoUrl(post.imageUrl);
+        const headerMediaHtml = isVideo 
+            ? `<video src="${post.imageUrl}" controls class="w-full rounded-lg mb-4"></video>`
+            : `<img src="${post.imageUrl || blogPlaceholder}" alt="${post.title}" class="w-full h-auto rounded-lg mb-4 object-cover" onerror="this.onerror=null;this.src='${blogPlaceholder}';">`;
+        
+        openModal(post.title, `<div class="markdown-body text-gray-300">${headerMediaHtml}${contentHtml}</div>`, '3xl');
+    }
+
+    // loadBlogPosts (Unchanged)
+    async function loadBlogPosts() {
+        // ... (remains identical) ...
+        featuredPostContainer.innerHTML = '';
+        blogListContainer.innerHTML = '<p class="text-gray-400 text-center">Loading posts...</p>';
+        try {
+            const { data, error } = await _supabase.from('blogPosts')
+                .select('id, title, author, imageUrl, content, created_at')
+                .order('created_at', { ascending: false });
+            if (error) throw error;
+            
+            if (!data || data.length === 0) {
+                document.getElementById('featured-post-section').style.display = 'none';
+                blogListContainer.innerHTML = '<p class="text-gray-400 text-center">No blog posts have been published yet.</p>';
+                return;
+            }
+
+            const featuredPost = data[0];
+            document.getElementById('featured-post-section').style.display = 'block';
+            const featuredIsVideo = isVideoUrl(featuredPost.imageUrl);
+            const featuredMediaTag = featuredIsVideo 
+                ? `<div class="w-full h-full bg-black flex items-center justify-center rounded-l-lg"><svg data-lucide="play-circle" class="w-20 h-20 text-gray-500"></svg></div>`
+                : `<img src="${featuredPost.imageUrl || blogPlaceholder}" alt="${featuredPost.title}" class="w-full h-full object-cover rounded-l-lg" onerror="this.onerror=null;this.src='${blogPlaceholder}';">`;
+            
+            featuredPostContainer.innerHTML = `
+                <div class="content-card featured-card flex flex-col md:flex-row rounded-lg overflow-hidden shadow-lg cursor-pointer w-full">
+                    <div class="md:w-3/5 h-64 md:h-auto min-h-[300px] relative overflow-hidden rounded-l-lg">
+                        ${featuredMediaTag}
+                    </div>
+                    <div class="md:w-2/5 p-8 flex flex-col justify-center">
+                        <p class="text-sm text-yellow-500 uppercase oswald font-semibold tracking-wider">Featured Post</p>
+                        <h3 class="text-3xl lg:text-4xl font-bold oswald text-white my-3 featured-title">${featuredPost.title || 'Untitled Post'}</h3>
+                        <p class="text-gray-400 mb-6 line-clamp-3">By ${featuredPost.author || 'SIMS Media'} • ${new Date(featuredPost.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                        <span class="text-lg font-semibold text-yellow-500 hover:text-yellow-400 inline-flex items-center group">
+                            Read More 
+                            <svg data-lucide="arrow-right" class="w-5 h-5 ml-2 featured-arrow group-hover:translate-x-1 transition-transform"></svg>
+                        </span>
+                    </div>
+                </div>
+            `;
+            featuredPostContainer.querySelector('.content-card').addEventListener('click', () => showBlogModal(featuredPost));
+
+            const otherPosts = data.slice(1);
+            if (otherPosts.length === 0) {
+                blogListContainer.innerHTML = '<p class="text-gray-400 text-center">No other posts available.</p>';
+            } else {
+                blogListContainer.innerHTML = ''; // Clear loading
+                otherPosts.forEach(post => {
+                    const postCard = document.createElement('div');
+                    postCard.className = 'content-card flex-shrink-0 w-80 rounded-lg overflow-hidden shadow-lg cursor-pointer';
+                    const postDate = new Date(post.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                    
+                    const isVideo = isVideoUrl(post.imageUrl);
+                    const mediaTag = isVideo 
+                        ? `<div class="w-full aspect-video bg-black flex items-center justify-center"><svg data-lucide="play-circle" class="w-12 h-12 text-gray-500"></svg></div>`
+                        : `<img src="${post.imageUrl || blogPlaceholder}" alt="${post.title}" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='${blogPlaceholder}';">`;
+
+                    postCard.innerHTML = `
+                        ${mediaTag}
+                        <div class="p-5">
+                            <h3 class="text-xl font-bold oswald text-white mb-2 truncate">${post.title || 'Untitled Post'}</h3>
+                            <p class="text-sm text-gray-400 mb-3">By ${post.author || 'SIMS Media'} • ${postDate}</p>
+                            <span class="text-sm font-semibold text-yellow-500 hover:text-yellow-400">Read More &rarr;</span>
+                        </div>
+                    `;
+                    postCard.addEventListener('click', () => showBlogModal(post));
+                    blogListContainer.appendChild(postCard);
+                });
+            }
+            lucide.createIcons();
+
+        } catch (error) {
+            console.error('Error fetching blog posts:', error);
+            blogListContainer.innerHTML = `<p class="text-red-500 text-center">Could not fetch blog posts: ${error.message}</p>`;
+        }
+    }
+
+    // loadGalleryItems (Unchanged)
+    async function loadGalleryItems() {
+        // ... (remains identical) ...
+        galleryListContainer.innerHTML = '<p class="text-gray-400 col-span-full text-center">Loading gallery...</p>';
+        try {
+            const { data, error } = await _supabase.from('galleryImages')
+                .select('id, title, category, imageUrl')
+                .order('created_at', { ascending: false });
+            if (error) throw error;
+
+            if (!data || data.length === 0) {
+                galleryListContainer.innerHTML = '<p class="text-gray-400 col-span-full text-center">No items in the gallery yet.</p>';
+                return;
+            }
+
+            galleryListContainer.innerHTML = '';
+            data.forEach(item => {
+                const itemCard = document.createElement('div');
+                itemCard.className = 'content-card relative group rounded-lg overflow-hidden aspect-[4/3] cursor-pointer'; 
+                
+                const isVideo = item.category === 'video' || isVideoUrl(item.imageUrl);
+                const mediaTag = isVideo
+                    ? `<div class="w-full h-full bg-black flex items-center justify-center"><svg data-lucide="play" class="w-12 h-12 text-gray-500"></svg></div>`
+                    : `<img src="${item.imageUrl || photoPlaceholder}" alt="${item.title}" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='${photoPlaceholder}';">`;
+                
+                itemCard.innerHTML = `
+                    ${mediaTag}
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div class="p-3 absolute bottom-0 left-0 right-0 translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                        <p class="font-bold text-white truncate text-base">${item.title || 'Untitled'}</p>
+                        <p class="text-xs text-yellow-400 capitalize">${isVideo ? 'Video' : 'Photo'}</p>
+                    </div>
+                `;
+
+                itemCard.addEventListener('click', () => {
+                    const modalMediaHtml = isVideo
+                        ? `<video src="${item.imageUrl}" controls autoplay class="w-full max-h-[70vh] rounded-lg"></video>`
+                        : `<img src="${item.imageUrl}" alt="${item.title}" class="w-full max-h-[70vh] object-contain rounded-lg">`;
+                    openModal(item.title, modalMediaHtml, '5xl'); 
+                });
+
+                galleryListContainer.appendChild(itemCard);
+            });
+            lucide.createIcons();
+
+        } catch (error) {
+            console.error('Error fetching gallery items:', error);
+            galleryListContainer.innerHTML = `<p class="text-red-500 col-span-full text-center">Could not fetch gallery: ${error.message}</p>`;
+        }
+    }
+
+    // loadMembers (Unchanged)
+    async function loadMembers() {
+        // ... (remains identical) ...
+        memberListContainer.innerHTML = '<p class="text-gray-400 text-center">Loading team...</p>';
+        try {
+            const { data, error } = await _supabase.from('members')
+                .select('name, role, description, imageUrl')
+                .order('created_at', { ascending: true });
+            if (error) throw error;
+
+            if (!data || data.length === 0) {
+                memberListContainer.innerHTML = '<p class="text-gray-400 text-center">Team members will be shown here.</p>';
+                return;
+            }
+
+            memberListContainer.innerHTML = '';
+            data.forEach(member => {
+                const memberCard = document.createElement('div');
+                memberCard.className = 'content-card member-card flex-shrink-0 w-64 rounded-lg overflow-hidden text-center cursor-pointer';
+                
+                memberCard.innerHTML = `
+                    <div class="member-img-container rounded-t-lg overflow-hidden">
+                        <img src="${member.imageUrl || memberPlaceholder}" alt="${member.name}" class="w-full h-64 object-cover" onerror="this.onerror=null;this.src='${memberPlaceholder}';">
+                    </div>
+                    <div class="p-5">
+                        <h3 class="text-xl font-bold oswald text-white truncate">${member.name}</h3>
+                        <p class="text-sm text-yellow-500 uppercase tracking-wider">${member.role}</p>
+                        ${member.description ? `<p class="text-xs text-gray-400 mt-2 line-clamp-3">${member.description}</p>` : ''}
+                    </div>
+                `;
+                
+                memberCard.addEventListener('click', () => {
+                    const modalHtml = `
+                        <img src="${member.imageUrl || memberPlaceholder}" alt="${member.name}" class="w-full h-64 object-cover rounded-lg mb-4" onerror="this.onerror=null;this.src='${memberPlaceholder}';">
+                        <p class="text-sm text-yellow-500 uppercase tracking-wider">${member.role}</p>
+                        ${member.description ? `<p class="text-gray-300 mt-4">${member.description}</p>` : '<p class="text-gray-400 italic mt-4">No description provided.</p>'}
+                    `;
+                    openModal(member.name, modalHtml, 'md'); 
+                });
+
+                memberListContainer.appendChild(memberCard);
+            });
+
+        } catch (error) {
+            console.error('Error fetching members:', error);
+            memberListContainer.innerHTML = `<p class="text-red-500 text-center">Could not fetch team: ${error.message}</p>`;
+        }
+    }
+    
+    // --- NEW: REALTIME ANALYTICS ---
+
+    /**
+     * Fetches the initial count for a table.
+     * @param {string} tableName - The name of the table (e.g., 'blogPosts').
+     * @returns {Promise<number>} - The count of rows.
+     */
+    async function getInitialCount(tableName) {
+        try {
+            const { count, error } = await _supabase
+                .from(tableName)
+                .select('*', { count: 'exact', head: true }); // head:true makes it faster
+            if (error) throw error;
+            return count || 0;
+        } catch (error) {
+            console.error(`Error fetching initial count for ${tableName}:`, error);
+            return 0; // Return 0 on error
+        }
+    }
+
+    /**
+     * Loads the initial values for the analytics cards.
+     */
+    async function loadAnalytics() {
+        if (!statBlogPostsEl || !statGalleryItemsEl || !statTeamMembersEl) return;
+        
+        console.log("Loading initial analytics...");
+        const [blogCount, galleryCount, memberCount] = await Promise.all([
+            getInitialCount('blogPosts'),
+            getInitialCount('galleryImages'),
+            getInitialCount('members')
+        ]);
+        
+        statBlogPostsEl.textContent = blogCount;
+        statGalleryItemsEl.textContent = galleryCount;
+        statTeamMembersEl.textContent = memberCount;
+        console.log("Initial analytics loaded:", { blogCount, galleryCount, memberCount });
+    }
+
+    /**
+     * Sets up Supabase Realtime subscriptions to update counts.
+     * NOTE: Requires Realtime to be enabled on blogPosts, galleryImages, and members tables in Supabase Dashboard.
+     */
+    function setupRealtimeSubscriptions() {
+        console.log("Setting up realtime subscriptions...");
+
+        // Blog Posts
+        blogChannel = _supabase.channel('public:blogPosts')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'blogPosts' }, 
+                () => { 
+                    console.log('Blog post inserted, updating count.');
+                    statBlogPostsEl.textContent = parseInt(statBlogPostsEl.textContent) + 1;
+                })
+            .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'blogPosts' }, 
+                () => { 
+                    console.log('Blog post deleted, updating count.');
+                    statBlogPostsEl.textContent = Math.max(0, parseInt(statBlogPostsEl.textContent) - 1); // Prevent negative
+                })
+            .subscribe((status, err) => {
+                if (status === 'SUBSCRIBED') console.log('Subscribed to blogPosts changes.');
+                if (err) console.error('Blog subscription error:', err);
+            });
+
+        // Gallery Items
+        galleryChannel = _supabase.channel('public:galleryImages')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'galleryImages' }, 
+                () => { 
+                    console.log('Gallery item inserted, updating count.');
+                    statGalleryItemsEl.textContent = parseInt(statGalleryItemsEl.textContent) + 1;
+                })
+            .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'galleryImages' }, 
+                () => { 
+                    console.log('Gallery item deleted, updating count.');
+                    statGalleryItemsEl.textContent = Math.max(0, parseInt(statGalleryItemsEl.textContent) - 1);
+                })
+            .subscribe((status, err) => {
+                if (status === 'SUBSCRIBED') console.log('Subscribed to galleryImages changes.');
+                 if (err) console.error('Gallery subscription error:', err);
+            });
+
+        // Members
+        memberChannel = _supabase.channel('public:members')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'members' }, 
+                () => { 
+                    console.log('Member inserted, updating count.');
+                    statTeamMembersEl.textContent = parseInt(statTeamMembersEl.textContent) + 1;
+                })
+            .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'members' }, 
+                () => { 
+                    console.log('Member deleted, updating count.');
+                    statTeamMembersEl.textContent = Math.max(0, parseInt(statTeamMembersEl.textContent) - 1);
+                })
+            .subscribe((status, err) => {
+                 if (status === 'SUBSCRIBED') console.log('Subscribed to members changes.');
+                 if (err) console.error('Member subscription error:', err);
+            });
+    }
+
+    /**
+     * Unsubscribes from all active Supabase Realtime channels.
+     */
+    async function unsubscribeRealtime() {
+        console.log("Unsubscribing from realtime channels...");
+        if (blogChannel) await _supabase.removeChannel(blogChannel);
+        if (galleryChannel) await _supabase.removeChannel(galleryChannel);
+        if (memberChannel) await _supabase.removeChannel(memberChannel);
+        blogChannel = galleryChannel = memberChannel = null;
+        console.log("Unsubscribed.");
+    }
+
+    // --- INITIAL PAGE LOAD ---
+    document.addEventListener('DOMContentLoaded', async () => {
+        console.log("DOM Loaded. Setting up page...");
+        initDom();
+        // Render static icons initially
+        lucide.createIcons(); 
+        
+        initAuthListeners();
+        initModalListeners();
+        
+        const isMember = await checkAuth(); 
+        
+        if (isMember) {
+            // Load all dynamic content
+            loadAnalytics(); // Load initial counts
+            loadBlogPosts();
+            loadGalleryItems();
+            loadMembers();
+            
+            // Setup realtime listeners AFTER initial load
+            setupRealtimeSubscriptions(); 
+            
+            // Staggered entry animations
+            const sections = document.querySelectorAll('#dashboard-content-wrapper section');
+            sections.forEach((section, index) => {
+                section.style.animationDelay = `${index * 100}ms`; // Faster delay
+                section.classList.add('fade-in-section');
+            });
+        }
+    });
+
+    // Clean up realtime subscriptions when the page is unloaded (e.g., navigation, closing tab)
+    window.addEventListener('beforeunload', unsubscribeRealtime);
+
+</script>
+</body>
+</html>
+

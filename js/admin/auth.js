@@ -2,6 +2,7 @@ import { _supabase } from './supabaseClient.js';
 import { loadGalleryItems } from './gallery.js';
 import { loadBlogPosts, initializeEasyMDE } from './blog.js';
 import { loadMembers } from './members.js';
+import { loadUserProfiles } from './profiles.js';
 import * as dom from './dom.js';
 
 /**
@@ -12,27 +13,40 @@ import * as dom from './dom.js';
 function applyPermissions(role) {
     console.log(`Applying "${role}" permissions.`);
 
-    // 1. Start by hiding all restricted tabs (they are hidden by default in HTML,
-    // but this is a good safeguard)
+    // 1. Start by hiding all restricted tabs (desktop AND mobile)
     if (dom.membersTabBtn) dom.membersTabBtn.style.display = 'none';
+    if (dom.mobileMembersTabBtn) dom.mobileMembersTabBtn.style.display = 'none'; // Mobile
+
     if (dom.inviteUserTabBtn) dom.inviteUserTabBtn.style.display = 'none';
+    if (dom.mobileInviteUserTabBtn) dom.mobileInviteUserTabBtn.style.display = 'none'; // Mobile
+    
+    if (dom.profilesTabBtn) dom.profilesTabBtn.style.display = 'none';
+    if (dom.mobileProfilesTabBtn) dom.mobileProfilesTabBtn.style.display = 'none'; // Mobile
     
     // 2. Grant permissions based on role (additive hierarchy)
     
-    // 'editor' (or higher) can see Gallery and Blog
+    // 'editor' (or higher)
     if (role === 'editor' || role === 'admin' || role === 'super_admin') {
-        if (dom.galleryTabBtn) dom.galleryTabBtn.style.display = 'flex';
-        if (dom.blogTabBtn) dom.blogTabBtn.style.display = 'flex';
+        if (dom.galleryTabBtn) dom.galleryTabBtn.style.display = 'inline-block';
+        if (dom.mobileGalleryTabBtn) dom.mobileGalleryTabBtn.style.display = 'flex'; // Mobile
+        
+        if (dom.blogTabBtn) dom.blogTabBtn.style.display = 'inline-block';
+        if (dom.mobileBlogTabBtn) dom.mobileBlogTabBtn.style.display = 'flex'; // Mobile
     }
     
-    // 'admin' (or higher) can also see Members
+    // 'admin' (or higher)
     if (role === 'admin' || role === 'super_admin') {
-        if (dom.membersTabBtn) dom.membersTabBtn.style.display = 'flex';
+        if (dom.membersTabBtn) dom.membersTabBtn.style.display = 'inline-block';
+        if (dom.mobileMembersTabBtn) dom.mobileMembersTabBtn.style.display = 'flex'; // Mobile
     }
     
-    // 'super_admin' (only) can also see Invite User
+    // 'super_admin' (only)
     if (role === 'super_admin') {
-        if (dom.inviteUserTabBtn) dom.inviteUserTabBtn.style.display = 'flex';
+        if (dom.inviteUserTabBtn) dom.inviteUserTabBtn.style.display = 'inline-block';
+        if (dom.mobileInviteUserTabBtn) dom.mobileInviteUserTabBtn.style.display = 'flex'; // Mobile
+
+        if (dom.profilesTabBtn) dom.profilesTabBtn.style.display = 'inline-block';
+        if (dom.mobileProfilesTabBtn) dom.mobileProfilesTabBtn.style.display = 'flex'; // Mobile
     }
     
     // 3. Ensure the active tab is one they are allowed to see
@@ -42,13 +56,15 @@ function applyPermissions(role) {
     if (activeTabBtn && getComputedStyle(activeTabBtn).display === 'none') {
         console.warn("Permissions hide the active tab. Switching to Gallery.");
         
-        // Deactivate current hidden tab
+        // Deactivate current hidden tab (desktop, mobile, and content)
         document.querySelector('.tab-content.active')?.classList.remove('active');
         activeTabBtn.classList.remove('active');
+        document.querySelector('.mobile-tab-btn.active')?.classList.remove('active');
         
         // Activate the default 'Gallery' tab (if it's visible)
         if (dom.galleryTabBtn && dom.galleryContent && getComputedStyle(dom.galleryTabBtn).display !== 'none') {
             dom.galleryTabBtn.classList.add('active');
+            if (dom.mobileGalleryTabBtn) dom.mobileGalleryTabBtn.classList.add('active'); // Sync mobile
             dom.galleryContent.classList.add('active');
         }
     }
@@ -137,6 +153,7 @@ export async function checkAuth() {
              console.warn("No active tab found after permissions. Defaulting to gallery.");
              if (dom.galleryTabBtn.style.display !== 'none') {
                  dom.galleryTabBtn.classList.add('active');
+                 if(dom.mobileGalleryTabBtn) dom.mobileGalleryTabBtn.classList.add('active'); // Sync mobile
                  dom.galleryContent.classList.add('active');
                  await loadGalleryItems();
              }
@@ -156,6 +173,9 @@ export async function checkAuth() {
         } else if (activeTab.id === 'invite-user-tab-btn') {
             console.log("Initial load: Invite User tab active.");
             // No data load needed
+        } else if (activeTab.id === 'profiles-tab-btn') {
+            console.log("Initial load: Profiles tab active.");
+            await loadUserProfiles();
         }
 
     } catch (error) {
@@ -166,12 +186,22 @@ export async function checkAuth() {
 }
 
 export function initAuth() {
+    if (!dom.logoutButton) {
+        console.warn("Logout button not found.");
+        return;
+    }
+    // This single listener handles logout for both desktop and mobile
+    // (since the mobile button triggers this one)
     dom.logoutButton.addEventListener('click', async () => {
         if(dom.galleryStatus) dom.galleryStatus.textContent = 'Logging out...';
         if(dom.blogStatus) dom.blogStatus.textContent = 'Logging out...';
         if(dom.membersStatus) dom.membersStatus.textContent = 'Logging out...';
         if(dom.inviteUserStatus) dom.inviteUserStatus.textContent = 'Logging out...';
+        if(dom.profileUpdateStatus) dom.profileUpdateStatus.textContent = 'Logging out...';
+        
         dom.logoutButton.disabled = true;
+        if(dom.mobileLogoutBtn) dom.mobileLogoutBtn.disabled = true;
+
         try {
             const { error } = await _supabase.auth.signOut();
             if (error) throw error;
@@ -183,7 +213,9 @@ export function initAuth() {
             if(dom.blogStatus) dom.blogStatus.textContent = '';
             if(dom.membersStatus) dom.membersStatus.textContent = '';
             if(dom.inviteUserStatus) dom.inviteUserStatus.textContent = '';
+            if(dom.profileUpdateStatus) dom.profileUpdateStatus.textContent = '';
             dom.logoutButton.disabled = false;
+            if(dom.mobileLogoutBtn) dom.mobileLogoutBtn.disabled = false;
         }
     });
 }

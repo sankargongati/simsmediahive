@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel | SIMS Media Hive</title>
-    <!-- All CSS and library <head> imports remain the same -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
@@ -39,72 +38,116 @@
          .delete-btn { transition: opacity 0.2s ease; }
         .thumbnail-generator-video { position: absolute; top: -9999px; left: -9999px; width: 320px; height: auto; }
         .member-card img { aspect-ratio: 1 / 1; object-fit: cover; }
+        /* === NEW STYLES FOR MOBILE MENU === */
+        .mobile-tab-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem; /* space-x-3 */
+            padding: 12px 16px;
+            font-size: 1.125rem; /* text-lg */
+            font-weight: 600;
+            color: var(--text-light);
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+        }
+        .mobile-tab-btn:hover {
+            background-color: var(--mid-bg);
+        }
+        .mobile-tab-btn.active {
+            background-color: var(--primary-color);
+            color: #000;
+        }
     </style>
 </head>
 <body class="antialiased">
     
-    <!-- Header -->
-    <header class="bg-gray-900 border-b border-gray-800 py-4 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+    <header class="bg-gray-900 border-b border-gray-800 py-4 sticky top-0 z-40"> <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
             <h1 class="text-xl font-bold text-white oswald tracking-wider">Admin Panel</h1>
-            <button id="logout-button" class="px-4 py-2 text-sm font-semibold bg-red-600 text-white rounded-md hover:bg-red-700 transition">Logout</button>
+            
+            <button id="burger-menu-btn" class="md:hidden text-gray-300 hover:text-yellow-500">
+                <i data-lucide="menu" class="w-6 h-6"></i>
+            </button>
+
+            <div class="hidden md:flex items-center space-x-4">
+                <a href="/profile.html" class="text-gray-300 hover:text-yellow-500 transition" title="My Profile">
+                    <i data-lucide="user-circle" class="w-6 h-6"></i>
+                </a>
+                <button id="logout-button" class="flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold bg-red-600 text-white rounded-md hover:bg-red-700 transition">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
         </div>
     </header>
+    <div id="mobile-menu" class="fixed inset-0 bg-gray-900 z-50 p-6 hidden animate-fadeIn">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-xl font-bold text-white oswald tracking-wider">Menu</h2>
+            <button id="mobile-menu-close-btn" class="text-gray-300 hover:text-yellow-500">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
+    <nav class="flex flex-col space-y-2">
+            <button id="mobile-gallery-tab-btn" class="mobile-tab-btn active"><i data-lucide="image" class="w-5 h-5"></i>Manage Gallery</button>
+            <button id="mobile-blog-tab-btn" class="mobile-tab-btn"><i data-lucide="file-text" class="w-5 h-5"></i>Manage Blog</button>
+            <button id="mobile-members-tab-btn" class="mobile-tab-btn" style="display: none;"><i data-lucide="users" class="w-5 h-5"></i>Manage Members</button>
+            <button id="mobile-invite-user-tab-btn" class="mobile-tab-btn" style="display: none;"><i data-lucide="user-plus" class="w-5 h-5"></i>Invite User</button>
+            <button id="mobile-profiles-tab-btn" class="mobile-tab-btn" style="display: none;"><i data-lucide="shield" class="w-5 h-5"></i>Manage Profiles</button>
+            
+            <hr class="border-gray-700 !my-4">
+            
+            <a href="/profile.html" class="mobile-tab-btn"><i data-lucide="user-circle" class="w-5 h-5"></i>My Profile</a>
+            <a href="#" id="mobile-logout-btn" class="mobile-tab-btn !text-red-400 hover:!text-red-400 hover:!bg-red-900/50"><i data-lucide="log-out" class="w-5 h-5"></i>Logout</a>
+        </nav>
+    </div>
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <!-- Tab Navigation -->
-        <div class="mb-8 border-b border-gray-700">
+        <div class="mb-8 border-b border-gray-600">
             <nav class="flex space-x-1 sm:space-x-4 overflow-x-auto pb-px" aria-label="Tabs">
-                <!-- Tabs will be shown/hidden by auth.js based on role -->
                 <button id="gallery-tab-btn" class="tab-btn active px-3 sm:px-4 py-2 text-sm font-medium rounded-t-md flex-shrink-0">Manage Gallery</button>
                 <button id="blog-tab-btn" class="tab-btn px-3 sm:px-4 py-2 text-sm font-medium rounded-t-md flex-shrink-0">Manage Blog</button>
                 <button id="members-tab-btn" class="tab-btn px-3 sm:px-4 py-2 text-sm font-medium rounded-t-md flex-shrink-0" style="display: none;">Manage Members</button>
                 <button id="invite-user-tab-btn" class="tab-btn px-3 sm:px-4 py-2 text-sm font-medium rounded-t-md flex-shrink-0" style="display: none;">Invite User</button>
+                <button id="profiles-tab-btn" class="tab-btn px-3 sm:px-4 py-2 text-sm font-medium rounded-t-md flex-shrink-0" style="display: none;">Manage Profiles</button>
             </nav>
         </div>
 
-        <!-- Loading Message -->
         <div id="loading-message" class="flex flex-col items-center justify-center text-center py-40">
             <h1 class="text-3xl font-bold oswald text-gray-300">Verifying session...</h1>
             <p class="text-gray-400 mt-2">Please wait while we log you in.</p>
         </div>
+        
 
-        <!-- Container for Admin Content -->
         <div id="admin-content-wrapper" class="hidden">
-            <!-- Tab Content: Gallery -->
             <div id="gallery-content" class="tab-content active">
-                 <!-- Gallery content remains the same -->
                  <section class="bg-gray-900 p-6 sm:p-8 rounded-lg border border-gray-800 mb-12 shadow-lg">
-                    <h2 class="text-2xl font-bold text-yellow-500 oswald mb-6">Add New Gallery Item</h2>
-                    <form id="gallery-upload-form" class="space-y-6">
-                        <div><label for="gallery-title" class="block text-sm font-medium text-gray-300 mb-2">Media Title</label><input type="text" id="gallery-title" required class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-yellow-500 focus:border-yellow-500"></div>
-                        <div><label class="block text-sm font-medium text-gray-300 mb-2">Category</label><div class="flex items-center space-x-6"><label class="flex items-center"><input type="radio" name="gallery-category" value="photo" checked class="text-yellow-500 focus:ring-yellow-500"> <span class="ml-2">Photo</span></label><label class="flex items-center"><input type="radio" name="gallery-category" value="video" class="text-yellow-500 focus:ring-yellow-500"> <span class="ml-2">Video</span></label></div></div>
-                        <div>
-                            <label for="gallery-media-file" class="block text-sm font-medium text-gray-300 mb-2">Media File (Image or Video) <a href="https://8mb.video/" target="_blank" class="text-yellow-500 hover:underline">(Compress Video)</a></label>
-                            <input type="file" id="gallery-media-file" accept="image/*,video/*" required class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-500 file:text-black hover:file:bg-yellow-600 cursor-pointer">
-                        </div>
-                        <div><button type="submit" class="w-full py-3 px-4 font-semibold text-black bg-yellow-500 rounded-md hover:bg-yellow-600 transition disabled:opacity-50 disabled:cursor-not-allowed">Upload Media</button></div>
-                        <div id="gallery-status" class="text-center text-sm h-5 min-h-[1.25rem]"></div>
-                    </form>
-                </section>
-                <section>
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-                        <h2 class="text-2xl font-bold text-yellow-500 oswald">Manage Gallery</h2>
-                        <div id="gallery-filter-buttons" class="flex items-center space-x-2 flex-shrink-0">
-                            <button class="filter-btn active px-4 py-1.5 font-semibold uppercase tracking-wider text-xs rounded-full transition duration-300" data-filter="all">All</button>
-                            <button class="filter-btn px-4 py-1.5 font-semibold uppercase tracking-wider text-xs rounded-full transition duration-300" data-filter="photo">Photos</button>
-                            <button class="filter-btn px-4 py-1.5 font-semibold uppercase tracking-wider text-xs rounded-full transition duration-300" data-filter="video">Videos</button>
-                        </div>
-                    </div>
-                    <div id="gallery-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                         <p class="text-gray-400 col-span-full text-center">Loading gallery...</p>
-                    </div>
-                </section>
+                     <h2 class="text-2xl font-bold text-yellow-500 oswald mb-6">Add New Gallery Item</h2>
+                     <form id="gallery-upload-form" class="space-y-6">
+                         <div><label for="gallery-title" class="block text-sm font-medium text-gray-300 mb-2">Media Title</label><input type="text" id="gallery-title" required class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-yellow-500 focus:border-yellow-500"></div>
+                         <div><label class="block text-sm font-medium text-gray-300 mb-2">Category</label><div class="flex items-center space-x-6"><label class="flex items-center"><input type="radio" name="gallery-category" value="photo" checked class="text-yellow-500 focus:ring-yellow-500"> <span class="ml-2">Photo</span></label><label class="flex items-center"><input type="radio" name="gallery-category" value="video" class="text-yellow-500 focus:ring-yellow-500"> <span class="ml-2">Video</span></label></div></div>
+                         <div>
+                             <label for="gallery-media-file" class="block text-sm font-medium text-gray-300 mb-2">Media File (Image or Video) <a href="https://8mb.video/" target="_blank" class="text-yellow-500 hover:underline">(Compress Video)</a></label>
+                             <input type="file" id="gallery-media-file" accept="image/*,video/*" required class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-500 file:text-black hover:file:bg-yellow-600 cursor-pointer">
+                         </div>
+                         <div><button type="submit" class="w-full py-3 px-4 font-semibold text-black bg-yellow-500 rounded-md hover:bg-yellow-600 transition disabled:opacity-50 disabled:cursor-not-allowed">Upload Media</button></div>
+                         <div id="gallery-status" class="text-center text-sm h-5 min-h-[1.25rem]"></div>
+                     </form>
+                 </section>
+                 <section>
+                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                         <h2 class="text-2xl font-bold text-yellow-500 oswald">Manage Gallery</h2>
+                         <div id="gallery-filter-buttons" class="flex items-center space-x-2 flex-shrink-0">
+                             <button class="filter-btn active px-4 py-1.5 font-semibold uppercase tracking-wider text-xs rounded-full transition duration-300" data-filter="all">All</button>
+                             <button class="filter-btn px-4 py-1.5 font-semibold uppercase tracking-wider text-xs rounded-full transition duration-300" data-filter="photo">Photos</button>
+                             <button class="filter-btn px-4 py-1.5 font-semibold uppercase tracking-wider text-xs rounded-full transition duration-300" data-filter="video">Videos</button>
+                         </div>
+                     </div>
+                     <div id="gallery-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                          <p class="text-gray-400 col-span-full text-center">Loading gallery...</p>
+                     </div>
+                 </section>
             </div>
 
-            <!-- Tab Content: Blog -->
             <div id="blog-content" class="tab-content">
-                 <!-- Blog content remains the same -->
                 <section class="bg-gray-900 p-6 sm:p-8 rounded-lg border border-gray-800 mb-12 shadow-lg">
                     <h2 class="text-2xl font-bold text-yellow-500 oswald mb-6">Create or Edit Blog Post</h2>
                     <form id="blog-form" class="space-y-6">
@@ -135,9 +178,7 @@
                 </section>
             </div>
 
-            <!-- Tab Content: Members -->
             <div id="members-content" class="tab-content">
-                 <!-- Members content remains the same -->
                 <section class="bg-gray-900 p-6 sm:p-8 rounded-lg border border-gray-800 mb-12 shadow-lg">
                     <h2 class="text-2xl font-bold text-yellow-500 oswald mb-6">Add or Edit Member</h2>
                     <form id="members-form" class="space-y-6">
@@ -169,12 +210,11 @@
                 <section>
                     <h2 class="text-2xl font-bold text-yellow-500 oswald mb-6">Manage Current Members</h2>
                     <div id="member-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                        <p class="text-gray-400 col-span-full text-center">Loading members...</p>
+                         <p class="text-gray-400 col-span-full text-center">Loading members...</p>
                     </div>
                 </section>
             </div>
 
-            <!-- Tab Content: Invite User -->
             <div id="invite-user-content" class="tab-content">
                 <section class="bg-gray-900 p-6 sm:p-8 rounded-lg border border-gray-800 mb-12 shadow-lg max-w-md mx-auto">
                     <h2 class="text-2xl font-bold text-yellow-500 oswald mb-6">Invite New User</h2>
@@ -202,14 +242,31 @@
                     </form>
                 </section>
             </div>
+            
+            <div id="profiles-content" class="tab-content">
+                <section class="bg-gray-900 p-6 sm:p-8 rounded-lg border border-gray-800 shadow-lg">
+                    <h2 class="text-2xl font-bold text-yellow-500 oswald mb-6">Manage User Profiles & Roles</h2>
+                    <p class="text-gray-400 mb-6 text-sm">Update the roles for existing users. Role changes will take effect on their next login session.</p>
+                    
+                    <div class="hidden md:grid grid-cols-12 gap-4 px-4 py-3 border-b border-gray-700 font-semibold text-gray-300 oswald tracking-wider">
+                        <div class="col-span-4">Name</div>
+                        <div class="col-span-4">Email</div>
+                        <div class="col-span-2">Current Role</div>
+                        <div class="col-span-2 text-right">Actions</div>
+                    </div>
 
-        </div> <!-- End Admin Content Wrapper -->
-    </main>
+                    <div id="user-profile-list" class="space-y-2 mt-4">
+                        <p class="text-gray-400 text-center col-span-full py-8">Loading user profiles...</p>
+                        
+                        </div>
+                    <div id="profile-update-status" class="text-center text-sm h-5 min-h-[1.25rem]"></div>
+                </section>
+            </div>
 
-    <!-- Hidden file input for EasyMDE -->
+        </div> </main>
+
     <input type="file" id="easymde-file-input" style="display: none;" accept="image/*,video/*">
 
-    <!-- Main JS Module -->
     <script src="/js/admin/admin.js" type="module"></script>
 </body>
 </html>

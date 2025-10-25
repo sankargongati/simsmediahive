@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile | SIMS Media Hive</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Re-using the same dark theme from your admin panel */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Oswald:wght@700&display=swap');
+        :root { --primary-color: #eab308; --dark-bg: #0d0d0d; --mid-bg: #1a1a1a; --text-light: #f3f4f6; --text-muted: #9ca3af; }
+        body { font-family: 'Inter', sans-serif; background-color: #0d0d0d; color: #f3f4f6; }
+        .oswald { font-family: 'Oswald', sans-serif; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-gray-900 border-b border-gray-800 py-4 sticky top-0 z-50">
+        <div class="max-w-xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-white oswald tracking-wider">My Profile</h1>
+            
+            <div class="flex items-center space-x-4">
+                <a href="/admin.html" class="text-sm font-medium text-gray-300 hover:text-yellow-500 transition" title="Back to Admin Dashboard">
+                    Back to Dashboard
+                </a>
+                <button id="logout-button" class="px-4 py-2 text-sm font-semibold bg-red-600 text-white rounded-md hover:bg-red-700 transition">Logout</button>
+            </div>
+            </div>
+    </header>
+
+    <main class="max-w-xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        
+        <div id="loading-message" class="flex flex-col items-center justify-center text-center py-40">
+            <h1 class="text-3xl font-bold oswald text-gray-300">Loading your profile...</h1>
+            <p class="text-gray-400 mt-2">Please wait.</p>
+        </div>
+
+        <div id="profile-content" class="hidden space-y-12">
+
+            <section class="bg-gray-900 p-6 sm:p-8 rounded-lg border border-gray-800 shadow-lg">
+                <h2 class="text-2xl font-bold text-yellow-500 oswald mb-6">Your Information</h2>
+                <form id="profile-form" class="space-y-6">
+                    <div>
+                        <label for="profile-email" class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                        <input type="email" id="profile-email" disabled class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-gray-400 cursor-not-allowed">
+                    </div>
+                    <div>
+                        <label for="profile-name" class="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
+                        <input type="text" id="profile-name" required class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-yellow-500 focus:border-yellow-500">
+                    </div>
+                    <div>
+                        <label for="profile-role" class="block text-sm font-medium text-gray-300 mb-2">Your Role</label>
+                        <input type="text" id="profile-role" disabled class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-gray-400 cursor-not-allowed">
+                    </div>
+                    <div>
+                        <button type="submit" id="profile-update-btn" class="w-full py-3 px-4 font-semibold text-black bg-yellow-500 rounded-md hover:bg-yellow-600 transition disabled:opacity-50">Save Changes</button>
+                    </div>
+                    <div id="profile-status" class="text-center text-sm h-5 min-h-[1.25rem]"></div>
+                </form>
+            </section>
+
+            <section class="bg-gray-900 p-6 sm:p-8 rounded-lg border border-gray-800 shadow-lg">
+                <h2 class="text-2xl font-bold text-yellow-500 oswald mb-6">Change Password</h2>
+                <form id="password-form" class="space-y-6">
+                    <div>
+                        <label for="profile-password" class="block text-sm font-medium text-gray-300 mb-2">New Password</label>
+                        <input type="password" id="profile-password" required class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-yellow-500 focus:border-yellow-500" placeholder="••••••••">
+                        <small class="text-gray-400 mt-1 block">Must be at least 6 characters long.</small>
+                    </div>
+                    <div>
+                        <label for="profile-password-confirm" class="block text-sm font-medium text-gray-300 mb-2">Confirm New Password</label>
+                        <input type="password" id="profile-password-confirm" required class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-yellow-500 focus:border-yellow-500" placeholder="••••••••">
+                    </div>
+                    <div>
+                        <button type="submit" id="password-update-btn" class="w-full py-3 px-4 font-semibold text-black bg-yellow-500 rounded-md hover:bg-yellow-600 transition disabled:opacity-50">Update Password</button>
+                    </div>
+                    <div id="password-status" class="text-center text-sm h-5 min-h-[1.25rem]"></div>
+                </form>
+            </section>
+
+        </div> </main>
+
+    <script src="/js/admin/profile.js" type="module"></script>
+</body>
+</html>

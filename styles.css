@@ -1,0 +1,710 @@
+/* --- 0. Global Reset and Base Styles --- */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Montserrat+Alternates:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Onest:wght@100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Orbitron:wght@400..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Roboto+Serif:ital,opsz,wght@0,8..144,100..900;1,8..144,100..900&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&family=Space+Grotesk:wght@300..700&display=swap');
+
+:root {
+    --color-dark: #0f1113; /* Very dark background */
+    --color-medium-dark: #1e2023; /* Slightly lighter dark for sections */
+    --color-light: #f4f6f8; /* Off-white text */
+    --color-accent-blue: #bbebe4; /* Light mint/cyan for Approach section background */
+    --color-text-dim: #9aa0a6; /* Dim text for paragraphs */
+    --color-cta-jellyfish: #ffc107; /* Orange/yellow for jellyfish glow */
+
+    /* Typography */
+    --font-heading: 'Roboto Serif', serif; /* Elegant and modern serif for headings */
+    --font-body: 'Montserrat Alternates', sans-serif; /* Clean and rounded sans-serif for body text */
+
+    /* Spacing */
+    --spacing-large: 80px;
+    --spacing-medium: 40px;
+}
+
+
+/* Minimal Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--color-light);
+  background-color: var(--color-dark);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  color: var(--color-light);
+}
+
+
+/* Standardizing link styles */
+a {
+    color: var(--color-accent-blue);
+    text-decoration: none;
+}
+
+/* Container for max width centering */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Section titles for consistency */
+.section-title {
+    font-family: var(--font-heading);
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.section-subtitle {
+    font-size: 1.2rem;
+    color: var(--color-text-dim);
+    margin-bottom: var(--spacing-medium);
+}
+
+/* --- 1. Header/Hero Section --- */
+
+.hero-section {
+    position: relative;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: center;
+    overflow: hidden;
+}
+
+.hero-background img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+}
+
+.header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    width: 100%;
+    z-index: 10;
+}
+/* Add this to your styles.css */
+.header-bar.scrolled {
+    background-color: rgba(15, 17, 19, 0.95); /* Dark semi-transparent background */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    position: fixed; /* Makes it stick to the top */
+    top: 0;
+    left: 0;
+    transition: background-color 0.3s ease;
+}
+.logo {
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--color-light);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    flex-grow: 1;
+    color: #ffffffff;
+}
+
+.hero-content {
+    flex-grow: 1; /* Pushes content to the center */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 20px;
+    z-index: 5;
+    margin-bottom: 10vh; /* Lift content slightly */
+}
+
+/* Light sweep animation for hero title */
+.hero-content h1 {
+    font-family: var(--font-heading);
+    font-size: 5.5rem;
+    font-weight: 700;
+    margin-bottom: 30px;
+    line-height: 1.1;
+    position: relative;
+    display: inline-block;
+    color: var(--color-light);
+    overflow: hidden;
+}
+
+/*hero bottom section*/
+.herobottom {
+  background-color: #ffffff;
+  text-align: center;
+  padding: 60px 20px;
+  position: relative;
+  overflow: hidden;
+  border-bottom-left-radius: 80px;
+  border-bottom-right-radius: 80px;
+}
+
+.herobottom .container {
+  max-width: 900px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.herobottom .hero-subheading {
+  font-size: 1.5rem;
+  color: #000000; /* earthy green for contrast */
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.herobottom .hero-tagline {
+  font-size: 1rem;
+  color: #444;
+  line-height: 1.7;
+  margin-bottom: 30px;
+}
+
+
+/* --- 2. Approach Section --- */
+
+.approach-section {
+    background-color: var(--color-accent-blue);
+    color: var(--color-dark);
+    /* Adjust padding to account for the curve "biting" into the content area */
+    padding: calc(var(--spacing-large) + 30px) 0; 
+    text-align: center;
+    position: relative;
+    z-index: 1; 
+    border-radius: 
+        50px 50px 50px 50px; 
+    overflow: hidden; 
+}
+
+.approach-section .section-title,
+.approach-section .section-subtitle {
+    color: var(--color-dark);
+}
+
+.approach-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 40px;
+    margin-top: var(--spacing-large);
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 20px;
+}
+
+.approach-item {
+    background-color: var(--color-light);
+    border-radius: 8px;
+    overflow: hidden;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
+}
+
+.approach-item img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.approach-item:hover img {
+    transform: scale(1.03);
+}
+
+.approach-item .text-content {
+    padding: 20px;
+    flex-grow: 1;
+}
+
+.approach-item h3 {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    color: var(--color-dark);
+}
+
+.approach-item p {
+    color: var(--color-dark);
+    opacity: 0.8;
+    line-height: 1.6;
+}
+
+/* Responsive adjustments for the grid */
+@media (max-width: 768px) {
+    .approach-grid {
+        grid-template-columns: 1fr;
+        padding: 0 15px;
+    }
+}
+/* --- 3. Portfolio/Work Section --- */
+
+.portfolio-section {
+    background-color: var(--color-dark);
+    padding-top: var(--spacing-large);
+    padding-bottom: var(--spacing-large);
+    text-align: center;
+
+    /* Curved edges on top and bottom for left and right corners */
+    border-top-left-radius: 50px;
+    border-top-right-radius: 50px;
+    border-bottom-left-radius: 50px;
+    border-bottom-right-radius: 50px;
+
+    /* Optional: smooth shadow for better visual effect */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.portfolio-section .container {
+    padding-bottom: var(--spacing-medium);
+}
+
+.portfolio-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding: var(--spacing-medium);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.portfolio-item {
+    overflow: hidden;
+    position: relative;
+    background-color: var(--color-medium-dark);
+    aspect-ratio: 1 / 1;
+
+    /* Rounded corners for each card */
+    border-radius: 20px; /* Make it more noticeable for curve */
+}
+
+.portfolio-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.3s ease;
+    border-radius: 20px; /* match the card radius */
+}
+
+.portfolio-item:hover img {
+    opacity: 0.8;
+}
+
+/* Styling for the info card (the 9th grid cell) */
+.portfolio-item.info-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--color-medium-dark);
+    color: var(--color-light);
+    text-align: center;
+    cursor: pointer;
+    border-radius: 20px; /* same curve as other items */
+}
+
+.project-info p {
+    font-size: 1.2rem;
+    margin: 5px 0;
+    font-weight: 500;
+}
+
+
+/* --- 4. About Us/Team Section --- */
+
+.about-section {
+    position: relative;
+    padding: var(--spacing-large) 0;
+    background-color: var(--color-medium-dark);
+    text-align: center;
+    overflow: hidden;
+
+    /* Curved edges for the section */
+    border-top-left-radius: 50px;
+    border-top-right-radius: 50px;
+    border-bottom-left-radius: 50px;
+    border-bottom-right-radius: 50px;
+
+    /* Optional shadow for better effect */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.about-background img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+    /* Dark overlay/blur */
+    filter: brightness(0.2) blur(1px); 
+    /* Ensure background respects section curves */
+    /* Curved edges for the section */
+    border-top-left-radius: 50px;
+    border-top-right-radius: 50px;
+    border-bottom-left-radius: 50px;
+    border-bottom-right-radius: 50px;
+
+    /* Optional shadow for better effect */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.about-content {
+    position: relative;
+    z-index: 5;
+    padding-bottom: var(--spacing-medium);
+}
+
+.about-text {
+    max-width: 800px;
+    margin: 0 auto;
+    font-size: 1.4rem;
+    color: var(--color-light);
+    font-weight: 300;
+}
+
+.team-members {
+    position: relative;
+    z-index: 5;
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-top: var(--spacing-large);
+    flex-wrap: wrap; /* Ensure responsive wrapping */
+}
+
+.team-member {
+    width: 250px;
+    text-align: center;
+}
+
+.team-member img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+
+    /* Add curved edges */
+    border-radius: 20px;
+    margin-bottom: 15px;
+
+    /* Optional: hover effect */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.team-member img:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+
+.team-member h4 {
+    font-family: var(--font-body);
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+
+.team-member p {
+    color: var(--color-text-dim);
+    font-size: 0.95rem;
+}
+
+
+/* --- 5. Mentors Section --- */
+
+.mentors-section {
+    background-color: var(--color-light);
+    color: var(--color-dark);
+    padding: var(--spacing-large) 0;
+    text-align: center;
+
+    /* Curved top corners */
+    border-top-left-radius: 50px;
+    border-top-right-radius: 50px;
+
+    /* Optional shadow for depth */
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+}
+
+.mentors-section .section-title,
+.mentors-section .section-subtitle {
+    color: var(--color-dark);
+}
+
+/* --- Desktop: horizontal scroll --- */
+.mentors-wrapper {
+  overflow: hidden;
+  width: 100%;
+  padding: 20px 0;
+}
+
+.mentor-images {
+  display: flex;
+  gap: 16px;
+  animation: scrollMentors 20s linear infinite;
+}
+
+.mentor-images img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 50%;
+  filter: grayscale(100%);
+  transition: filter 0.3s ease, transform 0.3s ease;
+}
+
+.mentor-images:hover {
+  animation-play-state: paused;
+}
+
+@keyframes scrollMentors {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); } /* Move first set of images */
+}
+
+/* --- Mobile: switch to grid, no animation --- */
+@media (max-width: 768px) {
+  .mentor-images {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    gap: 12px;
+    animation: none; /* Disable scrolling */
+  }
+
+  .mentor-images img {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+/*impact*/
+.impact-section {
+    background-color: var(--color-light);
+    padding: var(--spacing-large) 0;
+    text-align: center;
+    color: var(--color-dark);
+    position: relative;
+    border-top: 1px solid #ccc;
+    border-bottom-left-radius: 50px; /* adjust for curve size */
+    border-bottom-right-radius: 50px; /* adjust for curve size */
+}
+
+/* Optional: for smoother overlay if next section has a different color */
+.impact-section::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 50px; /* curve depth */
+    background-color: var(--color-light);
+    z-index: -1; /* behind content */
+    border-bottom-left-radius: 50px;
+    border-bottom-right-radius: 50px;
+}
+
+
+/* Text inside remains same */
+.impact-tagline {
+    font-size: 0.9rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--color-text-dim);
+}
+
+.impact-description {
+    max-width: 700px;
+    margin: 10px auto 30px;
+    font-size: 1.5rem;
+    color: var(--color-dark);
+}
+
+.statistic span {
+    font-family: var(--font-heading);
+    font-size: 10rem;
+    font-weight: bold;
+    line-height: 1;
+    display: inline-block;
+    color: var(--color-dark);
+}
+
+/* --- 7. CTA/Footer Section --- */
+
+/* Footer background image full width */
+.cta-banner {
+  position: relative;
+  width: 100%;
+  padding: 60px 20px;
+  text-align: center;
+  overflow: hidden;
+  background: url('/assets/images/footer-forest-art.png') center/cover no-repeat; /* full-width image */
+}
+
+.jellyfish-art {
+  display: none; /* optional: hide if background image used */
+}
+
+/* Flex container for email form and contact */
+.signup-contact {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  flex-wrap: wrap; /* for mobile */
+  gap: 20px;
+}
+
+/* Email signup form */
+.signup-form {
+  display: flex;
+  gap: 10px;
+}
+
+.signup-form input[type="email"] {
+  padding: 15px 20px;
+  width: 300px;
+  border: 1px solid var(--color-text-dim);
+  background-color: var(--color-medium-dark);
+  color: var(--color-light);
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.signup-form button {
+  padding: 15px 30px;
+  border: none;
+  background-color: var(--color-accent-blue);
+  color: var(--color-dark);
+  font-weight: bold;
+  text-transform: uppercase;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.signup-form button:hover {
+  background-color: #79c3d4;
+}
+
+/* Contact details (right) */
+.contact-details {
+  color: var(--color-light);
+  text-align: right;
+  font-size: 1rem;
+}
+
+/* Footer bottom */
+.footer-bottom {
+  padding: 10px 20px;
+  border-top: 1px solid var(--color-medium-dark);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  color: var(--color-text-dim);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .signup-contact {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .signup-form input[type="email"] {
+    width: 100%;
+  }
+
+  .contact-details {
+    text-align: center;
+  }
+}
+
+/* --- Responsive Adjustments --- */
+
+@media (max-width: 900px) {
+    .hero-content h1 {
+        font-size: 4rem;
+    }
+
+    .hero-subheading {
+        font-size: 1.5rem;
+    }
+    
+    .approach-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .team-members {
+        flex-direction: column;
+        align-items: center;
+        gap: 30px;
+    }
+
+    .team-member {
+        width: 80%;
+        max-width: 300px;
+    }
+    
+    .statistic span {
+        font-size: 6rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .header-bar {
+        padding: 15px 20px;
+    }
+
+    .hero-content h1 {
+        font-size: 2.5rem;
+    }
+
+    .hero-subheading {
+        font-size: 1.2rem;
+    }
+
+    .portfolio-grid {
+        grid-template-columns: 1fr 1fr;
+        grid-auto-rows: minmax(200px, auto);
+    }
+    
+    /* Make the info card span two columns on small screens */
+    .portfolio-item:nth-child(9) {
+        grid-column: span 2;
+    }
+
+    .signup-form {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .signup-form input[type="email"],
+    .signup-form button {
+        width: 80%;
+    }
+    
+    .footer-bottom {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+}
+
+

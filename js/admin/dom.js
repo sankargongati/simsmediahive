@@ -5,10 +5,12 @@ export let galleryTabBtn;
 export let blogTabBtn;
 export let membersTabBtn;
 export let inviteUserTabBtn;
+export let profilesTabBtn; // <-- ADDED
 export let galleryContent;
 export let blogContent;
 export let membersContent;
 export let inviteUserContent;
+export let profilesContent; // <-- ADDED
 export let loadingMessage;
 export let adminContentWrapper;
 
@@ -49,6 +51,21 @@ export let inviteUserStatus;
 export let inviteEmailInput;
 export let inviteRoleInput;
 
+// Profiles (This section is new)
+export let userProfileList;
+export let profileUpdateStatus;
+
+// --- NEW MOBILE MENU ELEMENTS ---
+export let burgerMenuBtn;
+export let mobileMenu;
+export let mobileMenuCloseBtn;
+export let mobileGalleryTabBtn;
+export let mobileBlogTabBtn;
+export let mobileMembersTabBtn;
+export let mobileInviteUserTabBtn;
+export let mobileProfilesTabBtn;
+export let mobileLogoutBtn;
+
 /**
  * NEW FUNCTION
  * This function will be called *after* the DOM is loaded.
@@ -60,10 +77,12 @@ export function initDom() {
     blogTabBtn = document.getElementById('blog-tab-btn');
     membersTabBtn = document.getElementById('members-tab-btn');
     inviteUserTabBtn = document.getElementById('invite-user-tab-btn');
+    profilesTabBtn = document.getElementById('profiles-tab-btn'); // <-- ADDED
     galleryContent = document.getElementById('gallery-content');
     blogContent = document.getElementById('blog-content');
     membersContent = document.getElementById('members-content');
     inviteUserContent = document.getElementById('invite-user-content');
+    profilesContent = document.getElementById('profiles-content'); // <-- ADDED
     loadingMessage = document.getElementById('loading-message');
     adminContentWrapper = document.getElementById('admin-content-wrapper');
 
@@ -99,5 +118,19 @@ export function initDom() {
     inviteUserStatus = document.getElementById('invite-user-status');
     inviteEmailInput = document.getElementById('invite-email');
     inviteRoleInput = document.getElementById('invite-role');
-}
 
+    // Add these for the Profiles tab
+    userProfileList = document.getElementById('user-profile-list');
+    profileUpdateStatus = document.getElementById('profile-update-status');
+    
+    // --- NEW ASSIGNMENTS FOR MOBILE MENU ---
+    burgerMenuBtn = document.getElementById('burger-menu-btn');
+    mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuCloseBtn = document.getElementById('mobile-menu-close-btn');
+    mobileGalleryTabBtn = document.getElementById('mobile-gallery-tab-btn');
+    mobileBlogTabBtn = document.getElementById('mobile-blog-tab-btn');
+    mobileMembersTabBtn = document.getElementById('mobile-members-tab-btn');
+    mobileInviteUserTabBtn = document.getElementById('mobile-invite-user-tab-btn');
+    mobileProfilesTabBtn = document.getElementById('mobile-profiles-tab-btn');
+    mobileLogoutBtn = document.getElementById('mobile-logout-btn');
+}

@@ -23,7 +23,7 @@ function createRoleSelect(userId, currentRole, isDisabled = false) {
 
 /**
  * Creates the HTML for a single user profile row.
- * (This function is updated)
+ * (This function is updated to include a delete button)
  */
 function createProfileRow(profile, currentAuthUserId) {
     const isCurrentUser = (profile.id === currentAuthUserId);
@@ -33,6 +33,17 @@ function createProfileRow(profile, currentAuthUserId) {
     // Handle cases where full_name might be null or empty
     const displayName = profile.full_name || 'N/A';
     const email = profile.email || 'No Email';
+
+    // SVG for the trash icon, matching your pencil icon style
+    const trashIconSvg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2">
+            <path d="M3 6h18"/>
+            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+            <line x1="10" x2="10" y1="11" y2="17"/>
+            <line x1="14" x2="14" y1="11" y2="17"/>
+        </svg>
+    `;
 
     return `
         <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-gray-800 p-4 rounded-lg shadow" data-user-id="${profile.id}">
@@ -57,14 +68,25 @@ function createProfileRow(profile, currentAuthUserId) {
                 ${roleSelectHtml}
             </div>
 
-            <div class="col-span-12 md:col-span-2 text-right">
-                <button 
-                    class="update-profile-btn w-full md:w-auto py-2 px-4 font-semibold text-black bg-yellow-500 rounded-md hover:bg-yellow-600 transition disabled:opacity-50 ${isCurrentUser ? 'cursor-not-allowed' : ''}" 
-                    ${buttonDisabled}>
-                    Save
-                </button>
+            <div class="col-span-12 md:col-span-2">
+                <label class="md:hidden text-xs font-bold oswald text-gray-400">ACTIONS</label>
+                <div class="flex items-center justify-start md:justify-end gap-2">
+                    <button 
+                        class="update-profile-btn py-2 px-4 font-semibold text-black bg-yellow-500 rounded-md hover:bg-yellow-600 transition disabled:opacity-50 ${isCurrentUser ? 'cursor-not-allowed' : ''}" 
+                        ${buttonDisabled}>
+                        Save
+                    </button>
+                    <button
+                        class="delete-user-btn py-2 px-2 font-semibold text-white bg-red-600 rounded-md hover:bg-red-700 transition disabled:opacity-50 ${isCurrentUser ? 'cursor-not-allowed' : ''}"
+                        data-user-id="${profile.id}"
+                        data-user-email="${email}"
+                        title="Delete User"
+                        ${buttonDisabled}>
+                        ${trashIconSvg}
+                    </button>
+                </div>
             </div>
-        </div>
+            </div>
     `;
 }
 
@@ -207,6 +229,64 @@ async function handleProfileUpdate(button) {
 }
 
 /**
+ * NEW: Handles the click event to delete a user.
+ */
+async function handleProfileDelete(button) {
+    if (!_supabase) { 
+        console.error("Supabase client not loaded. Cannot delete profile.");
+        return;
+    }
+
+    const userRow = button.closest('.grid[data-user-id]');
+    if (!userRow) return;
+
+    const userId = button.dataset.userId;
+    const userEmail = button.dataset.userEmail;
+    const statusEl = document.getElementById('profile-update-status');
+
+    // 1. Show a confirmation dialog
+    if (!confirm(`Are you sure you want to permanently delete the user: ${userEmail}?\n\nThis action cannot be undone.`)) {
+        return; // Stop if the admin clicks "Cancel"
+    }
+
+    // 2. Give visual feedback
+    button.disabled = true;
+    statusEl.textContent = `Deleting user ${userEmail}...`;
+    statusEl.className = 'text-center text-sm text-yellow-500';
+
+    try {
+        // 3. Call the Edge Function
+        const { data, error } = await _supabase.functions.invoke('delete-user', {
+            body: { user_id: userId }
+        });
+
+        if (error) throw error;
+
+        // 4. Handle success
+        statusEl.textContent = data.message || `Successfully deleted ${userEmail}.`;
+        statusEl.className = 'text-center text-sm text-green-500';
+        
+        // Remove the user's row from the page
+        userRow.remove();
+
+    } catch (error) {
+        // 5. Handle failure
+        console.error('Error deleting user:', error);
+        statusEl.textContent = `Error: ${error.message}`;
+        statusEl.className = 'text-center text-sm text-red-500';
+        button.disabled = false;
+    } finally {
+        // 6. Clear status message after a delay
+        setTimeout(() => {
+            if (statusEl.textContent.startsWith('Successfully') || statusEl.textContent.startsWith('Error:')) {
+                statusEl.textContent = '';
+            }
+        }, 4000);
+    }
+}
+
+
+/**
  * UPDATED: Sets up the event listener for the profile management section.
  */
 export function setupProfileEventListeners() {
@@ -216,15 +296,18 @@ export function setupProfileEventListeners() {
         return;
     }
 
-    // Use event delegation for both button types
+    // Use event delegation for all button types
     container.addEventListener('click', (event) => {
         const saveBtn = event.target.closest('.update-profile-btn');
         const editNameBtn = event.target.closest('.edit-name-btn');
+        const deleteBtn = event.target.closest('.delete-user-btn'); // <-- ADDED THIS
 
         if (saveBtn) {
             handleProfileUpdate(saveBtn); // Pass the button element
         } else if (editNameBtn) {
             handleNameEditToggle(editNameBtn); // Pass the button element
+        } else if (deleteBtn) { // <-- ADDED THIS
+            handleProfileDelete(deleteBtn); // Pass the button element
         }
     });
 }

@@ -92,7 +92,6 @@ function createProfileRow(profile, currentAuthUserId) {
 
 /**
  * Fetches all user profiles from the database and renders them in the list.
- * (This function is unchanged, but verified to fetch 'full_name')
  */
 export async function loadUserProfiles() {
     const container = document.getElementById('user-profile-list');
@@ -104,7 +103,11 @@ export async function loadUserProfiles() {
         return;
     }
 
-    container.innerHTML = '<p class="text-gray-400 text-center col-span-full py-8">Loading user profiles...</p>';
+    // Clear loading message by ID
+    const loadingMsg = document.getElementById('user-profile-loading');
+    if (loadingMsg) loadingMsg.remove();
+    
+    container.innerHTML = '<p id="user-profile-loading" class="text-gray-400 text-center col-span-full py-8">Loading user profiles...</p>';
     statusEl.textContent = '';
 
     try {
@@ -120,6 +123,10 @@ export async function loadUserProfiles() {
             .order('full_name', { ascending: true, nullsFirst: false });
 
         if (fetchError) throw fetchError;
+        
+        // Clear loading message again
+        const loadingMsgOnSuccess = document.getElementById('user-profile-loading');
+        if (loadingMsgOnSuccess) loadingMsgOnSuccess.remove();
 
         if (profiles.length === 0) {
             container.innerHTML = '<p class="text-gray-400 text-center col-span-full py-8">No user profiles found.</p>';
@@ -137,7 +144,7 @@ export async function loadUserProfiles() {
 }
 
 /**
- * NEW: Toggles a user's name field between text and input.
+ * Toggles a user's name field between text and input.
  */
 function handleNameEditToggle(button) {
     const wrapper = button.closest('[data-name-wrapper]');
@@ -158,8 +165,7 @@ function handleNameEditToggle(button) {
 
 
 /**
- * UPDATED: Handles the click event to update a user's role AND name.
- * (Replaces the old 'handleRoleUpdate' function)
+ * Handles the click event to update a user's role AND name.
  */
 async function handleProfileUpdate(button) {
     if (!_supabase) { 
@@ -229,7 +235,8 @@ async function handleProfileUpdate(button) {
 }
 
 /**
- * NEW: Handles the click event to delete a user.
+ * Handles the click event to delete a user.
+ * (This version passes the email to the Edge Function)
  */
 async function handleProfileDelete(button) {
     if (!_supabase) { 
@@ -255,9 +262,12 @@ async function handleProfileDelete(button) {
     statusEl.className = 'text-center text-sm text-yellow-500';
 
     try {
-        // 3. Call the Edge Function
+        // 3. Call the Edge Function, passing both ID and email
         const { data, error } = await _supabase.functions.invoke('delete-user', {
-            body: { user_id: userId }
+            body: { 
+                user_id: userId,
+                user_email: userEmail // <-- Pass email for notification
+            }
         });
 
         if (error) throw error;
@@ -287,7 +297,7 @@ async function handleProfileDelete(button) {
 
 
 /**
- * UPDATED: Sets up the event listener for the profile management section.
+ * Sets up the event listener for the profile management section.
  */
 export function setupProfileEventListeners() {
     const container = document.getElementById('user-profile-list');

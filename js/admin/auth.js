@@ -6,9 +6,15 @@ import { loadUserProfiles } from './profiles.js';
 import * as dom from './dom.js';
 
 /**
+ * NEW: Export a top-level variable to store the user's role
+ * This allows other scripts (like profiles.js) to import it.
+ */
+export let currentUserRole = null;
+
+/**
  * Applies permissions based on the user's role.
  * Hides/shows tabs and UI elements.
- * @param {string} role - The user's role (e.g., 'editor', 'admin', 'super_admin')
+ * (UPDATED with 'owner' permissions and invite filter)
  */
 function applyPermissions(role) {
     console.log(`Applying "${role}" permissions.`);
@@ -25,8 +31,8 @@ function applyPermissions(role) {
     
     // 2. Grant permissions based on role (additive hierarchy)
     
-    // 'editor' (or higher)
-    if (role === 'editor' || role === 'admin' || role === 'super_admin') {
+    // 'editor' (or higher) - REVERTED: 'member' removed
+    if (role === 'editor' || role === 'admin' || role === 'super_admin' || role === 'owner') {
         if (dom.galleryTabBtn) dom.galleryTabBtn.style.display = 'inline-block';
         if (dom.mobileGalleryTabBtn) dom.mobileGalleryTabBtn.style.display = 'flex'; // Mobile
         
@@ -35,13 +41,13 @@ function applyPermissions(role) {
     }
     
     // 'admin' (or higher)
-    if (role === 'admin' || role === 'super_admin') {
+    if (role === 'admin' || role === 'super_admin' || role === 'owner') {
         if (dom.membersTabBtn) dom.membersTabBtn.style.display = 'inline-block';
         if (dom.mobileMembersTabBtn) dom.mobileMembersTabBtn.style.display = 'flex'; // Mobile
     }
     
-    // 'super_admin' (only)
-    if (role === 'super_admin') {
+    // 'super_admin' (or higher)
+    if (role === 'super_admin' || role === 'owner') {
         if (dom.inviteUserTabBtn) dom.inviteUserTabBtn.style.display = 'inline-block';
         if (dom.mobileInviteUserTabBtn) dom.mobileInviteUserTabBtn.style.display = 'flex'; // Mobile
 
@@ -68,6 +74,19 @@ function applyPermissions(role) {
             dom.galleryContent.classList.add('active');
         }
     }
+
+    // --- NEW: Filter Invite Dropdown Based on Role ---
+    const inviteRoleSelect = document.getElementById('invite-role');
+    
+    if (inviteRoleSelect) {
+        const ownerOption = inviteRoleSelect.querySelector('option[value="owner"]');
+        
+        // If the "Owner" option exists AND the logged-in user is NOT an 'owner'
+        if (ownerOption && role !== 'owner') {
+            ownerOption.remove(); // Remove it from the list
+        }
+    }
+    // --- END OF NEW LOGIC ---
 }
 
 // --- AUTHENTICATION ---
@@ -102,25 +121,55 @@ export async function checkAuth() {
             }
             if (profile) {
                 userRole = profile.role;
+                currentUserRole = userRole; // <-- NEW: Assign to exported variable
             }
             console.log("User role:", userRole);
 
         } catch (roleError) {
             console.error("Error fetching user role:", roleError.message);
-            dom.loadingMessage.textContent = `Error fetching permissions: ${roleError.message}`;
+            // This is likely the RLS error you were seeing.
+            dom.loadingMessage.textContent = `Error fetching permissions: ${roleError.message}. Check RLS on 'profiles' table.`;
             dom.loadingMessage.style.color = '#ef4444'; // Red
             return; // Stop execution
         }
+
+        // --- NEW: Set Panel Title Based on Role ---
+        const panelTitle = document.getElementById('panel-title');
+        const mobilePanelTitle = document.getElementById('mobile-panel-title'); 
+        
+        let title = "Admin Panel"; // Default
+        switch (userRole) {
+            case 'owner':
+                title = "Owner's Panel";
+                break;
+            case 'super_admin':
+                title = "Super Admin Panel";
+                break;
+            case 'admin':
+                title = "Admin Panel";
+                break;
+            case 'editor':
+                title = "Editor Panel";
+                break;
+            // REVERTED: 'member' case removed
+        }
+        
+        if (panelTitle) {
+            panelTitle.textContent = title;
+        }
+        if (mobilePanelTitle) {
+            mobilePanelTitle.textContent = title; // Update mobile menu title as well
+        }
+        // --- END OF NEW LOGIC ---
         
         // --- UPDATED PERMISSION CHECK ---
         
-        // 1. If the user is a 'member', redirect them to their own dashboard.
+        // 1. If the user is a 'member', redirect them to their own dashboard. (RESTORED)
         if (userRole === 'member') {
             console.warn("Access Denied: User is a 'member'. Redirecting to member dashboard...");
             dom.loadingMessage.textContent = "Redirecting to your dashboard...";
             
-            // *** CHANGE THIS URL ***
-            // Change '/member-dashboard.html' to the correct path for your member page.
+            // *** ENSURE THIS URL IS CORRECT ***
             window.location.href = '/member-dashboard.html'; 
             return; // Stop execution
         }
@@ -137,8 +186,31 @@ export async function checkAuth() {
             return; // Stop execution
         }
         
-        // 3. If the role is 'editor', 'admin', or 'super_admin', proceed.
+        // 3. If the role is 'editor', 'admin', 'super_admin', or 'owner', proceed.
         // --- END OF UPDATED CHECK ---
+
+        // --- UPDATED: Show/Hide Database button for 'owner' ---
+        const dbBtnDesktop = document.getElementById('db-button-desktop');
+        const dbBtnMobile = document.getElementById('db-button-mobile');
+        const memberDashBtnDesktop = document.getElementById('member-dash-btn-desktop');
+        const memberDashBtnMobile = document.getElementById('member-dash-btn-mobile');
+        
+        if (memberDashBtnDesktop) memberDashBtnDesktop.style.display = 'flex';
+        if (memberDashBtnMobile) memberDashBtnMobile.style.display = 'flex';
+        
+        // --- THIS IS THE NEW LINE YOU ASKED ABOUT ---
+        if (memberDashBtnDesktop || memberDashBtnMobile) {
+            lucide.createIcons(); // Re-render icons
+        }
+        if (userRole === 'owner') {
+            if (dbBtnDesktop) dbBtnDesktop.style.display = 'flex';
+            if (dbBtnMobile) dbBtnMobile.style.display = 'flex';
+        } else {
+            // --- NEW: Explicitly hide buttons if NOT owner ---
+            if (dbBtnDesktop) dbBtnDesktop.style.display = 'none';
+            if (dbBtnMobile) dbBtnMobile.style.display = 'none';
+        }
+        // --- END OF UPDATED LOGIC ---
 
         // Apply permissions BEFORE showing the content
         applyPermissions(userRole);
@@ -219,3 +291,4 @@ export function initAuth() {
         }
     });
 }
+

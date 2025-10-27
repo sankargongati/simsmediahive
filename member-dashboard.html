@@ -4,12 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Member Dashboard | SIMS Media Hive</title>
-    <!-- Tailwind & Supabase -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Markdown Parser -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
     <style>
@@ -181,7 +178,6 @@
     </style>
 </head>
 <body class="antialiased">
-    <!-- Header with Animated Gradient -->
     <header class="animated-gradient-header py-4 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
             <h1 class="text-xl font-bold text-white oswald tracking-wider">Member Dashboard</h1>
@@ -191,29 +187,24 @@
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         
-        <!-- Loading Message (Unchanged) -->
         <div id="loading-message" class="flex flex-col items-center justify-center text-center py-40">
             <h1 class="text-3xl font-bold oswald text-gray-300">Verifying session...</h1>
             <p class="text-gray-400 mt-2">Please wait while we load your dashboard.</p>
         </div>
 
-        <!-- Container for Dashboard Content -->
         <div id="dashboard-content-wrapper" class="hidden space-y-20">
             
-            <!-- Welcome Message (Unchanged) -->
             <section>
                 <h1 class="text-5xl font-bold oswald text-white">Welcome to the <span class="gradient-text">SIMS Media Hub</span></h1>
                 <p class="text-xl text-gray-400 mt-3">Discover the latest updates and creations from the community.</p>
             </section>
 
-            <!-- Realtime Stats Section (Unchanged) -->
             <section id="realtime-stats-section">
                 <h2 class="text-3xl font-bold oswald mb-8 flex items-center">
                     <svg data-lucide="bar-chart-3" class="w-7 h-7 mr-3 gradient-text"></svg>
                     <span class="gradient-text">Community Stats</span>
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <!-- Stat Cards remain the same -->
                     <div class="stat-card p-6 flex items-center space-x-4">
                         <div class="bg-yellow-500/10 p-3 rounded-full">
                              <svg data-lucide="notebook-pen" class="w-8 h-8 text-yellow-500"></svg>
@@ -244,7 +235,6 @@
                 </div>
             </section>
 
-            <!-- Section: Featured Post (Unchanged) -->
             <section id="featured-post-section" style="display: none;">
                 <h2 class="text-3xl font-bold oswald mb-8 flex items-center">
                      <svg data-lucide="star" class="w-7 h-7 mr-3 gradient-text"></svg>
@@ -255,7 +245,6 @@
                 </div>
             </section>
 
-            <!-- Section: More Blog Posts (Unchanged) -->
             <section>
                  <h2 class="text-3xl font-bold oswald mb-8 flex items-center">
                      <svg data-lucide="newspaper" class="w-7 h-7 mr-3 gradient-text"></svg>
@@ -266,7 +255,6 @@
                 </div>
             </section>
 
-            <!-- Section: Media Gallery (Unchanged) -->
             <section>
                   <h2 class="text-3xl font-bold oswald mb-8 flex items-center">
                       <svg data-lucide="gallery-thumbnails" class="w-7 h-7 mr-3 gradient-text"></svg>
@@ -277,25 +265,20 @@
                 </div>
             </section>
             
-            <!-- Section: Meet the Team (UPDATED Structure for Scrolling) -->
             <section>
                  <h2 class="text-3xl font-bold oswald mb-8 flex items-center">
                     <svg data-lucide="contact-2" class="w-7 h-7 mr-3 gradient-text"></svg>
                      <span class="gradient-text">Meet the Team</span>
                  </h2>
-                 <!-- Outer container to hide overflow and apply mask -->
                  <div class="team-scroll-container">
-                     <!-- Inner track that moves -->
-                    <div id="member-list-container" class="team-scroll-track py-2"> {/* Added py-2 for vertical spacing */}
-                        {/* <!-- Members loaded via JS (will be duplicated) --> */}
+                     <div id="member-list-container" class="team-scroll-track py-2"> {/* Added py-2 for vertical spacing */}
+                        {/* */}
                     </div>
                  </div>
             </section>
 
-        </div> <!-- End Dashboard Content Wrapper -->
-    </main>
+        </div> </main>
 
-    <!-- Reusable Modal (Unchanged) -->
     <div id="modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden" style="animation: fadeIn 0.2s ease-out;">
         <div id="modal-content" class="bg-gray-900 border border-gray-700 rounded-lg shadow-2xl w-full max-h-[90vh] flex flex-col">
             <header class="flex items-center justify-between p-4 border-b border-gray-700">
@@ -305,7 +288,7 @@
                 </button>
             </header>
             <section id="modal-body" class="p-6 overflow-y-auto">
-                {/* <!-- Content will be injected here --> */}
+                {/* */}
             </section>
         </div>
     </div>
@@ -355,13 +338,14 @@
         return videoExtensions.some(ext => lowerUrl.endsWith(ext));
      }
     
-    // --- AUTHENTICATION & ROLE CHECK (Unchanged) ---
+    // --- AUTHENTICATION & ROLE CHECK (UPDATED) ---
     async function checkAuth() { 
         console.log("Checking authentication...");
         try {
             const { data: { session }, error: sessionError } = await _supabase.auth.getSession();
             if (sessionError) throw sessionError;
 
+            // If no session, redirect to login
             if (!session) {
                 console.log("No active session. Redirecting to login...");
                 window.location.href = '/login.html';
@@ -369,6 +353,8 @@
             }
             
             console.log("User authenticated:", session.user.email);
+            
+            // Fetch the user's role
             let userRole = null;
             try {
                 const { data: profile, error: profileError } = await _supabase
@@ -377,32 +363,33 @@
                     .eq('id', session.user.id)
                     .single(); 
                 
+                // Handle RLS or other fetch errors
                 if (profileError && profileError.code !== 'PGRST116') throw profileError;
                 if (profile) userRole = profile.role;
                 console.log("User role:", userRole);
 
             } catch (roleError) {
                 console.error("Error fetching user role:", roleError.message);
-                loadingMessage.textContent = `Error fetching permissions: ${roleError.message}`;
-                return false;
+                loadingMessage.textContent = `Error fetching permissions: ${roleError.message}. Check RLS on 'profiles' table.`;
+                return false; // Prevent access if role cannot be determined
             }
             
-            if (userRole === 'member') {
-                console.log("Access Granted: User is a 'member'.");
+            // Check if user has ANY role assigned
+            if (userRole) {
+                console.log(`Access Granted: User has role '${userRole}'.`);
                 loadingMessage.style.display = 'none';
                 dashboardContentWrapper.classList.remove('hidden');
-                return true; 
-            } else if (userRole === 'editor' || userRole === 'admin' || userRole === 'super_admin') {
-                console.warn("User is an admin. Redirecting to /admin.html");
-                loadingMessage.textContent = "Redirecting to admin panel...";
-                window.location.href = '/admin.html';
-                return false;
+                return true; // Grant access to anyone with a role
             } else {
-                 console.error("Access Denied: User role is not 'member'.");
-                 loadingMessage.innerHTML = `<h1 class="text-3xl font-bold oswald text-red-500">Access Denied</h1><p class="text-gray-400 mt-2">You do not have permission to view this page.</p>`;
+                 // If no role is found (e.g., trigger failed or profile missing)
+                 console.error("Access Denied: User role is null or undefined.");
+                 loadingMessage.innerHTML = `
+                    <h1 class="text-3xl font-bold oswald text-red-500">Access Denied</h1>
+                    <p class="text-gray-400 mt-2">Your user profile does not have a role assigned. Please contact support.</p>
+                 `;
                 loadingMessage.style.display = 'flex';
                 dashboardContentWrapper.classList.add('hidden');
-                return false;
+                return false; // Deny access
             }
 
         } catch (error) {
@@ -745,9 +732,9 @@
         initAuthListeners();
         initModalListeners();
         
-        const isMember = await checkAuth(); 
+        const hasAccess = await checkAuth(); // UPDATED variable name
         
-        if (isMember) {
+        if (hasAccess) { // UPDATED check
             loadAnalytics(); 
             loadBlogPosts();
             loadGalleryItems();
@@ -768,4 +755,3 @@
 </script>
 </body>
 </html>
-

@@ -62,16 +62,35 @@
 <body class="antialiased">
     
     <header class="bg-gray-900 border-b border-gray-800 py-4 sticky top-0 z-40"> <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-            <h1 class="text-xl font-bold text-white oswald tracking-wider">Admin Panel</h1>
+            <h1 id="panel-title" class="text-xl font-bold text-white oswald tracking-wider">Admin Panel</h1>
             
             <button id="burger-menu-btn" class="md:hidden text-gray-300 hover:text-yellow-500">
                 <i data-lucide="menu" class="w-6 h-6"></i>
             </button>
 
+            <!-- === DESKTOP HEADER BUTTONS === -->
             <div class="hidden md:flex items-center space-x-4">
                 <a href="/profile.html" class="text-gray-300 hover:text-yellow-500 transition" title="My Profile">
                     <i data-lucide="user-circle" class="w-6 h-6"></i>
                 </a>
+            <a href="/member-dashboard.html" 
+               id="member-dash-btn-desktop" 
+               class="flex items-center text-gray-300 hover:text-yellow-500 transition" 
+               title="Member Dashboard" 
+               style="display: none;"> <!-- It's hidden by default -->
+                <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
+            </a>
+            <!-- NEW DATABASE BUTTON -->
+            <a href="https://supabase.com/dashboard/project/YOUR_PROJECT_ID_HERE"
+                id="db-button-desktop"
+                class="flex items-center ... "
+                title="Database"
+                style="display: none;"> <!-- 2. ADD THIS STYLE -->
+                <i data-lucide="database" class="w-5 h-5"></i>
+                <span class="ml-2">Database</span>
+            </a>
+            <!-- END NEW BUTTON -->
+
                 <button id="logout-button" class="flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold bg-red-600 text-white rounded-md hover:bg-red-700 transition">
                     <i data-lucide="log-out" class="w-4 h-4"></i>
                     <span>Logout</span>
@@ -96,6 +115,21 @@
             <hr class="border-gray-700 !my-4">
             
             <a href="/profile.html" class="mobile-tab-btn"><i data-lucide="user-circle" class="w-5 h-5"></i>My Profile</a>
+            <a href="/member-dashboard.html" 
+                id="member-dash-btn-mobile" 
+                class="mobile-tab-btn" 
+                style="display: none;"> <!-- It's hidden by default -->
+            <i data-lucide="layout-dashboard" class="w-5 h-5"></i>Member Dashboard
+            </a>
+            <!-- NEW DATABASE LINK (MOBILE) -->
+            <a href="https://supabase.com/dashboard/project/YOUR_PROJECT_ID_HERE"
+                id="db-button-mobile"
+                class="mobile-tab-btn"
+                style="display: none;"> <!-- 2. ADD THIS STYLE -->
+                <i data-lucide="database" class="w-5 h-5"></i>Database
+            </a>
+            <!-- END NEW LINK -->
+
             <a href="#" id="mobile-logout-btn" class="mobile-tab-btn !text-red-400 hover:!text-red-400 hover:!bg-red-900/50"><i data-lucide="log-out" class="w-5 h-5"></i>Logout</a>
         </nav>
     </div>
@@ -227,11 +261,15 @@
                         
                         <div>
                             <label for="invite-role" class="block text-sm font-medium text-gray-300 mb-2">Assign Role</label>
+                            <!-- === UPDATED ROLE DROPDOWN === -->
                             <select id="invite-role" required class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-yellow-500 focus:border-yellow-500">
                                 <option value="member" selected>Member (No Admin Access)</option>
                                 <option value="editor">Editor (Manage Gallery & Blog)</option>
                                 <option value="admin">Admin (Manage Content & Members)</option>
                                 <option value="super_admin">Super Admin (Full Access)</option>
+                                <!-- NEW OWNER ROLE -->
+                                <option value="owner">Owner (Highest Access)</option>
+                                <!-- END NEW ROLE -->
                             </select>
                         </div>
                         
@@ -256,10 +294,49 @@
                     </div>
 
                     <div id="user-profile-list" class="space-y-2 mt-4">
-                        <p class="text-gray-400 text-center col-span-full py-8">Loading user profiles...</p>
-                        <button data-user-id="USER_ID_HERE" data-user-email="user.email@example.com" class="delete-user-btn px-3 py-2 text-sm font-semibold bg-red-600 text-white rounded-md hover:bg-red-700 transition" title="Delete User">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i>
-                        </button>
+                        <p id="user-profile-loading" class="text-gray-400 text-center col-span-full py-8">Loading user profiles...</p>
+                        
+                        <!--
+                        == JS Row Template Example ==
+                        Your /js/admin/admin.js file should generate rows like this inside the 'user-profile-list' div
+                        (and remove the 'user-profile-loading' p tag).
+                        The 'update-role-btn' and 'delete-user-btn' need event listeners.
+                        -->
+                        <!--
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-gray-800 p-4 rounded-lg border border-gray-700">
+                            
+                            <div class="md:hidden col-span-12">
+                                <h3 class="text-lg font-semibold text-white">User Name (e.g., Jane Doe)</h3>
+                                <p class="text-sm text-gray-400">user.email@example.com</p>
+                            </div>
+                            
+                            <div class="hidden md:block col-span-4">
+                                <span class="text-white">User Name (e.g., Jane Doe)</span>
+                            </div>
+                            <div class="hidden md:block col-span-4">
+                                <span class="text-gray-400">user.email@example.com</span>
+                            </div>
+
+                            <div class="col-span-12 md:col-span-2">
+                                <label class="md:hidden text-sm font-medium text-gray-300 mb-1">Role</label>
+                                <select data-user-id="USER_ID_HERE" class="profile-role-select w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md focus:ring-yellow-500 focus:border-yellow-500">
+                                    <option value="member">Member</option>
+                                    <option value="editor">Editor</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="super_admin">Super Admin</option>
+                                </select>
+                            </div>
+
+                            <div class="col-span-12 md:col-span-2 flex justify-end items-center gap-2 mt-2 md:mt-0">
+                                <button data-user-id="USER_ID_HERE" class="update-role-btn px-3 py-2 text-sm font-semibold bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">Update</button>
+                                
+                                <!- NEW DELETE BUTTON -->
+                                <button data-user-id="USER_ID_HERE" data-user-email="user.email@example.com" class="delete-user-btn px-3 py-2 text-sm font-semibold bg-red-600 text-white rounded-md hover:bg-red-700 transition" title="Delete User">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+               
                         </div>
                     <div id="profile-update-status" class="text-center text-sm h-5 min-h-[1.25rem]"></div>
                 </section>

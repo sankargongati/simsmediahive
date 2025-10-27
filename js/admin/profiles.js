@@ -1,10 +1,26 @@
 import { _supabase } from './supabaseClient.js'; 
+import { currentUserRole } from './auth.js'; // <-- NEW: Import the logged-in user's role
 
 /**
  * Creates the HTML for the role dropdown select element.
  */
-function createRoleSelect(userId, currentRole, isDisabled = false) {
-    const roles = ['member', 'editor', 'admin', 'super_admin'];
+function createRoleSelect(userId, currentRole, isDisabled = false, loggedInUserRole) {
+    let roles;
+    
+    // Filter the list of roles based on the logged-in user's permissions
+    if (loggedInUserRole === 'owner') {
+        roles = ['member', 'editor', 'admin', 'super_admin', 'owner'];
+    } else if (loggedInUserRole === 'super_admin') {
+        // Super admins cannot see or assign the 'owner' role
+        roles = ['member', 'editor', 'admin', 'super_admin'];
+    } else if (loggedInUserRole === 'admin') {
+        // Admins can only see or assign 'member' and 'editor'
+        roles = ['member', 'editor'];
+    } else {
+        // Default for any other role (like 'editor')
+        roles = [currentRole]; 
+    }
+
     const disabledAttr = isDisabled ? 'disabled' : '';
 
     let options = roles.map(role => {
@@ -23,18 +39,61 @@ function createRoleSelect(userId, currentRole, isDisabled = false) {
 
 /**
  * Creates the HTML for a single user profile row.
- * (This function is updated to include a delete button)
+ * (This function is updated to include delete permissions)
  */
-function createProfileRow(profile, currentAuthUserId) {
+function createProfileRow(profile, currentAuthUserId, loggedInUserRole) {
     const isCurrentUser = (profile.id === currentAuthUserId);
-    const roleSelectHtml = createRoleSelect(profile.id, profile.role, isCurrentUser);
-    const buttonDisabled = isCurrentUser ? 'disabled' : '';
+    const targetRole = profile.role; // The role of the user in this row
+
+    // === NEW HIERARCHICAL PERMISSION LOGIC ===
+    let canDelete = false;
+    let canModify = false; // For Save, Edit Name
+    let canChangeRole = false; // For Role Select
+
+    if (loggedInUserRole === 'owner') {
+        // Owner can modify everyone
+        canModify = true;
+        // Owner can change everyone's role
+        canChangeRole = true;
+        // Owner can delete everyone *except* another owner
+        canDelete = (targetRole !== 'owner');
+
+    } else if (loggedInUserRole === 'super_admin') {
+        // Super Admin can modify (name) anyone *except* owners
+        canModify = (targetRole !== 'owner');
+        // Super Admin can change role of anyone *except* owners AND other super_admins
+        canChangeRole = (targetRole !== 'owner' && targetRole !== 'super_admin');
+        // Super Admin can delete anyone *except* owners AND other super_admins
+        canDelete = (targetRole !== 'owner' && targetRole !== 'super_admin');
+
+    } else if (loggedInUserRole === 'admin') {
+        // Admin can modify/delete members and editors
+        canModify = (targetRole === 'member' || targetRole === 'editor');
+        canChangeRole = (targetRole === 'member' || targetRole === 'editor');
+        canDelete = (targetRole === 'member' || targetRole === 'editor');
+    }
+
+    // Final check: You can't delete or modify yourself.
+    if (isCurrentUser) {
+        canDelete = false;
+        canModify = false; 
+        canChangeRole = false;
+    }
+
+    const deleteButtonDisabled = !canDelete ? 'disabled' : '';
+    const modifyButtonDisabled = !canModify ? 'disabled' : ''; // For Save & Edit Name
+    const roleSelectDisabled = !canChangeRole; // Disable select if can't change role
+    // === END NEW LOGIC ===
+
+
+    const roleSelectHtml = createRoleSelect(profile.id, profile.role, roleSelectDisabled, loggedInUserRole);
+    const buttonDisabled = isCurrentUser ? 'disabled' : ''; // This is now redundant but safe
     
     // Handle cases where full_name might be null or empty
     const displayName = profile.full_name || 'N/A';
     const email = profile.email || 'No Email';
 
-    // SVG for the trash icon, matching your pencil icon style
+    // SVG for the trash icon
     const trashIconSvg = `
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2">
             <path d="M3 6h18"/>
@@ -52,7 +111,7 @@ function createProfileRow(profile, currentAuthUserId) {
                 <div class="flex items-center gap-2" data-name-wrapper>
                     <p class="text-white font-semibold truncate profile-name-display" title="${displayName}">${displayName}</p>
                     <input type="text" class="w-full px-2 py-1 bg-gray-700 border border-gray-600 rounded-md focus:ring-yellow-500 focus:border-yellow-500 profile-name-input hidden" value="${displayName}">
-                    <button class="edit-name-btn flex-shrink-0 text-gray-400 hover:text-yellow-500" title="Edit name" ${buttonDisabled}>
+                    <button class="edit-name-btn flex-shrink-0 text-gray-400 hover:text-yellow-500" title="Edit name" ${modifyButtonDisabled}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
                     </button>
                 </div>
@@ -68,25 +127,28 @@ function createProfileRow(profile, currentAuthUserId) {
                 ${roleSelectHtml}
             </div>
 
+            <!-- === UPDATED ACTIONS BLOCK === -->
             <div class="col-span-12 md:col-span-2">
                 <label class="md:hidden text-xs font-bold oswald text-gray-400">ACTIONS</label>
                 <div class="flex items-center justify-start md:justify-end gap-2">
                     <button 
-                        class="update-profile-btn py-2 px-4 font-semibold text-black bg-yellow-500 rounded-md hover:bg-yellow-600 transition disabled:opacity-50 ${isCurrentUser ? 'cursor-not-allowed' : ''}" 
-                        ${buttonDisabled}>
+                        class="update-profile-btn py-2 px-4 font-semibold text-black bg-yellow-500 rounded-md hover:bg-yellow-600 transition disabled:opacity-50 ${modifyButtonDisabled ? 'cursor-not-allowed' : ''}" 
+                        ${modifyButtonDisabled}>
                         Save
                     </button>
+                    <!-- === DELETE BUTTON WITH NEW PERMISSIONS === -->
                     <button
-                        class="delete-user-btn py-2 px-2 font-semibold text-white bg-red-600 rounded-md hover:bg-red-700 transition disabled:opacity-50 ${isCurrentUser ? 'cursor-not-allowed' : ''}"
+                        class="delete-user-btn py-2 px-2 font-semibold text-white bg-red-600 rounded-md hover:bg-red-700 transition disabled:opacity-50 ${deleteButtonDisabled ? 'cursor-not-allowed' : ''}"
                         data-user-id="${profile.id}"
                         data-user-email="${email}"
                         title="Delete User"
-                        ${buttonDisabled}>
+                        ${deleteButtonDisabled}>
                         ${trashIconSvg}
                     </button>
                 </div>
             </div>
-            </div>
+            <!-- === END OF UPDATED BLOCK === -->
+        </div>
     `;
 }
 
@@ -103,11 +165,7 @@ export async function loadUserProfiles() {
         return;
     }
 
-    // Clear loading message by ID
-    const loadingMsg = document.getElementById('user-profile-loading');
-    if (loadingMsg) loadingMsg.remove();
-    
-    container.innerHTML = '<p id="user-profile-loading" class="text-gray-400 text-center col-span-full py-8">Loading user profiles...</p>';
+    container.innerHTML = '<p class="text-gray-400 text-center col-span-full py-8">Loading user profiles...</p>';
     statusEl.textContent = '';
 
     try {
@@ -115,29 +173,57 @@ export async function loadUserProfiles() {
         if (authError) throw authError;
         if (!user) throw new Error("User not authenticated.");
         const currentAuthUserId = user.id;
+        
+        // We already have currentUserRole from auth.js, which ran on page load.
+        if (!currentUserRole) {
+            throw new Error("Could not determine current user's role. Check auth.js");
+        }
+        
+        // === NEW DEBUGGING LOGS ===
+        console.log('--- DEBUG: loadUserProfiles ---');
+        console.log('DEBUG: Current user role is:', currentUserRole);
+        // === END DEBUGGING LOGS ===
 
-        // Fetching id, full_name, email, and role
-        const { data: profiles, error: fetchError } = await _supabase
+        // === NEW DYNAMIC QUERY ===
+        // 1. Start building the query
+        let query = _supabase
             .from('profiles')
-            .select('id, full_name, email, role') 
-            .order('full_name', { ascending: true, nullsFirst: false });
+            .select('id, full_name, email, role');
+
+        // 2. Add filters based on the logged-in user's role
+        if (currentUserRole === 'admin') {
+            // Admin sees everyone EXCEPT owners and super_admins
+            query = query.neq('role', 'owner');
+            query = query.neq('role', 'super_admin');
+            
+        } else if (currentUserRole === 'editor') {
+            // Editor should not see this tab, but as a safeguard, show no one.
+            query = query.eq('role', 'non_existent_role'); // Returns 0 profiles
+        }
+        // Note: If role is 'owner' or 'super_admin', no filter is added, so they see everyone.
+
+        // 3. Add the ordering
+        query = query.order('full_name', { ascending: true, nullsFirst: false });
+        
+        // 4. Execute the query
+        const { data: profiles, error: fetchError } = await query;
+        // === END OF DYNAMIC QUERY ===
 
         if (fetchError) throw fetchError;
-        
-        // Clear loading message again
-        const loadingMsgOnSuccess = document.getElementById('user-profile-loading');
-        if (loadingMsgOnSuccess) loadingMsgOnSuccess.remove();
 
         if (profiles.length === 0) {
+            // This is what you are seeing, but it's *after* the query.
+            // Your error happens *during* the query.
             container.innerHTML = '<p class="text-gray-400 text-center col-span-full py-8">No user profiles found.</p>';
             return;
         }
 
         container.innerHTML = profiles
-            .map(profile => createProfileRow(profile, currentAuthUserId))
+            .map(profile => createProfileRow(profile, currentAuthUserId, currentUserRole)) // <-- UPDATED: Pass the role
             .join('');
 
     } catch (error) {
+        // THIS is where your error is being caught.
         console.error('Error loading user profiles:', error.message);
         container.innerHTML = `<p class="text-red-500 text-center col-span-full py-8">Error: ${error.message}</p>`;
     }
@@ -190,6 +276,47 @@ async function handleProfileUpdate(button) {
     const newRole = roleSelect.value;
     const statusEl = document.getElementById('profile-update-status');
     
+    // === NEW: Client-side role update check ===
+    // Fetch the user's current role from the DB to prevent client-side manipulation
+    const { data: originalProfile, error: fetchErr } = await _supabase.from('profiles').select('role').eq('id', userId).single();
+    if (fetchErr) {
+        statusEl.textContent = `Error: Could not verify original role. Aborting.`;
+        statusEl.className = 'text-center text-sm text-red-500';
+        return;
+    }
+    const originalRole = originalProfile.role;
+
+    // Check if a role change is happening
+    const isRoleChanging = (newRole !== originalRole);
+
+    if (currentUserRole === 'super_admin') {
+        // Super admin cannot promote to 'owner'
+        if (newRole === 'owner') {
+            statusEl.textContent = `Error: Only an 'owner' can assign the role of 'owner'.`; 
+            statusEl.className = 'text-center text-sm text-red-500';
+            roleSelect.value = originalRole; // Revert dropdown
+            return;
+        }
+        // NEW: Super admin cannot change another super admin's role
+        if (originalRole === 'super_admin' && isRoleChanging) {
+            statusEl.textContent = `Error: A 'super_admin' cannot change another 'super_admin's' role.`;
+            statusEl.className = 'text-center text-sm text-red-500';
+            roleSelect.value = originalRole; // Revert dropdown
+            return;
+        }
+
+    } else if (currentUserRole === 'admin') {
+        // Admin cannot promote to 'admin', 'super_admin', or 'owner'
+        if (newRole === 'admin' || newRole === 'super_admin' || newRole === 'owner') {
+            statusEl.textContent = `Error: Only 'super_admin' or 'owner' can assign the role of '${newRole}'.`; 
+            statusEl.className = 'text-center text-sm text-red-500';
+            roleSelect.value = originalRole; // Revert dropdown
+            return;
+        }
+    }
+    // If currentUserRole is 'owner', no checks are needed. They can do anything.
+    // === END OF NEW CHECK ===
+    
     const updateData = {
         full_name: newName,
         role: newRole
@@ -236,7 +363,6 @@ async function handleProfileUpdate(button) {
 
 /**
  * Handles the click event to delete a user.
- * (This version passes the email to the Edge Function)
  */
 async function handleProfileDelete(button) {
     if (!_supabase) { 
@@ -262,11 +388,11 @@ async function handleProfileDelete(button) {
     statusEl.className = 'text-center text-sm text-yellow-500';
 
     try {
-        // 3. Call the Edge Function, passing both ID and email
+        // 3. Call the Edge Function
         const { data, error } = await _supabase.functions.invoke('delete-user', {
             body: { 
                 user_id: userId,
-                user_email: userEmail // <-- Pass email for notification
+                user_email: userEmail // <-- Pass email for notifications
             }
         });
 
@@ -282,7 +408,8 @@ async function handleProfileDelete(button) {
     } catch (error) {
         // 5. Handle failure
         console.error('Error deleting user:', error);
-        statusEl.textContent = `Error: ${error.message}`;
+        // The error from the Edge Function will be more descriptive
+        statusEl.textContent = `Error: ${error.message}`; 
         statusEl.className = 'text-center text-sm text-red-500';
         button.disabled = false;
     } finally {
@@ -310,14 +437,15 @@ export function setupProfileEventListeners() {
     container.addEventListener('click', (event) => {
         const saveBtn = event.target.closest('.update-profile-btn');
         const editNameBtn = event.target.closest('.edit-name-btn');
-        const deleteBtn = event.target.closest('.delete-user-btn'); // <-- ADDED THIS
+        const deleteBtn = event.target.closest('.delete-user-btn');
 
         if (saveBtn) {
             handleProfileUpdate(saveBtn); // Pass the button element
         } else if (editNameBtn) {
             handleNameEditToggle(editNameBtn); // Pass the button element
-        } else if (deleteBtn) { // <-- ADDED THIS
+        } else if (deleteBtn) { 
             handleProfileDelete(deleteBtn); // Pass the button element
         }
     });
 }
+

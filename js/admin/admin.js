@@ -1,5 +1,5 @@
 // --- INITIAL PAGE LOAD ---
-import { initDom } from './dom.js'; 
+import { initDom } from './dom.js';
 import { initAuth, checkAuth } from './auth.js';
 import { setupTabs } from './tabs.js';
 import { initGalleryListeners } from './gallery.js';
@@ -8,6 +8,7 @@ import { initMembersListeners } from './members.js';
 import { initInviteFormListener } from './invite.js';
 import { setupProfileEventListeners } from './profiles.js';
 import * as dom from './dom.js'; // Import dom for mobile menu
+import { SUPABASE_DASHBOARD_URL } from './config.js';
 
 /**
  * Sets up the open/close listeners for the mobile burger menu
@@ -34,11 +35,17 @@ function initMobileMenu() {
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log("DOM Loaded. Setting up page...");
-    
+
     initDom(); // Run initDom FIRST
-    
+
     lucide.createIcons(); // Initialize static icons (will now also render mobile icons)
-    
+
+    // Set database button hrefs
+    const dbButtonDesktop = document.getElementById('db-button-desktop');
+    const dbButtonMobile = document.getElementById('db-button-mobile');
+    if (dbButtonDesktop) dbButtonDesktop.href = SUPABASE_DASHBOARD_URL;
+    if (dbButtonMobile) dbButtonMobile.href = SUPABASE_DASHBOARD_URL;
+
     // Setup all event listeners
     initAuth();
     setupTabs();
@@ -48,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initMembersListeners();
     initInviteFormListener();
     setupProfileEventListeners();
-    
+
     // Check login status and load initial data
-    checkAuth(); 
+    checkAuth();
 });

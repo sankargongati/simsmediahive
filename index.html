@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIMS Media Hive | Under Maintenance</title>
+    <title>SIMS Media Hive | Cinematic Media Club</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* Custom styles from the original theme */
+        /* Custom styles to match the dark theme and font */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Oswald:wght@200..700&display=swap');
 
         :root {
@@ -23,22 +23,26 @@
             background-color: var(--dark-bg);
             color: var(--text-light);
             overflow-x: hidden;
-            /* Ensure the body takes up at least the full viewport height */
-            min-height: 100vh; 
+        }
+
+        /* Style for the 'circular text' effect using a subtle SVG/CSS rotation */
+        .circular-text-container {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            border: 1px solid var(--primary-color);
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            animation: rotate 15s linear infinite;
         }
 
-        .oswald {
-            font-family: 'Oswald', sans-serif;
-        }
-
-        /* Styling the animated maintenance icon */
-        .maintenance-icon-spin {
-            animation: spin 3s linear infinite;
-        }
-
-        @keyframes spin {
+        @keyframes rotate {
             from {
                 transform: rotate(0deg);
             }
@@ -46,69 +50,514 @@
                 transform: rotate(360deg);
             }
         }
+
+        /* Hero Section Specific Styling - Image background removed, handled by video */
+        #hero {
+             /* Video will cover this area */
+        }
+
+        .oswald {
+            font-family: 'Oswald', sans-serif;
+        }
     </style>
-</head>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-YRRWP9405V">
+    </script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-YRRWP9405V');
+    </script>
+    </head>
 <body class="antialiased">
 
     <header class="bg-transparent absolute top-0 left-0 w-full z-20 pt-6">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-start">
             <div class="text-xl font-extrabold tracking-widest text-white oswald">
-                <a href="#">SIMS Media Hive</a>
+            <a href="index.html">SIMS Media Hive</a>
             </div>
 
             <div class="hidden md:block text-right text-xs text-gray-400">
                 <p>gds.simshive@gmail.com</p>
                 <p>+91 7981 951 879</p>
             </div>
-        </div>
-    </header>
-
-    <main class="flex-grow flex items-center justify-center text-center px-4 sm:px-6 lg:px-8 pt-24 pb-12">
-        <div class="max-w-3xl w-full">
-            <i data-lucide="cog" class="w-16 h-16 sm:w-24 sm:h-24 mx-auto text-yellow-500 maintenance-icon-spin mb-8"></i>
             
-            <h1 class="text-5xl sm:text-7xl md:text-8xl font-bold leading-tight text-white oswald mb-6">
-                Under The Hood.
-            </h1>
+            <button id="mobile-menu-button" class="md:hidden p-2 text-yellow-500 hover:text-white transition duration-300 z-30">
+                <i data-lucide="menu" class="w-7 h-7"></i>
+            </button>
+        </div>
 
-            <p class="text-xl md:text-2xl font-light leading-relaxed text-gray-300 mb-10">
-                We're currently making some **major upgrades** to our creative hub. The site will be back online shortly with new features and content!
-            </p>
+        <nav class="hidden md:flex justify-center mt-4">
+            <ul class="flex space-x-8 text-sm font-medium uppercase tracking-widest text-gray-300">
+                <li><a href="#" class="hover:text-yellow-500 transition duration-300">Home</a></li>
+                <li><a href="#focus" class="hover:text-yellow-500 transition duration-300">Focus</a></li>
+                <li><a href="#work" class="hover:text-yellow-500 transition duration-300">Projects</a></li>
+                <li><a href="/members.html" class="hover:text-yellow-500 transition duration-300">Members</a></li>
+                <li><a href="/blog.html" class="hover:text-yellow-500 transition duration-300">Blog</a></li>
+                <li><a href="/gallery.html" class="hover:text-yellow-500 transition duration-300">Gallery</a></li>
+                <li><a href="/contact.html" class="hover:text-yellow-500 transition duration-300">Join Us</a></li>
+            
+            </ul>
+        </nav>
 
-            <div class="bg-gray-900 border border-yellow-500/20 rounded-lg p-6 max-w-lg mx-auto">
-                <p class="text-sm font-semibold uppercase tracking-widest text-yellow-500 mb-2">Estimated Return</p>
-                <p class="text-2xl text-white oswald">Check back soon!</p>
+        <nav id="mobile-menu" class="hidden md:hidden fixed top-0 left-0 w-full h-full bg-gray-950/95 backdrop-blur-sm pt-24 pb-8 overflow-y-auto z-10">
+            <ul class="flex flex-col items-center space-y-8 text-xl font-semibold uppercase tracking-widest text-gray-300">
+                <li><a href="#" class="hover:text-yellow-500 transition duration-300 block py-2">Home</a></li>
+                <li><a href="#focus" class="hover:text-yellow-500 transition duration-300 block py-2">Focus</a></li>
+                <li><a href="#work" class="hover:text-yellow-500 transition duration-300 block py-2">Projects</a></li>
+                <li><a href="/members.html" class="hover:text-yellow-500 transition duration-300 block py-2">Members</a></li>
+                <li><a href="/blog.html" class="hover:text-yellow-500 transition duration-300 block py-2">Blog</a></li>
+                <li><a href="/gallery.html" class="hover:text-yellow-500 transition duration-300">Gallery</a></li>
+                <li><a href="/contact.html" class="hover:text-yellow-500 transition duration-300 block py-2">Join Us</a></li>
+            </ul>
+        </nav>
+    </header>
+<hr>
+    <section id="hero" class="relative pt-40 pb-20 md:pb-32 h-[80vh] min-h-[600px] flex items-end">
+        
+        <div id="video-sequence" class="absolute inset-0 w-full h-full z-[-2]">
+            
+            <video 
+                id="video-1"
+                data-video-id="1"
+                autoplay 
+                loop 
+                muted 
+                playsinline 
+                poster="" 
+                class="hero-video absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-100"
+            >
+                <source src="/src/vid3.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+
+            <video 
+                id="video-2"
+                data-video-id="2"
+                autoplay 
+                loop 
+                muted 
+                playsinline 
+                poster="/src/simshive.jpg" 
+                class="hero-video absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-0"
+            >
+                <source src="/src/vid2.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+
+            <video 
+                id="video-3"
+                data-video-id="3"
+                autoplay 
+                loop 
+                muted 
+                playsinline 
+                poster="/src/simshive.jpg" 
+                class="hero-video absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-0"
+            >
+                <source src="/src/vid1.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            
+        </div>
+        <div class="absolute inset-0 bg-black bg-opacity-60 z-[-1]"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-0 w-full">
+            <div class="md:w-3/5">
+                <p class="text-xs tracking-[0.2em] uppercase text-yellow-500 mb-4 font-semibold flex items-center">
+                    <span class="text-2xl mr-4 oswald">01</span>
+                    COLLEGE MEDIA & CREATIVE HUB
+                </p>
+                <h1 class="text-4xl sm:text-6xl md:text-8xl font-bold leading-tight text-white oswald">
+                    We craft campus stories & visuals.
+                </h1>
+                <div class="flex items-center space-x-8 mt-10">
+                    <a href="https://drive.google.com/file/d/17hfMFJqa_55NAnzQqQY4mwotWs5mkb1N/view?usp=sharing" class="inline-block px-8 py-3 bg-yellow-500 text-black font-semibold uppercase tracking-wider text-sm rounded-full transition duration-300 hover:bg-yellow-600 shadow-lg hover:shadow-yellow-500/50">
+                        Get LookBook
+                    </a>
+                    <div class="circular-text-container hidden sm:flex">
+                        <span class="text-gray-200">JOIN THE HIVE NOW</span>
+                    </div>
+                </div>
             </div>
 
-            <div class="mt-12">
-                <h3 class="text-lg font-semibold text-white oswald tracking-wider mb-4">Follow Our Progress</h3>
-                
-                <div class="flex space-x-6 justify-center">
-                    <a href="https://www.instagram.com/sims_hive" aria-label="Instagram" class="text-gray-400 hover:text-yellow-500 transition duration-300">
-                        <i data-lucide="instagram" class="w-7 h-7"></i>
-                    </a>
-                    <a href="https://www.youtube.com/@SIMSHIVE" aria-label="YouTube" class="text-gray-400 hover:text-yellow-500 transition duration-300">
-                        <i data-lucide="youtube" class="w-7 h-7"></i>
-                    </a>
-                    <a href="https://www.linkedin.com/in/sims-hive-792989386" aria-label="LinkedIn" class="text-gray-400 hover:text-yellow-500 transition duration-300">
-                        <i data-lucide="linkedin" class="w-7 h-7"></i>
-                    </a>
+            <div class="mt-16 md:absolute md:bottom-0 md:right-0 md:mt-0 flex flex-col items-start md:items-end">
+                <div class="w-full h-px bg-gray-700 mb-4"></div>
+                <div class="flex space-x-4 text-xs uppercase tracking-widest text-gray-500">
+                    <a href="https://www.instagram.com/sims_hive" class="hover:text-white transition duration-200">instagram</a>
+                    <a href="https://www.youtube.com/@SIMSHIVE" class="hover:text-white transition duration-200">youtube</a>
+                    <a href="https://www.snapchat.com/add/simshive" class="hover:text-white transition duration-200">Snapchat</a>
+                    <a href="https://www.linkedin.com/in/sims-hive-792989386" class="hover:text-white transition duration-200">Linkedin</a>
                 </div>
             </div>
         </div>
-    </main>
-
-    <footer class="bg-transparent border-t border-gray-800 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div class="text-center text-sm text-gray-500">
-                <p>© 2025 SIMS Media Hive. All Rights Reserved. </p>
+    </section>
+<hr>
+    <section class="bg-black py-8 border-y border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center text-sm font-semibold uppercase tracking-wider text-gray-500">
+                <div class="flex-1 text-center py-2 border-r border-gray-800">
+                    <span class="text-yellow-500 mr-2">—</span> FILM MAKING
+                </div>
+                <div class="flex-1 text-center py-2 border-r border-gray-800">
+                    <span class="text-yellow-500 mr-2">—</span> PHOTOGRAPHY
+                </div>
+                <div class="flex-1 text-center py-2">
+                    <span class="text-yellow-500 mr-2">—</span> GRAPHIC DESIGN
+                </div>
             </div>
+        </div>
+    </section>
+<hr>
+    <section class="bg-black py-20 md:py-32">
+        <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+            <h2 class="text-2xl sm:text-3xl font-bold mb-8 oswald">
+                SIMS Media Hive
+            </h2>
+            <p class="text-xl md:text-4xl font-light leading-snug text-gray-300">
+                We craft stories, capture campus life, and inspire the next generation of creative professionals.
+            </p>
+            <div class="flex justify-center space-x-8 mt-12 text-yellow-500">
+                <div class="flex flex-col items-center">
+                    <i data-lucide="award" class="w-12 h-12 mb-2"></i>
+                    <span class="text-xs text-gray-500 uppercase tracking-wider">Campus Award</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <i data-lucide="camera" class="w-12 h-12 mb-2"></i>
+                    <span class="text-xs text-gray-500 uppercase tracking-wider">Best Photo</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <i data-lucide="clapperboard" class="w-12 h-12 mb-2"></i>
+                    <span class="text-xs text-gray-500 uppercase tracking-wider">Short Film Fest</span>
+                </div>
+            </div>
+        </div>
+    </section>
+<hr>
+    <section id="focus" class="bg-gray-950 py-20 md:py-32 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <p class="text-sm text-center text-yellow-500 uppercase tracking-widest mb-2">Focus Areas</p>
+            <h2 class="text-4xl font-bold text-center mb-16 oswald">
+                Our Creative Channels
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                <div class="text-center">
+                    <img src="/src/Event-Organization1.jpg" onerror="this.onerror=null;this.src='https://placehold.co/600x400/1f2937/d1d5db?text=VIDEO+PRODUCTION';" alt="Video Production" class="rounded-lg mb-6 w-full h-auto object-cover transition duration-300 hover:opacity-90">
+                    <h3 class="text-xl font-semibold uppercase tracking-wider mb-3 text-yellow-500 oswald">Event Organization</h3>
+                    <p class="text-sm text-gray-400 leading-relaxed">
+                        From concept development and logistical planning to vendor coordination and on-site management, we handle every phase of the event organization process.
+                    </p>
+                </div>
+                <div class="text-center">
+                    <img src="/src/Podcast.jpg" onerror="this.onerror=null;this.src='https://placehold.co/600x400/1f2937/d1d5db?text=VIDEO+PRODUCTION';" alt="Video Production" class="rounded-lg mb-6 w-full h-auto object-cover transition duration-300 hover:opacity-90">
+                    <h3 class="text-xl font-semibold uppercase tracking-wider mb-3 text-yellow-500 oswald">Podcast</h3>
+                    <p class="text-sm text-gray-400 leading-relaxed">
+                        From concept development and guest booking to professional recording and final sound design, we handle every phase of the podcast production process.
+                    </p>
+                </div>
+                <div class="text-center">
+                    <img src="/src/Design-&-Graphics.jpg" onerror="this.onerror=null;this.src='https://placehold.co/600x400/1f2937/d1d5db?text=VIDEO+PRODUCTION';" alt="Video Production" class="rounded-lg mb-6 w-full h-auto object-cover transition duration-300 hover:opacity-90">
+                    <h3 class="text-xl font-semibold uppercase tracking-wider mb-3 text-yellow-500 oswald">Design & Graphics</h3>
+                    <p class="text-sm text-gray-400 leading-relaxed">
+                        From initial sketches and mood boards to final print-ready files and digital assets, we handle every phase of the design and graphics creation process.
+                    </p>
+                </div>
+                <div class="text-center">
+                    <img src="/src/Newsletter.jpg" onerror="this.onerror=null;this.src='https://placehold.co/600x400/1f2937/d1d5db?text=VIDEO+PRODUCTION';" alt="Video Production" class="rounded-lg mb-6 w-full h-auto object-cover transition duration-300 hover:opacity-90">
+                    <h3 class="text-xl font-semibold uppercase tracking-wider mb-3 text-yellow-500 oswald">Newsletter</h3>
+                    <p class="text-sm text-gray-400 leading-relaxed">
+                        From strategy and content outlines to copywriting, design, and email deployment, we handle every phase of the newsletter production process.
+                    </p>
+                </div>
+                <div class="text-center">
+                    <img src="/src/Social-Media.jpg" onerror="this.onerror=null;this.src='https://placehold.co/600x400/1f2937/d1d5db?text=VIDEO+PRODUCTION';" alt="Video Production" class="rounded-lg mb-6 w-full h-auto object-cover transition duration-300 hover:opacity-90">
+                    <h3 class="text-xl font-semibold uppercase tracking-wider mb-3 text-yellow-500 oswald">Social Media</h3>
+                    <p class="text-sm text-gray-400 leading-relaxed">
+                        From content strategy and creation to scheduling, community engagement, and performance reporting, we handle every phase of the social media management process.
+                    </p>
+                </div>
+                <div class="text-center">
+                    <img src="/src/Film-Making.jpg" onerror="this.onerror=null;this.src='https://placehold.co/600x400/1f2937/d1d5db?text=VIDEO+PRODUCTION';" alt="Video Production" class="rounded-lg mb-6 w-full h-auto object-cover transition duration-300 hover:opacity-90">
+                    <h3 class="text-xl font-semibold uppercase tracking-wider mb-3 text-yellow-500 oswald">Film Making</h3>
+                    <p class="text-sm text-gray-400 leading-relaxed">
+                        From short films and documentaries to event coverage and promotional content, we handle every phase of the filmmaking process.
+                    </p>
+                </div>
+                <div class="text-center">
+                    <img src="/src/Editing.jpg" onerror="this.onerror=null;this.src='https://placehold.co/600x400/1f2937/d1d5db?text=VIDEO+PRODUCTION';" alt="Video Production" class="rounded-lg mb-6 w-full h-auto object-cover transition duration-300 hover:opacity-90">
+                    <h3 class="text-xl font-semibold uppercase tracking-wider mb-3 text-yellow-500 oswald">Editing</h3>
+                    <p class="text-sm text-gray-400 leading-relaxed">
+                        From initial footage review and organization to precise cutting, color grading, and final sound mixing, we handle every phase of the editing process.
+                    </p>
+                </div>
+                <div class="text-center">
+                    <img src="/src/story2.jpg" onerror="this.onerror=null;this.src='https://placehold.co/600x400/1f2937/d1d5db?text=CREATIVE+STORYTELLING';" alt="Creative Storytelling" class="rounded-lg mb-6 w-full h-auto object-cover transition duration-300 hover:opacity-90">
+                    <h3 class="text-xl font-semibold uppercase tracking-wider mb-3 text-yellow-500 oswald">Creative Storytelling</h3>
+                    <p class="text-sm text-gray-400 leading-relaxed">
+                        Developing scripts, concepts, and narratives for all club projects, ensuring every piece of content has a compelling core message.
+                    </p>
+                </div>
+
+                <div class="text-center">
+                    <img src="/src/photography.jpg" onerror="this.onerror=null;this.src='https://placehold.co/600x400/1f2937/d1d5db?text=PHOTOGRAPHY+AND+DESIGN';" alt="Photography & Design" class="rounded-lg mb-6 w-full h-auto object-cover transition duration-300 hover:opacity-90">
+                    <h3 class="text-xl font-semibold uppercase tracking-wider mb-3 text-yellow-500 oswald">Photography & Design</h3>
+                    <p class="text-sm text-gray-400 leading-relaxed">
+                        Mastering stills, portraits, and graphic assets for social media campaigns, print materials, and visual branding across campus.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+<hr>
+    <section id="work" class="bg-black py-20 md:py-32">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <p class="text-sm text-center text-yellow-500 uppercase tracking-widest mb-2">Our Recent Work</p>
+            <h2 class="text-4xl font-bold text-center mb-16 oswald">
+                Featured Projects
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                <div class="group relative overflow-hidden rounded-lg">
+                    <img src="" onerror="this.onerror=null;this.src='https://placehold.co/800x600/1c1917/f59e0b?text=COMING+SOON';" alt="Project 1" class="w-full h-auto object-cover transform transition duration-500 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
+                    <div class="absolute bottom-4 left-4">
+                        <span class="text-xs text-yellow-500 uppercase tracking-widest">Short Film</span>
+                        <h3 class="text-2xl font-bold text-white oswald">The Campus Echo</h3>
+                    </div>
+                </div>
+
+                <div class="group relative overflow-hidden rounded-lg">
+                    <img src="" onerror="this.onerror=null;this.src='https://placehold.co/800x600/1c1917/f59e0b?text=COMING+SOON';" alt="Project 2" class="w-full h-auto object-cover transform transition duration-500 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
+                    <div class="absolute bottom-4 left-4">
+                        <span class="text-xs text-yellow-500 uppercase tracking-widest">Photography</span>
+                        <h3 class="text-2xl font-bold text-white oswald">Annual Tech Fest</h3>
+                    </div>
+                </div>
+
+                <div class="group relative overflow-hidden rounded-lg">
+                    <img src="" onerror="this.onerror=null;this.src='https://placehold.co/800x600/1c1917/f59e0b?text=COMING+SOON';" alt="Project 3" class="w-full h-auto object-cover transform transition duration-500 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
+                    <div class="absolute bottom-4 left-4">
+                        <span class="text-xs text-yellow-500 uppercase tracking-widest">Graphic Design</span>
+                        <h3 class="text-2xl font-bold text-white oswald">New Logo Reveal</h3>
+                    </div>
+                </div>
+
+                <div class="group relative overflow-hidden rounded-lg">
+                    <img src="" onerror="this.onerror=null;this.src='https://placehold.co/800x600/1c1917/f59e0b?text=COMING+SOON';" alt="Project 4" class="w-full h-auto object-cover transform transition duration-500 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition duration-300"></div>
+                    <div class="absolute bottom-4 left-4">
+                        <span class="text-xs text-yellow-500 uppercase tracking-widest">Music Video</span>
+                        <h3 class="text-2xl font-bold text-white oswald">Band Promo</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+<hr>
+    <footer class="bg-gray-900 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+                
+                <div>
+                    <h3 class="text-xl font-extrabold tracking-widest text-white oswald mb-4">
+                        <a href="index.html">SIMS Media Hive</a>
+                    </h3>
+                    <p class="text-gray-400 text-sm mb-4 max-w-xs">
+                        Sims College Guntur is your creative partner in Health and Technology. We merge Life Sciences with digital media production and impactful storytelling. Join our "SIMS Media Hive" to create content that makes a difference
+                    </p>
+                    <div class="space-y-2 text-sm text-gray-400">
+                        <p class="flex items-center">
+                            <i data-lucide="mail" class="inline w-4 h-4 mr-2 text-yellow-500 shrink-0"></i>
+                            <span>gds.simshive@gmail.com</span>
+                        </p>
+                        <p class="flex items-center">
+                            <i data-lucide="phone" class="inline w-4 h-4 mr-2 text-yellow-500 shrink-0"></i>
+                            <span>+91 7981 951 879</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-lg font-semibold text-white oswald tracking-wider mb-4">Quick Links</h4>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="/index.html" class="text-gray-400 hover:text-yellow-500 transition duration-300">Home</a></li>
+                        <li><a href="/index.html#work" class="text-gray-400 hover:text-yellow-500 transition duration-300">Projects</a></li>
+                        <li><a href="/members.html" class="text-gray-400 hover:text-yellow-500 transition duration-300">Members</a></li>
+                        
+                        <li><a href="/login.html" class="text-gray-400 hover:text-yellow-500 transition duration-300">Member Login</a></li>
+                        
+                        <li><a href="/blog.html" class="text-gray-400 hover:text-yellow-500 transition duration-300">Blog</a></li>
+                        <li><a href="/gallery.html" class="text-gray-400 hover:text-yellow-500 transition duration-300">Gallery</a></li>
+                        <li><a href="/contact.html" class="text-gray-400 hover:text-yellow-500 transition duration-300">Join Us</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-lg font-semibold text-white oswald tracking-wider mb-4">Follow Us</h4>
+                    <p class="text-sm text-gray-400 mb-4">Stay connected on our social channels.</p>
+                    
+                    <div class="flex space-x-4 justify-start">
+                        <a href="https://www.instagram.com/sims_hive" aria-label="Instagram" class="text-gray-400 hover:text-yellow-500 transition duration-300">
+                            <i data-lucide="instagram" class="w-6 h-6"></i>
+                        </a>
+                        <a href="https://www.youtube.com/@SIMSHIVE" aria-label="YouTube" class="text-gray-400 hover:text-yellow-500 transition duration-300">
+                            <i data-lucide="youtube" class="w-6 h-6"></i>
+                        </a>
+                        <a href="#" aria-label="Facebook" class="text-gray-400 hover:text-yellow-500 transition duration-300">
+                            <i data-lucide="facebook" class="w-6 h-6"></i>
+                        </a>
+                        <a href="#" aria-label="LinkedIn" class="text-gray-400 hover:text-yellow-500 transition duration-3D00">
+                            <i data-lucide="linkedin" class="w-6 h-6"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold text-white oswald tracking-wider mb-4">Our Location</h4>
+                    <div class="rounded-lg overflow-hidden w-full h-[200px]">
+                        <iframe
+                            class="w-full h-full grayscale invert brightness-90 contrast-125"
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3829.471644919799!2d80.46380584097716!3d16.309474700890423!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a4a755b57c91e3b%3A0x6039c33f4139b09!2sSIMS%20College%20of%20Life%20Sciences!5e0!3m2!1sen!2sin!4v1678888888888!5m2!1sen!2sin"
+                            style="border:0;"
+                            allowfullscreen=""
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade"
+                            title="SIMS College Guntur Location Map">
+                        </iframe>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="mt-16 pt-8 border-t border-gray-800 text-center text-sm text-gray-500">
+                <p>&copy; 2025 SIMS Media Hive. All Rights Reserved. Designed by <a href="https://dcagency.in/" target="_blank" class="hover:text-yellow-500 transition">Darion Creative Agency.</a></p>
+            </div>
+
         </div>
     </footer>
 
     <script>
         // Initialize Lucide icons
         lucide.createIcons();
+
+        // --- Mobile Menu Toggle Logic ---
+        const menuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIcon = menuButton.querySelector('i');
+
+        menuButton.addEventListener('click', () => {
+            // Toggle the 'hidden' class on the mobile menu
+            mobileMenu.classList.toggle('hidden');
+            
+            // Toggle the visibility of the main body content (to prevent scrolling behind the menu)
+            document.body.classList.toggle('overflow-hidden');
+
+            // Toggle the icon (Menu <-> X)
+            const isMenuOpen = !mobileMenu.classList.contains('hidden');
+            if (isMenuOpen) {
+                // Menu is open, show 'x' icon
+                menuIcon.setAttribute('data-lucide', 'x');
+            } else {
+                // Menu is closed, show 'menu' icon
+                menuIcon.setAttribute('data-lucide', 'menu');
+            }
+            lucide.createIcons(); // Re-render the icon
+        });
+
+        // Close the mobile menu when a link is clicked
+        document.querySelectorAll('#mobile-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                // Close the menu
+                mobileMenu.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+                
+                // Reset the icon
+                menuIcon.setAttribute('data-lucide', 'menu');
+                lucide.createIcons();
+            });
+        });
+
+        // Simple smooth scrolling for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if (targetId && targetId !== '#') {
+                    document.querySelector(targetId).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+        
+        // --- NEW: Video Sequence Logic ---
+        const heroVideos = document.querySelectorAll('.hero-video');
+        const videoCount = heroVideos.length;
+
+        if (videoCount > 0) {
+            let currentVideoIndex = 0;
+
+            function playNextVideo() {
+                // Hide current video using opacity for a smooth fade
+                heroVideos[currentVideoIndex].classList.remove('opacity-100');
+                heroVideos[currentVideoIndex].classList.add('opacity-0');
+                
+                // Increment index, looping back to 0 if it exceeds the count
+                currentVideoIndex = (currentVideoIndex + 1) % videoCount;
+
+                const nextVideo = heroVideos[currentVideoIndex];
+
+                // Start playing the next video and make it visible
+                nextVideo.play().catch(error => {
+                    console.warn("Autoplay was prevented, user interaction might be needed:", error);
+                    // Fallback: Just display the video if it can't autoplay
+                });
+                nextVideo.classList.remove('opacity-0');
+                nextVideo.classList.add('opacity-100');
+
+                // Set a new timer for the next transition
+                setupVideoTransition(nextVideo);
+            }
+
+            function setupVideoTransition(videoElement) {
+                // Remove previous event listener just in case
+                videoElement.removeEventListener('loadeddata', handleLoadedData);
+
+                // Use 'loadeddata' to ensure we have the duration before setting the timer
+                function handleLoadedData() {
+                    // Determine the duration of the clip
+                    const duration = videoElement.duration; 
+                    // We switch 0.5 seconds before the video naturally ends for a smooth fade (duration-0.5)
+                    const delay = (duration - 0.5) * 1000; 
+
+                    // Ensure a minimum delay if the video is extremely short
+                    if (delay > 100) { 
+                        setTimeout(playNextVideo, delay);
+                    } else {
+                        // If video is too short or metadata is missing, just switch after a fixed time (e.g., 3 seconds)
+                        setTimeout(playNextVideo, 3000); 
+                    }
+
+                    // Remove the one-time listener after it fires
+                    videoElement.removeEventListener('loadeddata', handleLoadedData);
+                }
+
+                // If video metadata is already loaded, execute the logic immediately
+                if (videoElement.readyState >= 2) { // READY_STATE_ENOUGH_DATA
+                    handleLoadedData();
+                } else {
+                    // Otherwise, wait for the metadata
+                    videoElement.addEventListener('loadeddata', handleLoadedData);
+                }
+            }
+
+            // Start the sequence with the first video
+            setupVideoTransition(heroVideos[0]);
+        }
     </script>
 </body>
 </html>

@@ -21,6 +21,7 @@ export let galleryStatus;
 export let galleryMediaInput;
 export let galleryTitleInput;
 export let galleryFilterButtonsContainer;
+export let galleryYoutubeUrl;
 
 // Blog
 export let blogForm;
@@ -33,6 +34,19 @@ export let blogAuthorInput;
 export let blogHeaderMediaInput;
 export let easymdeFileInput;
 export let blogContentEditor;
+export let blogYoutubeUrl;
+export let youtubeModal;
+export let youtubeModalClose;
+export let youtubePlayerContainer;
+export let aiPromptTextarea;
+export let generateAiContentBtn;
+export let aiWriteSection;
+export let suggestionsContainer;
+export let refreshSuggestionsBtn;
+export let generateIcon;
+export let generateText;
+export let generatingSpinner;
+
 
 // Members
 export let membersForm;
@@ -92,6 +106,7 @@ export function initDom() {
     galleryMediaInput = document.getElementById('gallery-media-file');
     galleryTitleInput = document.getElementById('gallery-title');
     galleryFilterButtonsContainer = document.getElementById('gallery-filter-buttons');
+    galleryYoutubeUrl = document.getElementById('gallery-youtube-url');
 
     blogForm = document.getElementById('blog-form');
     blogPostList = document.getElementById('blog-post-list');
@@ -103,6 +118,19 @@ export function initDom() {
     blogHeaderMediaInput = document.getElementById('blog-header-media-file');
     easymdeFileInput = document.getElementById('easymde-file-input');
     blogContentEditor = document.getElementById('blog-content-editor');
+    blogYoutubeUrl = document.getElementById('blog-youtube-url');
+    youtubeModal = document.getElementById('youtube-modal');
+    youtubeModalClose = document.getElementById('youtube-modal-close');
+    youtubePlayerContainer = document.getElementById('youtube-player-container');
+    aiPromptTextarea = document.getElementById('ai-prompt');
+    generateAiContentBtn = document.getElementById('generate-ai-content-btn');
+    aiWriteSection = document.getElementById('ai-write-section');
+    suggestionsContainer = document.getElementById('suggestions-container');
+    refreshSuggestionsBtn = document.getElementById('refresh-suggestions-btn');
+    generateIcon = document.getElementById('generate-icon');
+    generateText = document.getElementById('generate-text');
+    generatingSpinner = document.getElementById('generating-spinner');
+
 
     membersForm = document.getElementById('members-form');
     memberList = document.getElementById('member-list');

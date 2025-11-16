@@ -173,6 +173,18 @@
         <div id="lightbox-caption"></div>
     </div>
 
+    <!-- YouTube Player Modal -->
+    <div id="youtube-modal" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-gray-900 rounded-lg max-w-4xl w-full max-h-[90vh] relative">
+            <button id="youtube-modal-close" class="absolute -top-4 -right-4 bg-red-600 hover:bg-red-700 text-white rounded-full w-8 h-8 flex items-center justify-center z-10">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div id="youtube-player-container" class="relative w-full" style="padding-bottom: 56.25%;">
+                <!-- YouTube iframe will be inserted here -->
+            </div>
+        </div>
+    </div>
+
 
     <script>
         // Initialize Lucide icons
@@ -241,6 +253,78 @@
             return videoExtensions.some(ext => lowerUrl.endsWith(ext));
         }
 
+        function extractYouTubeVideoId(url) {
+            const patterns = [
+                /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+                /youtube\.com\/v\/([a-zA-Z0-9_-]{11})/,
+                /(?:youtu\.be\/)([a-zA-Z0-9_-]{11})/
+            ];
+
+            for (const pattern of patterns) {
+                const match = url.match(pattern);
+                if (match && match[1]) {
+                    return match[1];
+                }
+            }
+            return null;
+        }
+
+        function isYouTubeUrl(url) {
+            return url.includes('youtube.com') || url.includes('youtu.be');
+        }
+
+        // YouTube Modal Functions
+        function openYouTubeModal(videoUrl) {
+            console.log('openYouTubeModal called with URL:', videoUrl);
+            if (!document.getElementById('youtube-modal') || !document.getElementById('youtube-player-container')) {
+                console.error('YouTube modal elements not found');
+                return;
+            }
+
+            const videoId = extractYouTubeVideoId(videoUrl);
+            console.log('Extracted video ID:', videoId);
+            if (!videoId) {
+                console.error('Could not extract video ID from URL');
+                return;
+            }
+
+    // Create YouTube embed iframe
+    const iframe = document.createElement('iframe');
+    iframe.src = `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&playsinline=1`;
+    iframe.width = '100%';
+    iframe.height = '100%';
+    iframe.frameBorder = '0';
+    iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+    iframe.allowFullscreen = true;
+    iframe.className = 'absolute inset-0 w-full h-full rounded-lg';
+
+            console.log('Created iframe with src:', iframe.src);
+
+            // Clear previous content and add new iframe
+            const container = document.getElementById('youtube-player-container');
+            container.innerHTML = '';
+            container.appendChild(iframe);
+
+            // Show modal
+            const modal = document.getElementById('youtube-modal');
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            console.log('YouTube modal should now be visible');
+        }
+
+        function closeYouTubeModal() {
+            const modal = document.getElementById('youtube-modal');
+            if (!modal) return;
+
+            // Stop video by clearing iframe
+            const container = document.getElementById('youtube-player-container');
+            if (container) container.innerHTML = '';
+
+            // Hide modal
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
         // --- Video Thumbnail Generation Function (Copied from working implementation) ---
         async function generateVideoThumbnail(videoUrl) {
             return new Promise((resolve) => {
@@ -296,9 +380,20 @@
                     let previewSrc = defaultPlaceholder;
 
                     if (isVideo && item.imageUrl) {
-                        // --- Generate Thumbnail ---
-                        const thumbnailUrl = await generateVideoThumbnail(item.imageUrl);
-                        previewSrc = thumbnailUrl || defaultPlaceholder; // Use generated or fallback
+                        // Check if it's a YouTube URL
+                        if (isYouTubeUrl(item.imageUrl)) {
+                            // Extract YouTube video ID and create thumbnail URL
+                            const videoId = extractYouTubeVideoId(item.imageUrl);
+                            if (videoId) {
+                                previewSrc = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+                            } else {
+                                previewSrc = defaultPlaceholder;
+                            }
+                        } else {
+                            // --- Generate Thumbnail ---
+                            const thumbnailUrl = await generateVideoThumbnail(item.imageUrl);
+                            previewSrc = thumbnailUrl || defaultPlaceholder; // Use generated or fallback
+                        }
                     } else if (!isVideo && item.imageUrl) {
                         previewSrc = item.imageUrl; // Use actual image URL
                     }
@@ -312,7 +407,7 @@
                              data-is-video="${isVideo}">
                             <img src="${previewSrc}"
                                  alt="Preview: ${item.title || 'Gallery item'}"
-                                 onerror="this.onerror=null;this.src='${defaultPlaceholder}';"
+                                 onerror="this.onerror=null;this.src='${defaultPlaceholder}';this.style.filter='blur(2px)';"
                                  class="absolute inset-0 w-full h-full object-cover transition duration-500 group-hover:scale-105">
                             ${isVideo ? `
                                 <div class="video-overlay-icon">
@@ -381,9 +476,16 @@
 
                      if (!src) { console.warn("No src found for gallery item."); return; }
 
+                     if (isVideo && isYouTubeUrl(src)) {
+                         // Handle YouTube embedding using modal
+                         openYouTubeModal(src);
+                         return;
+                     }
+
                      let mediaElementHTML = '';
                      if (isVideo) {
-                         mediaElementHTML = `<video src="${src}" controls autoplay loop class="lightbox-content" preload="auto">Video not supported.</video>`;
+                         // Handle regular video files
+                         mediaElementHTML = `<video src="${src}" controls loop class="lightbox-content" preload="auto">Video not supported.</video>`;
                      } else {
                          mediaElementHTML = `<img src="${src}" alt="${title}" class="lightbox-content">`;
                      }
@@ -415,6 +517,35 @@
         // --- Initial Load ---
         // FIXED: Call the function directly, no DOMContentLoaded
         loadGallery();
+
+        // Initialize YouTube modal event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            const youtubeModalClose = document.getElementById('youtube-modal-close');
+            const youtubeModal = document.getElementById('youtube-modal');
+
+            if (youtubeModalClose) {
+                youtubeModalClose.addEventListener('click', closeYouTubeModal);
+            }
+
+            if (youtubeModal) {
+                youtubeModal.addEventListener('click', (e) => {
+                    if (e.target === youtubeModal) {
+                        closeYouTubeModal();
+                    }
+                });
+            }
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && youtubeModal && !youtubeModal.classList.contains('hidden')) {
+                    closeYouTubeModal();
+                }
+            });
+
+            // Initialize Lucide icons for modal close button
+            if (youtubeModalClose) {
+                lucide.createIcons();
+            }
+        });
 
     </script>
 </body>

@@ -159,8 +159,12 @@
                          <div><label for="gallery-title" class="block text-sm font-medium text-gray-300 mb-2">Media Title</label><input type="text" id="gallery-title" required class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-yellow-500 focus:border-yellow-500"></div>
                          <div><label class="block text-sm font-medium text-gray-300 mb-2">Category</label><div class="flex items-center space-x-6"><label class="flex items-center"><input type="radio" name="gallery-category" value="photo" checked class="text-yellow-500 focus:ring-yellow-500"> <span class="ml-2">Photo</span></label><label class="flex items-center"><input type="radio" name="gallery-category" value="video" class="text-yellow-500 focus:ring-yellow-500"> <span class="ml-2">Video</span></label></div></div>
                          <div>
-                             <label for="gallery-media-file" class="block text-sm font-medium text-gray-300 mb-2">Media File (Image or Video) <a href="https://8mb.video/" target="_blank" class="text-yellow-500 hover:underline">(Compress Video)</a></label>
-                             <input type="file" id="gallery-media-file" accept="image/*,video/*" required class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-500 file:text-black hover:file:bg-yellow-600 cursor-pointer">
+                             <label for="gallery-media-file" class="block text-sm font-medium text-gray-300 mb-2">Media File (Image, Video, or YouTube Link) <a href="https://8mb.video/" target="_blank" class="text-yellow-500 hover:underline">(Compress Video)</a></label>
+                             <input type="file" id="gallery-media-file" accept="image/*,video/*" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-500 file:text-black hover:file:bg-yellow-600 cursor-pointer">
+                             <div class="mt-2">
+                                 <input type="url" id="gallery-youtube-url" placeholder="Or paste YouTube URL (e.g., https://www.youtube.com/watch?v=VIDEO_ID)" class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-yellow-500 focus:border-yellow-500 text-sm">
+                             </div>
+                             <small class="text-gray-400 mt-1 block">Upload a file OR paste a YouTube URL. File upload is required for new items unless using YouTube.</small>
                          </div>
                          <div><button type="submit" class="w-full py-3 px-4 font-semibold text-black bg-yellow-500 rounded-md hover:bg-yellow-600 transition disabled:opacity-50 disabled:cursor-not-allowed">Upload Media</button></div>
                          <div id="gallery-status" class="text-center text-sm h-5 min-h-[1.25rem]"></div>
@@ -192,10 +196,43 @@
                             <label for="blog-content-editor" class="block text-sm font-medium text-gray-300 mb-2">Content (Markdown)</label>
                             <textarea id="blog-content-editor"></textarea>
                         </div>
+                        <div id="ai-write-section" style="display: none;">
+                            <label for="ai-prompt" class="block text-sm font-medium text-gray-300 mb-2 flex items-center">
+                                <i class="fas fa-robot mr-2 text-yellow-500"></i>
+                                AI Write Assistant
+                                <span class="ml-2 text-xs text-gray-400">(Beta)</span>
+                            </label>
+                            <div class="bg-gray-800 border border-gray-700 rounded-md p-4 mb-3">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="text-xs text-gray-400">Example prompts:</div>
+                                    <button id="refresh-suggestions-btn" class="text-xs text-yellow-500 hover:text-yellow-400 transition flex items-center" title="Get new suggestions">
+                                        <i class="fas fa-sync-alt mr-1"></i>
+                                        Refresh
+                                    </button>
+                                </div>
+                                <div id="suggestions-container" class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+                                    <button class="ai-suggestion-btn bg-gray-700 hover:bg-gray-600 text-gray-300 px-2 py-1 rounded transition" data-prompt="Write about AI-powered video editing tools and their impact on modern filmmaking">AI in video editing</button>
+                                    <button class="ai-suggestion-btn bg-gray-700 hover:bg-gray-600 text-gray-300 px-2 py-1 rounded transition" data-prompt="How to create viral short-form content for TikTok and Instagram Reels">Viral short-form content</button>
+                                    <button class="ai-suggestion-btn bg-gray-700 hover:bg-gray-600 text-gray-300 px-2 py-1 rounded transition" data-prompt="The rise of vertical video format and mobile-first content creation">Vertical video trends</button>
+                                    <button class="ai-suggestion-btn bg-gray-700 hover:bg-gray-600 text-gray-300 px-2 py-1 rounded transition" data-prompt="Using AR filters and effects in social media storytelling">AR filters in storytelling</button>
+                                    <button class="ai-suggestion-btn bg-gray-700 hover:bg-gray-600 text-gray-300 px-2 py-1 rounded transition" data-prompt="Sustainable content creation: Eco-friendly filming practices">Sustainable filmmaking</button>
+                                    <button class="ai-suggestion-btn bg-gray-700 hover:bg-gray-600 text-gray-300 px-2 py-1 rounded transition" data-prompt="Live streaming strategies for building engaged communities">Live streaming strategies</button>
+                                </div>
+                            </div>
+                            <textarea id="ai-prompt" rows="4" class="w-full px-3 py-3 bg-gray-800 border border-gray-700 rounded-md focus:ring-yellow-500 focus:border-yellow-500 resize-vertical" placeholder="Enter a detailed prompt for AI to generate content... e.g., 'Write a 500-word article about the latest trends in digital photography'"></textarea>
+                            <button type="button" id="generate-ai-content-btn" class="mt-3 w-full py-3 px-4 font-semibold text-black bg-yellow-500 rounded-md hover:bg-yellow-600 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
+                                <i class="fas fa-magic mr-2" id="generate-icon"></i>
+                                <span id="generate-text">Generate Content with AI</span>
+                                <i class="fas fa-spinner fa-spin ml-2 hidden" id="generating-spinner"></i>
+                            </button>
+                        </div>
                         <div>
-                            <label for="blog-header-media-file" class="block text-sm font-medium text-gray-300 mb-2">Header Media (Image or Video)</label>
+                            <label for="blog-header-media-file" class="block text-sm font-medium text-gray-300 mb-2">Header Media (Image, Video, or YouTube Link)</label>
                             <input type="file" id="blog-header-media-file" accept="image/*,video/*" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-500 file:text-black hover:file:bg-yellow-600 cursor-pointer">
-                            <small class="text-gray-400 mt-1 block">Required for new posts. Leave empty if editing to keep existing media.</small>
+                            <div class="mt-2">
+                                <input type="url" id="blog-youtube-url" placeholder="Or paste YouTube URL (e.g., https://www.youtube.com/watch?v=VIDEO_ID)" class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-yellow-500 focus:border-yellow-500 text-sm">
+                            </div>
+                            <small class="text-gray-400 mt-1 block">Required for new posts. Upload a file OR paste a YouTube URL. Leave empty if editing to keep existing media.</small>
                         </div>
                         <div class="flex space-x-4">
                             <button type="submit" class="w-full py-3 px-4 font-semibold text-black bg-yellow-500 rounded-md hover:bg-yellow-600 transition disabled:opacity-50 disabled:cursor-not-allowed">Save Post</button>
@@ -325,6 +362,12 @@
                                     <option value="admin">Admin</option>
                                     <option value="super_admin">Super Admin</option>
                                 </select>
+                                <div class="mt-2">
+                                    <label class="flex items-center">
+                                        <input type="checkbox" data-user-id="USER_ID_HERE" class="ai-access-toggle text-yellow-500 focus:ring-yellow-500">
+                                        <span class="ml-2 text-sm text-gray-300">AI Write Access</span>
+                                    </label>
+                                </div>
                             </div>
 
                             <div class="col-span-12 md:col-span-2 flex justify-end items-center gap-2 mt-2 md:mt-0">
@@ -345,6 +388,18 @@
         </div> </main>
 
     <input type="file" id="easymde-file-input" style="display: none;" accept="image/*,video/*">
+
+    <!-- YouTube Player Modal -->
+    <div id="youtube-modal" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-gray-900 rounded-lg max-w-4xl w-full max-h-[90vh] relative">
+            <button id="youtube-modal-close" class="absolute -top-4 -right-4 bg-red-600 hover:bg-red-700 text-white rounded-full w-8 h-8 flex items-center justify-center z-10">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div id="youtube-player-container" class="relative w-full" style="padding-bottom: 56.25%;">
+                <!-- YouTube iframe will be inserted here -->
+            </div>
+        </div>
+    </div>
 
     <script src="/js/admin/admin.js" type="module"></script>
 </body>

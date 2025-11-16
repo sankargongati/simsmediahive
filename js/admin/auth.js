@@ -237,7 +237,7 @@ export async function checkAuth() {
             await loadGalleryItems();
         } else if (activeTab.id === 'blog-tab-btn') {
             console.log("Initial load: Blog tab active.");
-            initializeEasyMDE();
+            await initializeEasyMDE();
             await loadBlogPosts();
         } else if (activeTab.id === 'members-tab-btn') {
             console.log("Initial load: Members tab active.");

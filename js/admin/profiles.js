@@ -39,7 +39,7 @@ function createRoleSelect(userId, currentRole, isDisabled = false, loggedInUserR
 
 /**
  * Creates the HTML for a single user profile row.
- * (This function is updated to include delete permissions)
+ * (This function is updated to include delete permissions and AI access toggle)
  */
 function createProfileRow(profile, currentAuthUserId, loggedInUserRole) {
     const isCurrentUser = (profile.id === currentAuthUserId);
@@ -88,10 +88,19 @@ function createProfileRow(profile, currentAuthUserId, loggedInUserRole) {
 
     const roleSelectHtml = createRoleSelect(profile.id, profile.role, roleSelectDisabled, loggedInUserRole);
     const buttonDisabled = isCurrentUser ? 'disabled' : ''; // This is now redundant but safe
-    
+
     // Handle cases where full_name might be null or empty
     const displayName = profile.full_name || 'N/A';
     const email = profile.email || 'No Email';
+
+    // AI access toggle - only show for owner
+    const aiAccessToggle = (loggedInUserRole === 'owner') ?
+        `<div class="mt-2">
+            <label class="flex items-center">
+                <input type="checkbox" data-user-id="${profile.id}" class="ai-access-toggle text-yellow-500 focus:ring-yellow-500" ${profile.ai_access ? 'checked' : ''}>
+                <span class="ml-2 text-sm text-gray-300">AI Write Access</span>
+            </label>
+        </div>` : '';
 
     // SVG for the trash icon
     const trashIconSvg = `
@@ -125,6 +134,7 @@ function createProfileRow(profile, currentAuthUserId, loggedInUserRole) {
             <div class="col-span-12 md:col-span-2">
                 <label class="md:hidden text-xs font-bold oswald text-gray-400">ROLE</label>
                 ${roleSelectHtml}
+                ${aiAccessToggle}
             </div>
 
             <!-- === UPDATED ACTIONS BLOCK === -->
@@ -188,7 +198,7 @@ export async function loadUserProfiles() {
         // 1. Start building the query
         let query = _supabase
             .from('profiles')
-            .select('id, full_name, email, role');
+            .select('id, full_name, email, role, ai_access');
 
         // 2. Add filters based on the logged-in user's role
         if (currentUserRole === 'admin') {
@@ -317,9 +327,13 @@ async function handleProfileUpdate(button) {
     // If currentUserRole is 'owner', no checks are needed. They can do anything.
     // === END OF NEW CHECK ===
     
+    const aiAccessToggle = userRow.querySelector('.ai-access-toggle');
+    const aiAccess = aiAccessToggle ? aiAccessToggle.checked : false;
+
     const updateData = {
         full_name: newName,
-        role: newRole
+        role: newRole,
+        ai_access: aiAccess
     };
 
     button.disabled = true;

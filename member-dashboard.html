@@ -565,7 +565,7 @@
 
                 itemCard.addEventListener('click', () => {
                     const modalMediaHtml = isVideo
-                        ? `<video src="${item.imageUrl}" controls autoplay class="w-full max-h-[70vh] rounded-lg"></video>`
+                        ? `<video src="${item.imageUrl}" controls class="w-full max-h-[70vh] rounded-lg"></video>`
                         : `<img src="${item.imageUrl}" alt="${item.title}" class="w-full max-h-[70vh] object-contain rounded-lg">`;
                     openModal(item.title, modalMediaHtml, '5xl'); 
                 });

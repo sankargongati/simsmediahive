@@ -10,3 +10,7 @@ export const MEMBERS_BUCKET = 'member-images';
 
 export const defaultPlaceholder = 'https://placehold.co/800x600/1c1917/f59e0b?text=MEDIA';
 export const memberPlaceholder = 'https://placehold.co/200x200/292524/eab308?text=MEMBER';
+
+// AI Configuration
+export const DEEPSEEK_API_KEY = 'sk-3f0c4d1172444fcaa6f75063416a3f08'; // Replace with your actual DeepSeek API key
+export const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions'; // DeepSeek API endpoint

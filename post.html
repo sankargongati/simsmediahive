@@ -11,6 +11,10 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Marked.js Library for Markdown Rendering -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+
+
+
     <style>
         /* Your existing styles */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Oswald:wght@200..700&display=swap');
@@ -72,6 +76,31 @@
         <div id="post-content-container" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 post-content">
             <p>Loading content...</p>
         </div>
+
+        <!-- Rating Section -->
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
+            <div class="bg-gray-900 p-6 rounded-lg border border-gray-800">
+                <h3 class="text-xl font-bold text-yellow-500 oswald mb-4">Rate This Post</h3>
+                <div id="rating-display" class="flex items-center mb-4">
+                    <span class="text-gray-400 mr-4">Average Rating:</span>
+                    <div id="avg-stars" class="flex items-center mr-2"></div>
+                    <span id="avg-rating-text" class="text-gray-400"></span>
+                </div>
+                <div id="rating-input" class="flex items-center">
+                    <span class="text-gray-400 mr-4">Your Rating:</span>
+                    <div id="user-stars" class="flex items-center space-x-1 cursor-pointer">
+                        <i data-lucide="star" class="w-6 h-6 text-gray-500 hover:text-yellow-500" data-rating="1"></i>
+                        <i data-lucide="star" class="w-6 h-6 text-gray-500 hover:text-yellow-500" data-rating="2"></i>
+                        <i data-lucide="star" class="w-6 h-6 text-gray-500 hover:text-yellow-500" data-rating="3"></i>
+                        <i data-lucide="star" class="w-6 h-6 text-gray-500 hover:text-yellow-500" data-rating="4"></i>
+                        <i data-lucide="star" class="w-6 h-6 text-gray-500 hover:text-yellow-500" data-rating="5"></i>
+                    </div>
+                    <button id="submit-rating" class="ml-4 px-4 py-2 bg-yellow-500 text-black font-semibold rounded-md hover:bg-yellow-600 disabled:opacity-50">Submit</button>
+                </div>
+                <div id="rating-status" class="text-sm mt-2"></div>
+            </div>
+        </div>
+
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 pt-8 border-t border-gray-800 text-center">
             <a href="/blog.html" class="inline-flex items-center px-8 py-3 bg-yellow-500 text-black font-semibold uppercase tracking-wider text-sm rounded-full transition duration-300 hover:bg-yellow-600 shadow-lg hover:shadow-yellow-500/50">
                 <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i>
@@ -175,68 +204,468 @@
             return videoExtensions.some(ext => lowerUrl.endsWith(ext));
         }
 
+        function extractYouTubeVideoId(url) {
+            const patterns = [
+                /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+                /youtube\.com\/v\/([a-zA-Z0-9_-]{11})/,
+                /(?:youtu\.be\/)([a-zA-Z0-9_-]{11})/
+            ];
+
+            for (const pattern of patterns) {
+                const match = url.match(pattern);
+                if (match && match[1]) {
+                    return match[1];
+                }
+            }
+            return null;
+        }
+
+        function isYouTubeUrl(url) {
+            return url.includes('youtube.com') || url.includes('youtu.be');
+        }
+
+        // --- Helper Function to Get Average Rating with Advanced Error Handling ---
+        async function getAverageRating(postId) {
+            // Input validation
+            if (!postId || typeof postId !== 'number' || postId <= 0) {
+                console.warn("Invalid postId provided to getAverageRating:", postId);
+                return 0;
+            }
+
+            try {
+                const { data, error } = await _supabase
+                    .from('blogPosts')
+                    .select('average_rating')
+                    .eq('id', postId)
+                    .single();
+
+                if (error) {
+                    // Handle specific Supabase errors
+                    if (error.code === 'PGRST116') {
+                        console.warn(`Post ${postId} not found for rating fetch`);
+                        return 0;
+                    }
+                    throw error;
+                }
+
+                // Validate returned data
+                const rating = data?.average_rating;
+                if (typeof rating !== 'number' || rating < 0 || rating > 5) {
+                    console.warn(`Invalid rating value for post ${postId}:`, rating);
+                    return 0;
+                }
+
+                return rating;
+            } catch (error) {
+                console.error(`Error fetching rating for post ${postId}:`, error);
+                // Return fallback value instead of throwing to prevent UI breakage
+                return 0;
+            }
+        }
+
+        // --- Function to Generate Star Display with Validation ---
+        function generateStars(rating) {
+            // Input validation
+            if (typeof rating !== 'number' || isNaN(rating)) {
+                console.warn("Invalid rating provided to generateStars:", rating);
+                rating = 0;
+            }
+
+            // Clamp rating between 0 and 5
+            rating = Math.max(0, Math.min(5, rating));
+
+            const fullStars = Math.floor(rating);
+            const halfStar = rating % 1 >= 0.5;
+            const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+
+            let stars = '';
+
+            // Generate full stars
+            for (let i = 0; i < fullStars; i++) {
+                stars += '<i data-lucide="star" class="w-4 h-4 text-yellow-500 fill-current" aria-label="Full star"></i>';
+            }
+
+            // Generate half star if needed
+            if (halfStar) {
+                stars += '<i data-lucide="star-half" class="w-4 h-4 text-yellow-500 fill-current" aria-label="Half star"></i>';
+            }
+
+            // Generate empty stars
+            for (let i = 0; i < emptyStars; i++) {
+                stars += '<i data-lucide="star" class="w-4 h-4 text-gray-500" aria-label="Empty star"></i>';
+            }
+
+            return stars;
+        }
+
+        // --- Function to Submit Rating with Advanced Error Handling ---
+        async function submitRating(postId, newRating) {
+            // Input validation
+            if (!postId || typeof postId !== 'number' || postId <= 0) {
+                console.error("Invalid postId provided to submitRating:", postId);
+                return false;
+            }
+
+            if (!newRating || typeof newRating !== 'number' || newRating < 1 || newRating > 5) {
+                console.error("Invalid rating provided to submitRating:", newRating);
+                return false;
+            }
+
+            try {
+                // Fetch current average and count with error handling
+                const { data: post, error: fetchError } = await _supabase
+                    .from('blogPosts')
+                    .select('average_rating, rating_count')
+                    .eq('id', postId)
+                    .single();
+
+                if (fetchError) {
+                    // Handle specific errors
+                    if (fetchError.code === 'PGRST116') {
+                        console.error(`Post ${postId} not found for rating submission`);
+                        return false;
+                    }
+                    throw new Error(`Failed to fetch current rating data: ${fetchError.message}`);
+                }
+
+                // Validate fetched data
+                if (!post) {
+                    console.error(`No data returned for post ${postId}`);
+                    return false;
+                }
+
+                const currentAvg = (typeof post.average_rating === 'number' && !isNaN(post.average_rating)) ? post.average_rating : 0;
+                const currentCount = (typeof post.rating_count === 'number' && !isNaN(post.rating_count)) ? post.rating_count : 0;
+
+                // Validate ranges
+                if (currentAvg < 0 || currentAvg > 5) {
+                    console.warn(`Invalid current average for post ${postId}:`, currentAvg);
+                    // Continue with 0 as fallback
+                }
+
+                if (currentCount < 0) {
+                    console.warn(`Invalid current count for post ${postId}:`, currentCount);
+                    // Continue with 0 as fallback
+                }
+
+                // Calculate new average safely
+                const newCount = currentCount + 1;
+                const newAvg = ((currentAvg * currentCount) + newRating) / newCount;
+
+                // Validate new average
+                if (isNaN(newAvg) || newAvg < 0 || newAvg > 5) {
+                    console.error(`Calculated invalid new average for post ${postId}:`, newAvg);
+                    return false;
+                }
+
+                // Update the post with retry logic
+                const maxRetries = 3;
+                let attempt = 0;
+                let updateError;
+
+                while (attempt < maxRetries) {
+                    try {
+                        const { error } = await _supabase
+                            .from('blogPosts')
+                            .update({
+                                average_rating: parseFloat(newAvg.toFixed(2)),
+                                rating_count: newCount
+                            })
+                            .eq('id', postId);
+
+                        if (!error) {
+                            console.log(`Successfully updated rating for post ${postId}: ${newAvg.toFixed(2)} (${newCount} ratings)`);
+                            return true;
+                        }
+
+                        updateError = error;
+                        attempt++;
+
+                        if (attempt < maxRetries) {
+                            console.warn(`Update attempt ${attempt} failed for post ${postId}, retrying...`);
+                            await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // Exponential backoff
+                        }
+                    } catch (retryError) {
+                        updateError = retryError;
+                        attempt++;
+                        if (attempt < maxRetries) {
+                            console.warn(`Update attempt ${attempt} failed for post ${postId}, retrying...`);
+                            await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+                        }
+                    }
+                }
+
+                // All retries failed
+                console.error(`Failed to update rating for post ${postId} after ${maxRetries} attempts:`, updateError);
+                return false;
+
+            } catch (error) {
+                console.error(`Error submitting rating for post ${postId}:`, error);
+                return false;
+            }
+        }
+
         async function loadSinglePost() {
             try {
-                // 1. Get ID from URL
+                // 1. Get ID from URL with validation
                 const urlParams = new URLSearchParams(window.location.search);
-                const postId = urlParams.get('id');
-                if (!postId) throw new Error("No post ID provided.");
+                const postIdParam = urlParams.get('id');
 
-                // 2. Fetch the post
-                const { data: post, error } = await _supabase.from('blogPosts').select('*').eq('id', postId).single();
-                if (error) throw error;
-                if (!post) throw new Error("Post not found.");
+                if (!postIdParam) {
+                    throw new Error("No post ID provided in URL.");
+                }
 
-                // 3. Fill page data
-                document.title = post.title + " | SIMS Media Hive";
-                postTitle.textContent = post.title;
-                postCategory.textContent = "A Post By " + post.author;
-                postAuthor.textContent = "By " + post.author;
-                postDate.textContent = new Date(post.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                const postId = parseInt(postIdParam, 10);
+                if (isNaN(postId) || postId <= 0) {
+                    throw new Error("Invalid post ID format.");
+                }
 
-                // 4. Create and add the header media (Image OR Video)
+                // 2. Fetch the post with error handling
+                const { data: post, error } = await _supabase
+                    .from('blogPosts')
+                    .select('*')
+                    .eq('id', postId)
+                    .single();
+
+                if (error) {
+                    // Handle specific Supabase errors
+                    if (error.code === 'PGRST116') {
+                        throw new Error("Post not found.");
+                    }
+                    throw new Error(`Database query failed: ${error.message}`);
+                }
+
+                if (!post) {
+                    throw new Error("Post data is empty.");
+                }
+
+                // 3. Validate and fill page data
+                const safeTitle = (post.title || 'Untitled Post').replace(/[<>]/g, '');
+                const safeAuthor = (post.author || 'Unknown Author').replace(/[<>]/g, '');
+
+                document.title = safeTitle + " | SIMS Media Hive";
+                postTitle.textContent = safeTitle;
+                postCategory.textContent = "A Post By " + safeAuthor;
+                postAuthor.textContent = "By " + safeAuthor;
+
+                // Format date safely
+                let formattedDate = 'Unknown date';
+                try {
+                    if (post.created_at) {
+                        formattedDate = new Date(post.created_at).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        });
+                    }
+                } catch (dateError) {
+                    console.warn(`Invalid date format for post ${postId}:`, post.created_at);
+                }
+                postDate.textContent = formattedDate;
+
+                // 4. Create and add the header media (Image OR Video) with validation
                 const mediaUrl = post.imageUrl;
                 let mediaElementHTML = '';
 
-                if (isVideoUrl(mediaUrl)) {
-                    // Create <video> tag
-                    mediaElementHTML = `
-                        <video
-                            src="${mediaUrl}"
-                            alt="Header video for ${post.title}"
-                            class="w-full h-auto max-h-[600px] object-cover rounded-xl shadow-2xl border-2 border-gray-800"
-                            controls loop muted autoplay playsinline preload="metadata"
-                        >
-                            Your browser doesn't support HTML video. Here is a <a href="${mediaUrl}" target="_blank" class="text-yellow-400 underline">link to the video</a> instead.
-                        </video>
-                    `;
-                } else if (mediaUrl) {
-                     // Create <img> tag
-                     mediaElementHTML = `
-                        <img src="${mediaUrl}"
-                             alt="Header image for ${post.title}"
-                             class="w-full h-auto max-h-[600px] object-cover rounded-xl shadow-2xl border-2 border-gray-800">
-                    `;
-                } else {
-                    mediaElementHTML = '<p class="text-gray-500 text-center">No header media for this post.</p>';
+                try {
+                    if (isVideoUrl(mediaUrl) && !isYouTubeUrl(mediaUrl)) {
+                        // Create <video> tag with security attributes for regular videos
+                        mediaElementHTML = `
+                            <video
+                                src="${mediaUrl}"
+                                alt="Header video for ${safeTitle}"
+                                class="w-full h-auto max-h-[600px] object-cover rounded-xl shadow-2xl border-2 border-gray-800"
+                                controls loop muted playsinline preload="metadata"
+                            >
+                                Your browser doesn't support HTML video. Here is a <a href="${mediaUrl}" target="_blank" rel="noopener noreferrer" class="text-yellow-400 underline">link to the video</a> instead.
+                            </video>
+                        `;
+                    } else if (isYouTubeUrl(mediaUrl)) {
+                        // Handle YouTube embedding
+                        const videoId = extractYouTubeVideoId(mediaUrl);
+                        if (videoId) {
+                            // Use thumbnail with play button for YouTube videos to ensure they always play
+                            const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+                            mediaElementHTML = `
+                                <div class="relative w-full cursor-pointer youtube-play-btn" style="padding-bottom: 56.25%; height: 0; max-height: 600px;" data-youtube-url="${mediaUrl}">
+                                    <img src="${thumbnailUrl}" alt="Video thumbnail" class="absolute top-0 left-0 w-full h-full object-cover rounded-xl shadow-2xl border-2xl border-gray-800" loading="lazy">
+                                    <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 hover:bg-opacity-50 transition-all duration-300 rounded-xl">
+                                        <div class="bg-black bg-opacity-70 rounded-full p-4">
+                                            <svg class="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            mediaElementHTML = '<p class="text-gray-500 text-center">Invalid YouTube URL.</p>';
+                        }
+                    } else if (mediaUrl) {
+                         // Create <img> tag with error handling
+                         mediaElementHTML = `
+                            <img src="${mediaUrl}"
+                                 alt="Header image for ${safeTitle}"
+                                 class="w-full h-auto max-h-[600px] object-cover rounded-xl shadow-2xl border-2 border-gray-800"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <p class="text-gray-500 text-center hidden">Image failed to load.</p>
+                        `;
+                    } else {
+                        mediaElementHTML = '<p class="text-gray-500 text-center">No header media for this post.</p>';
+                    }
+                } catch (mediaError) {
+                    console.warn(`Error processing media for post ${postId}:`, mediaError);
+                    mediaElementHTML = '<p class="text-gray-500 text-center">Error loading media.</p>';
                 }
+
                 postMediaContainer.innerHTML = mediaElementHTML;
 
+                // 5. Render Markdown content to HTML using Marked.js with safety
+                try {
+                    marked.setOptions({
+                        breaks: true,
+                        gfm: true,
+                        headerIds: false, // Prevent ID conflicts
+                        mangle: false     // Prevent email mangling
+                    });
 
-                // 5. Render Markdown content to HTML using Marked.js
-                 marked.setOptions({ breaks: true, gfm: true });
-                 // Ensure Marked.js processes the content safely if needed in future
-                 // Consider using DOMPurify: DOMPurify.sanitize(marked.parse(post.content || ''))
-                postContentContainer.innerHTML = marked.parse(post.content || ''); // Render the content
+                    const content = post.content || '';
+                    // Basic sanitization - remove script tags
+                    const sanitizedContent = content.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+
+                    postContentContainer.innerHTML = marked.parse(sanitizedContent);
+                } catch (markdownError) {
+                    console.error(`Error rendering markdown for post ${postId}:`, markdownError);
+                    postContentContainer.innerHTML = '<p class="text-red-500">Error rendering content.</p>';
+                }
+
+                // 6. Load and display ratings with error handling
+                try {
+                    const avgRating = await getAverageRating(postId);
+                    const avgStars = generateStars(avgRating);
+                    document.getElementById('avg-stars').innerHTML = avgStars;
+                    document.getElementById('avg-rating-text').textContent = `(${avgRating.toFixed(1)})`;
+                } catch (ratingError) {
+                    console.error(`Error loading ratings for post ${postId}:`, ratingError);
+                    document.getElementById('avg-stars').innerHTML = '<span class="text-gray-500">Rating unavailable</span>';
+                    document.getElementById('avg-rating-text').textContent = '';
+                }
+
+                // 7. Setup rating interaction after icons are rendered
+                setTimeout(() => {
+                    try {
+                        lucide.createIcons();
+
+                        // Use requestAnimationFrame to ensure DOM is updated
+                        requestAnimationFrame(() => {
+                            // Setup rating interaction after icons are rendered
+                            let selectedRating = 0;
+                            const userStars = document.querySelectorAll('#user-stars i');
+                            const submitBtn = document.getElementById('submit-rating');
+                            const statusEl = document.getElementById('rating-status');
+
+                            if (!userStars || userStars.length === 0) {
+                                console.warn("Rating stars not found in DOM");
+                                return;
+                            }
+
+                            if (!submitBtn || !statusEl) {
+                                console.warn("Rating submit button or status element not found");
+                                return;
+                            }
+
+                            // Reset button state
+                            submitBtn.disabled = true;
+                            statusEl.textContent = '';
+                            statusEl.className = 'text-sm mt-2';
+
+                            userStars.forEach((star, index) => {
+                                star.addEventListener('click', () => {
+                                    selectedRating = index + 1;
+                                    userStars.forEach((s, i) => {
+                                        if (i <= index) {
+                                            s.classList.remove('text-gray-500');
+                                            s.classList.add('text-yellow-500', 'fill-current');
+                                        } else {
+                                            s.classList.remove('text-yellow-500', 'fill-current');
+                                            s.classList.add('text-gray-500');
+                                        }
+                                    });
+                                    submitBtn.disabled = false;
+                                });
+                            });
+
+                            submitBtn.addEventListener('click', async () => {
+                                if (selectedRating < 1 || selectedRating > 5) {
+                                    statusEl.textContent = 'Please select a valid rating (1-5 stars).';
+                                    statusEl.className = 'text-sm mt-2 text-red-500';
+                                    return;
+                                }
+
+                                submitBtn.disabled = true;
+                                statusEl.textContent = 'Submitting rating...';
+                                statusEl.className = 'text-sm mt-2 text-blue-500';
+
+                                try {
+                                    const success = await submitRating(postId, selectedRating);
+                                    if (success) {
+                                        statusEl.textContent = 'Rating submitted successfully!';
+                                        statusEl.className = 'text-sm mt-2 text-green-500';
+
+                                        // Reload average rating
+                                        const newAvg = await getAverageRating(postId);
+                                        const newStars = generateStars(newAvg);
+                                        document.getElementById('avg-stars').innerHTML = newStars;
+                                        document.getElementById('avg-rating-text').textContent = `(${newAvg.toFixed(1)})`;
+
+                                        // Reset selection
+                                        selectedRating = 0;
+                                        userStars.forEach((s) => {
+                                            s.classList.remove('text-yellow-500', 'fill-current');
+                                            s.classList.add('text-gray-500');
+                                        });
+                                    } else {
+                                        statusEl.textContent = 'Failed to submit rating. Please check your connection and try again.';
+                                        statusEl.className = 'text-sm mt-2 text-red-500';
+                                        submitBtn.disabled = false;
+                                    }
+                                } catch (submitError) {
+                                    console.error('Error in rating submission handler:', submitError);
+                                    statusEl.textContent = 'An unexpected error occurred. Please try again.';
+                                    statusEl.className = 'text-sm mt-2 text-red-500';
+                                    submitBtn.disabled = false;
+                                }
+                            });
+                        });
+
+                    } catch (iconError) {
+                        console.warn("Error rendering icons:", iconError);
+                    }
+                }, 100);
 
             } catch (error) {
                 console.error("Error loading post:", error);
+
+                // Safe error display
                 postTitle.textContent = "Error Loading Post";
-                postCategory.textContent = ""; postAuthor.textContent = ""; postDate.textContent = "";
+                postCategory.textContent = "";
+                postAuthor.textContent = "";
+                postDate.textContent = "";
                 postMediaContainer.innerHTML = "";
-                postContentContainer.innerHTML = `<p class="text-center text-red-500 text-lg">Could not load post: ${error.message}</p>`;
+                postContentContainer.innerHTML = `<p class="text-center text-red-500 text-lg">Could not load post: ${error.message || 'Unknown error'}</p>`;
+
+                // Hide rating section on error
+                const ratingSection = document.querySelector('.bg-gray-900.p-6.rounded-lg');
+                if (ratingSection) {
+                    ratingSection.style.display = 'none';
+                }
             } finally {
-                lucide.createIcons();
+                // Always attempt to render icons
+                try {
+                    // Icons are already rendered above in step 7
+                } catch (iconError) {
+                    console.warn("Error rendering icons:", iconError);
+                }
             }
         }
 
@@ -246,9 +675,144 @@
         const mobileMenu = document.getElementById('mobile-menu');
         if (menuButton) { const menuIcon = menuButton.querySelector('i'); if (mobileMenu && menuIcon) { menuButton.addEventListener('click', () => { mobileMenu.classList.toggle('hidden'); document.body.classList.toggle('overflow-hidden'); const isOpen = !mobileMenu.classList.contains('hidden'); menuIcon.setAttribute('data-lucide', isOpen ? 'x' : 'menu'); lucide.createIcons(); }); document.querySelectorAll('#mobile-menu a').forEach(link => { link.addEventListener('click', () => { mobileMenu.classList.add('hidden'); document.body.classList.remove('overflow-hidden'); menuIcon.setAttribute('data-lucide', 'menu'); lucide.createIcons(); }); }); } }
 
+
+
+        // --- YouTube Modal for Post Page ---
+        let youtubeModal = null;
+        let youtubePlayerContainer = null;
+
+        function createYouTubeModal() {
+            if (youtubeModal) return; // Already created
+
+            youtubeModal = document.createElement('div');
+            youtubeModal.id = 'youtube-modal-post';
+            youtubeModal.className = 'fixed inset-0 bg-black bg-opacity-75 z-50 hidden flex items-center justify-center p-4';
+            youtubeModal.innerHTML = `
+                <div class="bg-gray-900 rounded-lg max-w-4xl w-full max-h-[90vh] relative">
+                    <button id="youtube-modal-close-post" class="absolute -top-4 -right-4 bg-red-600 hover:bg-red-700 text-white rounded-full w-8 h-8 flex items-center justify-center z-10">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                    <div id="youtube-player-container-post" class="relative w-full" style="padding-bottom: 56.25%;">
+                        <!-- YouTube iframe will be inserted here -->
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(youtubeModal);
+
+            // Add event listeners
+            const closeBtn = document.getElementById('youtube-modal-close-post');
+            youtubePlayerContainer = document.getElementById('youtube-player-container-post');
+
+            closeBtn.addEventListener('click', closeYouTubeModal);
+            youtubeModal.addEventListener('click', (e) => {
+                if (e.target === youtubeModal) {
+                    closeYouTubeModal();
+                }
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !youtubeModal.classList.contains('hidden')) {
+                    closeYouTubeModal();
+                }
+            });
+
+            // Initialize Lucide icons
+            lucide.createIcons();
+        }
+
+        function openYouTubeModal(videoUrl) {
+            if (!youtubeModal || !youtubePlayerContainer) {
+                createYouTubeModal();
+            }
+
+            // Convert YouTube URL to embed URL
+            let embedUrl = videoUrl;
+            if (videoUrl.includes('youtube.com/watch?v=')) {
+                embedUrl = videoUrl.replace('youtube.com/watch?v=', 'youtube.com/embed/');
+            } else if (videoUrl.includes('youtu.be/')) {
+                const videoId = videoUrl.split('youtu.be/')[1].split('?')[0].split('&')[0];
+                embedUrl = `https://www.youtube.com/embed/${videoId}`;
+            } else if (videoUrl.includes('youtube.com/embed/')) {
+                embedUrl = videoUrl;
+            } else {
+                console.error('Unsupported YouTube URL format:', videoUrl);
+                alert('Unsupported YouTube URL format. Please use a standard YouTube URL.');
+                return;
+            }
+
+            // Add autoplay and other params
+            const url = new URL(embedUrl);
+            url.searchParams.set('autoplay', '1');
+            url.searchParams.set('rel', '0');
+            url.searchParams.set('modestbranding', '1');
+
+            // Create YouTube embed iframe
+            const iframe = document.createElement('iframe');
+            iframe.src = url.toString();
+            iframe.width = '100%';
+            iframe.height = '100%';
+            iframe.frameBorder = '0';
+            iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+            iframe.allowFullscreen = true;
+            iframe.className = 'absolute inset-0 w-full h-full rounded-lg';
+
+            // Clear previous content and add new iframe
+            youtubePlayerContainer.innerHTML = '';
+            youtubePlayerContainer.appendChild(iframe);
+
+            // Show modal
+            youtubeModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeYouTubeModal() {
+            if (!youtubeModal || !youtubePlayerContainer) return;
+
+            // Stop video by clearing iframe
+            youtubePlayerContainer.innerHTML = '';
+
+            // Hide modal
+            youtubeModal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // --- Add YouTube play button event listener ---
+        document.addEventListener('click', (e) => {
+            const playBtn = e.target.closest('.youtube-play-btn');
+            if (playBtn) {
+                e.preventDefault();
+                const videoUrl = playBtn.dataset.youtubeUrl;
+                if (videoUrl) {
+                    playYouTubeVideo(playBtn, videoUrl);
+                }
+            }
+        });
+
+        function playYouTubeVideo(container, videoUrl) {
+            const videoId = extractYouTubeVideoId(videoUrl);
+            if (!videoId) {
+                console.error('Could not extract video ID from URL:', videoUrl);
+                container.innerHTML = '<div class="flex items-center justify-center h-full text-red-500 bg-gray-800 rounded-xl">Invalid YouTube URL</div>';
+                return;
+            }
+
+            // Replace thumbnail with iframe embed
+            const iframeHtml = `
+                <iframe src="https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&playsinline=1"
+                        width="100%" height="100%" frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen
+                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 0.75rem;">
+                </iframe>
+            `;
+
+            container.innerHTML = iframeHtml;
+            container.style.paddingBottom = '56.25%';
+            container.style.height = '0';
+            container.style.position = 'relative';
+        }
+
         // --- Run Supabase logic ---
         document.addEventListener('DOMContentLoaded', loadSinglePost);
     </script>
 </body>
 </html>
-

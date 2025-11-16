@@ -216,6 +216,22 @@
             return videoExtensions.some(ext => lowerUrl.endsWith(ext));
         }
 
+        function extractYouTubeVideoId(url) {
+            const patterns = [
+                /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+                /youtube\.com\/v\/([a-zA-Z0-9_-]{11})/,
+                /(?:youtu\.be\/)([a-zA-Z0-9_-]{11})/
+            ];
+
+            for (const pattern of patterns) {
+                const match = url.match(pattern);
+                if (match && match[1]) {
+                    return match[1];
+                }
+            }
+            return null;
+        }
+
         async function generateVideoThumbnail(videoUrl) {
             return new Promise((resolve) => {
                 const video = document.createElement('video');
@@ -282,73 +298,217 @@
             });
         }
 
-        // --- SUPABASE BLOG POST LOGIC ---
+        // --- Helper Function to Get Average Rating with Advanced Error Handling ---
+        async function getAverageRating(postId) {
+            // Input validation
+            if (!postId || typeof postId !== 'number' || postId <= 0) {
+                console.warn("Invalid postId provided to getAverageRating:", postId);
+                return 0;
+            }
+
+            try {
+                const { data, error } = await _supabase
+                    .from('blogPosts')
+                    .select('average_rating')
+                    .eq('id', postId)
+                    .single();
+
+                if (error) {
+                    // Handle specific Supabase errors
+                    if (error.code === 'PGRST116') {
+                        console.warn(`Post ${postId} not found for rating fetch`);
+                        return 0;
+                    }
+                    throw error;
+                }
+
+                // Validate returned data
+                const rating = data?.average_rating;
+                if (typeof rating !== 'number' || rating < 0 || rating > 5) {
+                    console.warn(`Invalid rating value for post ${postId}:`, rating);
+                    return 0;
+                }
+
+                return rating;
+            } catch (error) {
+                console.error(`Error fetching rating for post ${postId}:`, error);
+                // Return fallback value instead of throwing to prevent UI breakage
+                return 0;
+            }
+        }
+
+        // --- Function to Generate Star Display with Validation ---
+        function generateStars(rating) {
+            // Input validation
+            if (typeof rating !== 'number' || isNaN(rating)) {
+                console.warn("Invalid rating provided to generateStars:", rating);
+                rating = 0;
+            }
+
+            // Clamp rating between 0 and 5
+            rating = Math.max(0, Math.min(5, rating));
+
+            const fullStars = Math.floor(rating);
+            const halfStar = rating % 1 >= 0.5;
+            const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+
+            let stars = '';
+
+            // Generate full stars
+            for (let i = 0; i < fullStars; i++) {
+                stars += '<i data-lucide="star" class="w-4 h-4 text-yellow-500 fill-current" aria-label="Full star"></i>';
+            }
+
+            // Generate half star if needed
+            if (halfStar) {
+                stars += '<i data-lucide="star-half" class="w-4 h-4 text-yellow-500 fill-current" aria-label="Half star"></i>';
+            }
+
+            // Generate empty stars
+            for (let i = 0; i < emptyStars; i++) {
+                stars += '<i data-lucide="star" class="w-4 h-4 text-gray-500" aria-label="Empty star"></i>';
+            }
+
+            return stars;
+        }
+
+        // --- SUPABASE BLOG POST LOGIC with Advanced Error Handling ---
         async function loadBlogPosts() {
+            // Validate DOM elements
             if (!postsContainer) {
                 console.error("Blog posts container not found!");
                 return;
             }
+
+            // Set loading state
             postsContainer.innerHTML = '<p class="text-gray-400 col-span-full text-center">Loading articles...</p>';
+
             try {
+                // Fetch blog posts with timeout and retry logic
                 const { data, error } = await _supabase
                     .from('blogPosts')
                     .select('id, title, author, imageUrl, created_at')
                     .order('created_at', { ascending: false });
 
-                if (error) throw error;
-                postsContainer.innerHTML = ''; 
+                if (error) {
+                    throw new Error(`Database query failed: ${error.message}`);
+                }
 
-                if (data.length === 0) {
+                // Clear loading state
+                postsContainer.innerHTML = '';
+
+                // Handle empty results
+                if (!data || data.length === 0) {
                     postsContainer.innerHTML = '<p class="text-gray-400 col-span-full text-center">No articles have been published yet.</p>';
                     return;
                 }
-                
-                const postPromises = data.map(async (post) => {
-                    const postDate = new Date(post.created_at).toLocaleDateString('en-US', {
-                        month: 'short', day: 'numeric', year: 'numeric'
-                    });
 
-                    let imageSource = defaultPlaceholder; 
-                    if (post.imageUrl) {
-                        if (isVideoUrl(post.imageUrl)) {
-                            const thumbnailUrl = await generateVideoThumbnail(post.imageUrl);
-                            if (thumbnailUrl) {
-                                imageSource = thumbnailUrl; 
-                            } else {
-                                imageSource = defaultPlaceholder; 
-                                console.warn(`Using placeholder for video: ${post.title}`);
-                            }
-                        } else {
-                            imageSource = post.imageUrl;
+                // Process posts with error handling for each post
+                const postPromises = data.map(async (post, index) => {
+                    try {
+                        // Validate post data
+                        if (!post || !post.id || !post.title) {
+                            console.warn(`Invalid post data at index ${index}:`, post);
+                            return ''; // Skip invalid posts
                         }
-                    }
 
-                    return `
-                        <a href="post.html?id=${post.id}" class="block post-card rounded-lg overflow-hidden transition duration-300 hover:shadow-yellow-500/20 shadow-xl">
-                            <img src="${imageSource}"
-                                 onerror="this.onerror=null;this.src='${defaultPlaceholder}';"
-                                 alt="Preview for ${post.title}" class="w-full h-48 object-cover bg-gray-700">
-                            <div class="p-6">
-                                <h3 class="text-xl font-bold text-white oswald mb-2 hover:text-yellow-400 transition duration-200">
-                                    ${post.title}
-                                </h3>
-                                <p class="text-sm text-gray-400">
-                                    By ${post.author}
-                                </p>
-                                <p class="text-xs text-gray-500 mt-4">${postDate}</p>
-                            </div>
-                        </a>
-                    `;
+                        // Format date safely
+                        let postDate = 'Unknown date';
+                        try {
+                            postDate = new Date(post.created_at).toLocaleDateString('en-US', {
+                                month: 'short', day: 'numeric', year: 'numeric'
+                            });
+                        } catch (dateError) {
+                            console.warn(`Invalid date for post ${post.id}:`, post.created_at);
+                        }
+
+                        // Handle image processing
+                        let imageSource = defaultPlaceholder;
+                        if (post.imageUrl) {
+                            try {
+                                // Always check for YouTube URL first, regardless of category
+                                if (post.imageUrl.includes('youtube.com') || post.imageUrl.includes('youtu.be')) {
+                                    // Extract YouTube video ID and create thumbnail URL
+                                    const videoId = extractYouTubeVideoId(post.imageUrl);
+                                    if (videoId) {
+                                        imageSource = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+                                    } else {
+                                        imageSource = defaultPlaceholder;
+                                    }
+                                } else if (isVideoUrl(post.imageUrl)) {
+                                    // For non-YouTube videos, generate thumbnail
+                                    const thumbnailUrl = await generateVideoThumbnail(post.imageUrl);
+                                    if (thumbnailUrl) {
+                                        imageSource = thumbnailUrl;
+                                    } else {
+                                        console.warn(`Using placeholder for video: ${post.title}`);
+                                    }
+                                } else {
+                                    // For photos and other non-video items
+                                    imageSource = post.imageUrl;
+                                }
+                            } catch (imageError) {
+                                console.warn(`Error processing image for post ${post.id}:`, imageError);
+                                // Keep default placeholder
+                            }
+                        }
+
+                        // Get rating with error handling
+                        const avgRating = await getAverageRating(post.id);
+                        const stars = generateStars(avgRating);
+
+                        // Sanitize content for HTML
+                        const safeTitle = (post.title || 'Untitled').replace(/[<>]/g, '');
+                        const safeAuthor = (post.author || 'Unknown').replace(/[<>]/g, '');
+
+                        return `
+                            <a href="post.html?id=${post.id}" class="block post-card rounded-lg overflow-hidden transition duration-300 hover:shadow-yellow-500/20 shadow-xl">
+                                <img src="${imageSource}"
+                                     onerror="this.onerror=null;this.src='${defaultPlaceholder}';"
+                                     alt="Preview for ${safeTitle}" class="w-full h-48 object-cover bg-gray-700">
+                                <div class="p-6">
+                                    <h3 class="text-xl font-bold text-white oswald mb-2 hover:text-yellow-400 transition duration-200">
+                                        ${safeTitle}
+                                    </h3>
+                                    <p class="text-sm text-gray-400">
+                                        By ${safeAuthor}
+                                    </p>
+                                    <div class="flex items-center mt-2">
+                                        <div class="flex items-center mr-2">${stars}</div>
+                                        <span class="text-xs text-gray-500">(${avgRating.toFixed(1)})</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-4">${postDate}</p>
+                                </div>
+                            </a>
+                        `;
+                    } catch (postError) {
+                        console.error(`Error processing post ${post?.id || index}:`, postError);
+                        return ''; // Skip problematic posts
+                    }
                 });
 
-                const postHTMLArray = await Promise.all(postPromises);
-                postsContainer.innerHTML = postHTMLArray.join('');
+                // Wait for all posts to be processed
+                const postHTMLArray = await Promise.allSettled(postPromises);
+                const validPosts = postHTMLArray
+                    .filter(result => result.status === 'fulfilled' && result.value)
+                    .map(result => result.value);
+
+                if (validPosts.length === 0) {
+                    postsContainer.innerHTML = '<p class="text-gray-400 col-span-full text-center">Unable to load articles. Please try again later.</p>';
+                } else {
+                    postsContainer.innerHTML = validPosts.join('');
+                }
 
             } catch(error) {
                 console.error("Error loading blog posts:", error);
-                postsContainer.innerHTML = `<p class="text-center text-red-500 text-lg col-span-full">Could not load articles. Error: ${error.message}</p>`;
+                postsContainer.innerHTML = `<p class="text-center text-red-500 text-lg col-span-full">Could not load articles. Please check your connection and try again.</p>`;
             } finally {
-                 lucide.createIcons();
+                // Always re-render icons
+                try {
+                    lucide.createIcons();
+                } catch (iconError) {
+                    console.warn("Error rendering icons:", iconError);
+                }
             }
         }
 

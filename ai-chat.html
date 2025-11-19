@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant | SIMS Media Hive</title>
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Oswald:wght@200..700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Oswald:wght@200..700&display=swap"></noscript>
+    
+    <!-- Inline critical CSS -->
+    <style>
+        :root {
+            --primary-color: #eab308; /* Tailwind yellow-500 equivalent */
+            --dark-bg: #0d0d0d;
+            --mid-bg: #1a1a1a;
+            --text-light: #f3f4f6;
+            --text-muted: #9ca3af;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .oswald {
+            font-family: 'Oswald', sans-serif;
+        }
+        
+        /* Chat container */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .chat-header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #374151;
+            margin-bottom: 20px;
+        }
+
+        .chat-header h1 {
+            font-size: 2rem;
+            margin: 0;
+            color: var(--primary-color);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background-color: var(--mid-bg);
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            margin-bottom: 10px;
+            position: relative;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-message {
+            background-color: var(--primary-color);
+            color: #000;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .ai-message {
+            background-color: #374151;
+            color: var(--text-light);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-sender {
+            font-weight: bold;
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+        }
+
+        .user-message .message-sender {
+            color: #000;
+        }
+
+        .ai-message .message-sender {
+            color: var(--primary-color);
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #374151;
+            border-radius: 24px;
+            background-color: var(--mid-bg);
+            color: var(--text-light);
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .chat-input:focus {
+            border-color: var(--primary-color);
+        }
+
+        .send-button {
+            background-color: var(--primary-color);
+            color: #000;
+            border: none;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+        }
+
+        .send-button:hover {
+            background-color: #d9a007;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 10px 15px;
+            background-color: #374151;
+            border-radius: 18px;
+            align-self: flex-start;
+            margin-bottom: 10px;
+            color: var(--text-muted);
+        }
+
+        .typing-indicator.active {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--text-muted);
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: 0s; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-5px); }
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .chat-container {
+                padding: 10px;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+            
+            .chat-header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+    
+    <!-- Load Tailwind CSS asynchronously -->
+    <script>
+        // Load Tailwind CSS asynchronously
+        (function() {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.tailwindcss.com';
+            script.async = true;
+            document.head.appendChild(script);
+        })();
+    </script>
+    
+    <!-- Load Lucide icons asynchronously -->
+    <script>
+        // Load Lucide icons asynchronously
+        (function() {
+            const script = document.createElement('script');
+            script.src = 'https://unpkg.com/lucide@latest/dist/umd/lucide.js';
+            script.async = true;
+            script.onload = function() {
+                lucide.createIcons();
+            };
+            document.head.appendChild(script);
+        })();
+    </script>
+</head>
+<body class="antialiased">
+    <div class="chat-container">
+        <header class="chat-header">
+            <h1 class="oswald">SIMS Media Hive AI Assistant</h1>
+            <p>Ask me anything about our creative projects, services, or club information!</p>
+        </header>
+
+        <div class="chat-messages" id="chat-messages">
+            <div class="welcome-message">
+                Hello! I'm your SIMS Media Hive assistant. How can I help you today?
+            </div>
+        </div>
+
+        <div class="typing-indicator" id="typing-indicator">
+            <span>AI is typing</span>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+        </div>
+
+        <div class="chat-input-container">
+            <input type="text" class="chat-input" id="user-input" placeholder="Type your message here..." autocomplete="off">
+            <button class="send-button" id="send-button">
+                <i data-lucide="send" class="w-5 h-5"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // DOM elements
+        const chatMessages = document.getElementById('chat-messages');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        const typingIndicator = document.getElementById('typing-indicator');
+
+        // Function to add a message to the chat
+        function addMessage(sender, text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            
+            if (sender === 'user') {
+                messageDiv.classList.add('user-message');
+            } else {
+                messageDiv.classList.add('ai-message');
+            }
+            
+            const senderSpan = document.createElement('div');
+            senderSpan.classList.add('message-sender');
+            senderSpan.textContent = sender === 'user' ? 'You' : 'SIMS AI';
+            
+            const textSpan = document.createElement('div');
+            textSpan.textContent = text;
+            
+            messageDiv.appendChild(senderSpan);
+            messageDiv.appendChild(textSpan);
+            chatMessages.appendChild(messageDiv);
+            
+            // Scroll to the bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Function to simulate AI response
+        function getAIResponse(userMessage) {
+            const lowerCaseMessage = userMessage.toLowerCase();
+            
+            // Define responses based on keywords
+            if (lowerCaseMessage.includes('hello') || lowerCaseMessage.includes('hi') || lowerCaseMessage.includes('hey')) {
+                return "Hello! I'm the SIMS Media Hive AI assistant. How can I help you today?";
+            } else if (lowerCaseMessage.includes('thank')) {
+                return "You're welcome! Is there anything else I can help you with?";
+            } else if (lowerCaseMessage.includes('help')) {
+                return "I can help you with information about SIMS Media Hive, our creative services, projects, and club activities. What would you like to know?";
+            } else if (lowerCaseMessage.includes('contact') || lowerCaseMessage.includes('email') || lowerCaseMessage.includes('phone')) {
+                return "You can reach us at gds.simshive@gmail.com or call +91 7981 951 879. We're always happy to connect with creative minds!";
+            } else if (lowerCaseMessage.includes('service') || lowerCaseMessage.includes('focus') || lowerCaseMessage.includes('creative')) {
+                return "SIMS Media Hive specializes in multiple creative areas: Event Organization, Podcast, Design & Graphics, Newsletter, Social Media, Film Making, Editing, Creative Storytelling, and Photography & Design. We craft campus stories and visuals!";
+            } else if (lowerCaseMessage.includes('project') || lowerCaseMessage.includes('work')) {
+                return "Our featured projects include 'The Campus Echo' short film, Annual Tech Fest photography, New Logo Reveal design, and various music video productions. We're constantly working on new creative content!";
+            } else if (lowerCaseMessage.includes('join') || lowerCaseMessage.includes('member') || lowerCaseMessage.includes('club')) {
+                return "We're always looking for passionate creative minds! You can join us by visiting our 'Join Us' page or contacting us directly. We welcome students interested in film making, photography, design, podcasting, and more!";
+            } else if (lowerCaseMessage.includes('social') || lowerCaseMessage.includes('instagram') || lowerCaseMessage.includes('youtube')) {
+                return "You can follow us on Instagram (@sims_hive), YouTube (@SIMSHIVE), Snapchat (simshive), and LinkedIn (sims-hive-792989386). Stay connected with our latest creative content!";
+            } else if (lowerCaseMessage.includes('about') || lowerCaseMessage.includes('what is')) {
+                return "SIMS Media Hive is a College Media & Creative Hub that crafts campus stories and visuals. We're dedicated to creating content that makes a difference in the fields of Health and Technology at SIMS College Guntur.";
+            } else {
+                // Default responses
+                const defaultResponses = [
+                    "That's interesting! At SIMS Media Hive, we're passionate about creative storytelling and visual production. Could you tell me more?",
+                    "I'd love to help with that! SIMS Media Hive specializes in various creative fields. What specifically would you like to know?",
+                    "Great question! Our team at SIMS Media Hive focuses on crafting compelling stories and visuals. Is there a particular service you're interested in?",
+                    "I'm here to help! SIMS Media Hive offers services in film making, photography, design, and more. What can I assist you with?",
+                    "Thanks for asking! As part of SIMS Media Hive, we're dedicated to creative storytelling. What would you like to learn more about?"
+                ];
+                return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+            }
+        }
+
+        // Function to handle sending a message
+        function sendMessage() {
+            const message = userInput.value.trim();
+            if (message) {
+                // Add user message
+                addMessage('user', message);
+                
+                // Clear input
+                userInput.value = '';
+                
+                // Show typing indicator
+                typingIndicator.classList.add('active');
+                
+                // Simulate AI thinking
+                setTimeout(() => {
+                    // Hide typing indicator
+                    typingIndicator.classList.remove('active');
+                    
+                    // Get and add AI response
+                    const aiResponse = getAIResponse(message);
+                    addMessage('ai', aiResponse);
+                }, 1500); // Simulate 1.5 seconds of "thinking"
+            }
+        }
+
+        // Event listeners
+        sendButton.addEventListener('click', sendMessage);
+        
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Add initial AI message
+        setTimeout(() => {
+            addMessage('ai', "Hi there! I'm your SIMS Media Hive assistant. You can ask me about our services, projects, or anything related to our creative community. What would you like to know?");
+        }, 1000);
+    </script>
+</body>
+</html>

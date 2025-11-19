@@ -99,6 +99,9 @@ export async function loadBlogPosts() {
     dom.blogPostList.innerHTML = '<p class="text-gray-400 text-center">Loading posts...</p>';
     try { const { data, error } = await _supabase.from('blogPosts').select('id, title, author, imageUrl').order('created_at', { ascending: false }); if (error) throw error; dom.blogPostList.innerHTML = ''; if (!data || data.length === 0) { dom.blogPostList.innerHTML = '<p class="text-gray-400 text-center">No blog posts yet.</p>'; } else { data.forEach(post => { const postEl = document.createElement('div'); postEl.className = 'flex items-center justify-between bg-gray-800 p-4 rounded-md shadow'; const thumbnailSrc = getBlogPostThumbnail(post.imageUrl); postEl.innerHTML = `<div class="flex items-center space-x-3"><img src="${thumbnailSrc}" alt="Post thumbnail" class="w-12 h-12 object-cover rounded" onerror="this.src='${config.defaultPlaceholder}'"><div><p class="font-bold text-white">${post.title || 'Untitled Post'}</p><p class="text-sm text-gray-400">By ${post.author || 'Unknown Author'}</p></div></div><div class="flex space-x-2 flex-shrink-0"><button class="edit-post-btn p-2 bg-blue-600 hover:bg-blue-700 rounded-md text-xs font-semibold text-white transition">EDIT</button><button class="delete-post-btn p-2 bg-red-600 hover:bg-red-700 rounded-md text-xs font-semibold text-white transition">DELETE</button></div>`; postEl.querySelector('.edit-post-btn').addEventListener('click', () => populateBlogFormForEdit(post.id)); postEl.querySelector('.delete-post-btn').addEventListener('click', () => handleBlogDelete(post.id, post.imageUrl)); dom.blogPostList.appendChild(postEl); }); } }
     catch (error) { console.error('Error loading posts:', error); dom.blogPostList.innerHTML = `<p class="text-red-500 text-center">Error loading posts: ${error.message}</p>`; }
+    
+    initializeBlogSearch();
+    initializeBlogSort();
 }
 
 // Helper function to get blog post thumbnail
@@ -366,4 +369,62 @@ export function initBlogListeners() {
             refreshAiSuggestions();
         });
     }
+}
+
+// Initialize blog search functionality
+function initializeBlogSearch() {
+    if (!dom.blogSearch) return;
+    
+    dom.blogSearch.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        const blogPosts = dom.blogPostList.querySelectorAll('.flex.items-center');
+        
+        blogPosts.forEach(post => {
+            const title = post.querySelector('p.font-bold').textContent.toLowerCase();
+            const author = post.querySelector('p.text-sm').textContent.toLowerCase().replace('by ', '');
+            
+            const matchesSearch = title.includes(searchTerm) || author.includes(searchTerm);
+            
+            if (!matchesSearch) {
+                post.style.display = 'none';
+            } else {
+                post.style.display = 'flex';
+            }
+        });
+    });
+}
+
+// Initialize blog sort functionality
+function initializeBlogSort() {
+    if (!dom.blogSort) return;
+    
+    dom.blogSort.addEventListener('change', (e) => {
+        const sortBy = e.target.value;
+        const blogPosts = Array.from(dom.blogPostList.querySelectorAll('.flex.items-center'));
+        
+        blogPosts.sort((a, b) => {
+            const titleA = a.querySelector('p.font-bold').textContent.toLowerCase();
+            const titleB = b.querySelector('p.font-bold').textContent.toLowerCase();
+            
+            const authorA = a.querySelector('p.text-sm').textContent.toLowerCase();
+            const authorB = b.querySelector('p.text-sm').textContent.toLowerCase();
+            
+            switch (sortBy) {
+                case 'newest':
+                    // For now, we'll sort by title since we don't have date info in the DOM
+                    // In a real implementation, you'd want to sort by date
+                    return titleB.localeCompare(titleA);
+                case 'oldest':
+                    return titleA.localeCompare(titleB);
+                case 'title':
+                    return titleA.localeCompare(titleB);
+                default:
+                    return 0;
+            }
+        });
+        
+        // Clear the container and re-add sorted elements
+        dom.blogPostList.innerHTML = '';
+        blogPosts.forEach(post => dom.blogPostList.appendChild(post));
+    });
 }

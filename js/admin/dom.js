@@ -6,11 +6,13 @@ export let blogTabBtn;
 export let membersTabBtn;
 export let inviteUserTabBtn;
 export let profilesTabBtn; // <-- ADDED
+export let analyticsTabBtn;
 export let galleryContent;
 export let blogContent;
 export let membersContent;
 export let inviteUserContent;
 export let profilesContent; // <-- ADDED
+export let analyticsContent;
 export let loadingMessage;
 export let adminContentWrapper;
 
@@ -92,11 +94,13 @@ export function initDom() {
     membersTabBtn = document.getElementById('members-tab-btn');
     inviteUserTabBtn = document.getElementById('invite-user-tab-btn');
     profilesTabBtn = document.getElementById('profiles-tab-btn'); // <-- ADDED
+    analyticsTabBtn = document.getElementById('analytics-tab-btn');
     galleryContent = document.getElementById('gallery-content');
     blogContent = document.getElementById('blog-content');
     membersContent = document.getElementById('members-content');
     inviteUserContent = document.getElementById('invite-user-content');
     profilesContent = document.getElementById('profiles-content'); // <-- ADDED
+    analyticsContent = document.getElementById('analytics-content');
     loadingMessage = document.getElementById('loading-message');
     adminContentWrapper = document.getElementById('admin-content-wrapper');
 

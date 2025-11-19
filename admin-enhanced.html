@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel | SIMS Media Hive</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+    <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* All your styles remain exactly the same */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Oswald:wght@700&display=swap');
+        :root { --primary-color: #eab308; --dark-bg: #0d0d0d; --mid-bg: #1a1a1a; --text-light: #f3f4f6; --text-muted: #9ca3af; }
+        body { font-family: 'Inter', sans-serif; background-color: #0d0d0d; color: #f3f4f6; }
+        .oswald { font-family: 'Oswald', sans-serif; }
+        .tab-btn.active { background-color: #eab308; color: #000; }
+        .tab-btn { background-color: #374151; color: #d1d5db; transition: background-color 0.2s ease, color 0.2s ease; }
+        .tab-btn:hover { background-color: #4b5563; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .editor-toolbar, .EasyMDEContainer .CodeMirror { background-color: #1f2937 !important; border-color: #4b5563 !important; color: #d1d5db; }
+        .editor-toolbar button { color: #d1d5db !important; }
+        .editor-toolbar button.active, .editor-toolbar button:hover { background: #4b5563 !important; border-color: #6b7280 !important; }
+        .CodeMirror-cursor { border-left-color: #eab308 !important; }
+        .cm-s-easymde .cm-link { color: #facc15 !important; } .cm-s-easymde .cm-url { color: #9ca3af !important; } .cm-s-easymde .cm-formatting-image { color: #facc15 !important;}
+        .editor-preview { background-color: #111827 !important; color: #d1d5db; } .editor-preview h1, .editor-preview h2, .editor-preview h3 { color: #f3f4f6; }
+        .editor-statusbar { background: #1f2937; color: #9ca3af; }
+        .filter-btn.active { background-color: #eab308; color: #000; }
+        .filter-btn { background-color: #374151; color: #d1d5db; }
+         .video-overlay-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 36px; height: 36px; background-color: rgba(0,0,0,0.6); border-radius: 50%; display: flex; align-items: center; justify-content: center; pointer-events: none; opacity: 0.8; transition: opacity 0.3s ease; }
+         .gallery-item:hover .video-overlay-icon { opacity: 1; }
+         .video-overlay-icon svg { color: white; width: 20px; height: 20px; }
+         .gallery-item.hidden { display: none; }
+         .delete-btn { transition: opacity 0.2s ease; }
+        .thumbnail-generator-video { position: absolute; top: -9999px; left: -9999px; width: 320px; height: auto; }
+        .member-card img { aspect-ratio: 1 / 1; object-fit: cover; }
+        /* === NEW STYLES FOR MOBILE MENU === */
+        .mobile-tab-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem; /* space-x-3 */
+            padding: 12px 16px;
+            font-size: 1.125rem; /* text-lg */
+            font-weight: 600;
+            color: var(--text-light);
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+        }
+        .mobile-tab-btn:hover {
+            background-color: var(--mid-bg);
+        }
+        .mobile-tab-btn.active {
+            background-color: var(--primary-color);
+            color: #000;
+        }
+        
+        /* Dark/Light Mode Toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #374151;
+            color: #d1d5db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .theme-toggle:hover {
+            background-color: #4b5563;
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Status indicators */
+        .status-success { color: #10b981; }
+        .status-error { color: #ef4444; }
+        .status-warning { color: #f59e0b; }
+        
+        /* Dashboard analytics */
+        .dashboard-card {
+            background-color: #1f2937;
+            border: 1px solid #374151;
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: transform 0.2s ease;
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+        }
+        
+        /* Improved file upload */
+        .file-upload-area {
+            border: 2px dashed #4b5563;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .file-upload-area:hover, .file-upload-area.dragover {
+            border-color: #eab308;
+            background-color: rgba(234, 179, 8, 0.05);
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background-color: #1a1a1a;
+            border-radius: 8px;
+            padding: 1.5rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        /* Analytics dashboard */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        /* Notification badge */
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    
+    <header class="bg-gray-900 border-b border-gray-800 py-4 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+            <h1 id="panel-title" class="text-xl font-bold text-white oswald tracking-wider">Admin Panel</h1>
+            
+            <button id="burger-menu-btn" class="md:hidden text-gray-300 hover:text-yellow-500">
+                <i data-lucide="menu" class="w-6 h-6"></i>
+            </button>
+
+            <!-- === DESKTOP HEADER BUTTONS === -->
+            <div class="hidden md:flex items-center space-x-4">
+                <a href="/profile.html" class="text-gray-300 hover:text-yellow-500 transition" title="My Profile">
+                    <i data-lucide="user-circle" class="w-6 h-6"></i>
+                </a>
+                
+                <!-- Analytics Dashboard Button -->
+                <a href="#" id="analytics-btn" class="text-gray-300 hover:text-yellow-500 transition" title="Analytics Dashboard">
+                    <i data-lucide="bar-chart-3" class="w-6 h-6"></i>
+                    <span class="notification-badge hidden" id="analytics-badge">3</span>
+                </a>
+                
+            <a href="/member-dashboard.html" 
+               id="member-dash-btn-desktop" 
+               class="flex items-center text-gray-300 hover:text-yellow-500 transition" 
+               title="Member Dashboard" 
+               style="display: none;"> <!-- It's hidden by default -->
+                <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
+            </a>
+            <!-- NEW DATABASE BUTTON -->
+            <a href="https://supabase.com/dashboard/project/YOUR_PROJECT_ID_HERE"
+                id="db-button-desktop"
+                class="flex items-center ... "
+                title="Database"
+                style="display: none;"> <!-- 2. ADD THIS STYLE -->
+                <i data-lucide="database" class="w-5 h-5"></i>
+                <span class="ml-2">Database</span>
+            </a>
+            <!-- END NEW BUTTON -->
+
+                <button id="logout-button" class="flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold bg-red-600 text-white rounded-md hover:bg-red-700 transition">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <div id="mobile-menu" class="fixed inset-0 bg-gray-900 z-50 p-6 hidden animate-fadeIn">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-xl font-bold text-white oswald tracking-wider">Menu</h2>
+            <button id="mobile-menu-close-btn" class="text-gray-300 hover:text-yellow-500">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
+    <nav class="flex flex-col space-y-2">
+            <button id="mobile-gallery-tab-btn" class="mobile-tab-btn active"><i data-lucide="image" class="w-5 h-5"></i>Manage Gallery</button>
+            <button id="mobile-blog-tab-btn" class="mobile-tab-btn"><i data-lucide="file-text" class="w-5 h-5"></i>Manage Blog</button>
+            <button id="mobile-members-tab-btn" class="mobile-tab-btn" style="display: none;"><i data-lucide="users" class="w-5 h-5"></i>Manage Members</button>
+            <button id="mobile-invite-user-tab-btn" class="mobile-tab-btn" style="display: none;"><i data-lucide="user-plus" class="w-5 h-5"></i>Invite User</button>
+            <button id="mobile-profiles-tab-btn" class="mobile-tab-btn" style="display: none;"><i data-lucide="shield" class="w-5 h-5"></i>Manage Profiles</button>
+            
+            <hr class="border-gray-700 !my-4">
+            
+            <a href="/profile.html" class="mobile-tab-btn"><i data-lucide="user-circle" class="w-5 h-5"></i>My Profile</a>
+            
+            <!-- Analytics Dashboard Button (Mobile) -->
+            <a href="#" id="analytics-btn-mobile" class="mobile-tab-btn"><i data-lucide="bar-chart-3" class="w-5 h-5"></i>Analytics Dashboard</a>
+            
+            <a href="/member-dashboard.html" 
+                id="member-dash-btn-mobile" 
+                class="mobile-tab-btn" 
+                style="display: none;"> <!-- It's hidden by default -->
+            <i data-lucide="layout-dashboard" class="w-5 h-5"></i>Member Dashboard
+            </a>
+            <!-- NEW DATABASE LINK (MOBILE) -->
+            <a href="https://supabase.com/dashboard/project/YOUR_PROJECT_ID_HERE"
+                id="db-button-mobile"
+                class="mobile-tab-btn"
+                style="display: none;"> <!-- 2. ADD THIS STYLE -->
+                <i data-lucide="database" class="w-5 h-5"></i>Database
+            </a>
+            <!-- END NEW LINK -->
+
+            <a href="#" id="mobile-logout-btn" class="mobile-tab-btn !text-red-400 hover:!text-red-400 hover:!bg-red-900/50"><i data-lucide="log-out" class="w-5 h-5"></i>Logout</a>
+        </nav>
+    </div>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="mb-8 border-b border-gray-600">
+            <nav class="flex space-x-1 sm:space-x-4 overflow-x-auto pb-px" aria-label="Tabs">
+                <button id="gallery-tab-btn" class="tab-btn active px-3 sm:px-4 py-2 text-sm font-medium rounded-t-md flex-shrink-0">Manage Gallery</button>
+                <button id="blog-tab-btn" class="tab-btn px-3 sm:px-4 py-2 text-sm font-medium rounded-t-md flex-shrink-0">Manage Blog</button>
+                <button id="members-tab-btn" class="tab-btn px-3 sm:px-4 py-2 text-sm font-medium rounded-t-md flex-shrink-0" style="display: none;">Manage Members</button>
+                <button id="invite-user-tab-btn" class="tab-btn px-3 sm:px-4 py-2 text-sm font-medium rounded-t-md flex-shrink-0" style="display: none;">Invite User</button>
+                <button id="profiles-tab-btn" class="tab-btn px-3 sm:px-4 py-2 text-sm font-medium rounded-t-md flex-shrink-0" style="display: none;">Manage Profiles</button>
+                <!-- Analytics Dashboard Tab -->
+                <button id="analytics-tab-btn" class="tab-btn px-3 sm:px-4 py-2 text-sm font-medium rounded-t-md flex-shrink-0">Analytics Dashboard</button>
+            </nav>
+        </div>
+
+        <div id="loading-message" class="flex flex-col items-center justify-center text-center py-40">
+            <h1 class="text-3xl font-bold oswald text-gray-300">Verifying session...</h1>
+            <p class="text-gray-400 mt-2">Please wait while we log you in.</p>
+        </div>
+        
+
+        <div id="admin-content-wrapper" class="hidden">
+            <!-- Analytics Dashboard Tab Content -->
+            <div id="analytics-content" class="tab-content">
+                <section class="mb-8">
+                    <h2 class="text-2xl font-bold text-yellow-500 oswald mb-6">Analytics Dashboard</h2>
+                    <div class="analytics-grid">
+                        <div class="dashboard-card">
+                            <h3 class="text-lg font-semibold text-white mb-2">Total Content</h3>
+                            <p class="text-3xl font-bold text-yellow-500" id="total-content-count">0</p>
+                            <p class="text-sm text-gray-400 mt-1">Total media items and blog posts</p>
+                        </div>
+                        <div class="dashboard-card">
+                            <h3 class="text-lg font-semibold text-white mb-2">Active Users</h3>
+                            <p class="text-3xl font-bold text-yellow-500" id="active-users-count">0</p>
+                            <p class="text-sm text-gray-400 mt-1">Currently active users</p>
+                        </div>
+                        <div class="dashboard-card">
+                            <h3 class="text-lg font-semibold text-white mb-2">New This Week</h3>
+                            <p class="text-3xl font-bold text-yellow-500" id="new-this-week">0</p>
+                            <p class="text-sm text-gray-400 mt-1">New content added this week</p>
+                        </div>
+                        <div class="dashboard-card">
+                            <h3 class="text-lg font-semibold text-white mb-2">Storage Used</h3>
+                            <p class="text-3xl font-bold text-yellow-500" id="storage-used">0 MB</p>
+                            <p class="text-sm text-gray-400 mt-1">Total storage used</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                        <div class="dashboard-card">
+                            <h3 class="text-lg font-semibold text-white mb-4">Content Distribution</h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm text-gray-300">Photos</span>
+                                        <span class="text-sm text-gray-400" id="photos-percentage">0%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-700 rounded-full h-2">
+                                        <div class="bg-yellow-500 h-2 rounded-full" id="photos-progress" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm text-gray-300">Videos</span>
+                                        <span class="text-sm text-gray-400" id="videos-percentage">0%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-700 rounded-full h-2">
+                                        <div class="bg-blue-500 h-2 rounded-full" id="videos-progress" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm text-gray-300">Blog Posts</span>
+                                        <span class="text-sm text-gray-400" id="blog-posts-percentage">0%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-700 rounded-full h-2">
+                                        <div class="bg-green-500 h-2 rounded-full" id="blog-posts-progress" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="dashboard-card">
+                            <h3 class="text-lg font-semibold text-white mb-4">Recent Activity</h3>
+                            <div id="recent-activity" class="space-y-3">
+                                <p class="text-gray-400">Loading recent activity...</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            
+            <div id="gallery-content" class="tab-content">
+                 <section class="bg-gray-900 p-6 sm:p-8 rounded-lg border border-gray-800 mb-12 shadow-lg">
+                     <h2 class="text-2xl font-bold text-yellow-500 oswald mb-6">Add New Gallery Item</h2>
+                     <form id="gallery-upload-form" class="space-y-6">
+                         <div><label for="gallery-title" class="block text-sm font-medium text-gray-300 mb-2">Media Title</label><input type="text" id="gallery-title" required class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-yellow-500 focus:border-yellow-500"></div>
+                         <div><label class="block text-sm font-medium text-gray-300 mb-2">Category</label><div class="flex items-center space-x-6"><label class="flex items-center"><input type="radio" name="gallery-category" value="photo" checked class="text-yellow-500 focus:ring-yellow-500"> <span class="ml-2">Photo</span></label><label class="flex items-center"><input type="radio" name="gallery-category" value="video" class="text-yellow-500 focus:ring-yellow-500"> <span class="ml-2">Video</span></label></div></div>
+                         <div>
+                             <label for="gallery-media-file" class="block text-sm font-medium text-gray-300 mb-2">Media File (Image, Video, or YouTube Link) <a href="https://8mb.video/" target="_blank" class="text-yellow-500 hover:underline">(Compress Video)</a></label>
+                             <div id="gallery-upload-area" class="file-upload-area">
+                                 <i data-lucide="upload" class="w-12 h-12 mx-auto mb-2 text-gray-400"></i>
+                                 <p class="text-gray-400 mb-2">Drag & drop your file here or click to browse</p>
+                                 <input type="file" id="gallery-media-file" accept="image/*,video/*" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-500 file:text-black hover:file:bg-yellow-600 cursor-pointer hidden">
+                                 <p class="text-xs text-gray-500 mt-2">Supports JPG, PNG, MP4, MOV up to 100MB</p>
+                             </div>
+                             <div class="mt-2">
+                                 <input type="url" id="gallery-youtube-url" placeholder="Or paste YouTube URL (e.g., https://www.youtube.com/watch?v=VIDEO_ID)" class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-yellow-500 focus:border-yellow-500 text-sm">
+                             </div>
+                             <small class="text-gray-400 mt-1 block">Upload a file OR paste a YouTube URL. File upload is required for new items unless using YouTube.</small>
+                         </div>
+                         <div><button type="submit" class="w-full py-3 px-4 font-semibold text-black bg-yellow-500 rounded-md hover:bg-yellow-600 transition disabled:opacity-50 disabled:cursor-not-allowed">Upload Media</button></div>
+                         <div id="gallery-status" class="text-center text-sm h-5 min-h-[1.25rem]"></div>
+                     </form>
+                 </section>
+                 <section>
+                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                         <h2 class="text-2xl font-bold text-yellow-500 oswald">Manage Gallery</h2>
+                         <div class="flex items-center space-x-4">
+                             <div class="relative">
+                                 <input type="text" id="gallery-search" placeholder="Search gallery..." class="px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-yellow-500 focus:border-yellow-500 text-sm">
+                                 <i data-lucide="search" class="w-4 h-4 absolute right-3 top-3 text-gray-400"></i>
+                             </div>
+                             <div id="gallery-filter-buttons" class="flex items-center space-x-2 flex-shrink-0">
+                                 <button class="filter-btn active px-4 py-1.5 font-semibold uppercase tracking-wider text-xs rounded-full transition duration-300" data-filter="all">All</button>
+                                 <button class="filter-btn px-4 py-1.5 font-semibold uppercase tracking-wider text-xs rounded-full transition duration-300" data-filter="photo">Photos</button>
+                                 <button class="filter-btn px-4 py-1.5 font-semibold uppercase tracking-wider text-xs rounded-full transition duration-300" data-filter="video">Videos</button>
+                             </div>
+                         </div>
+                     </div>
+                     <div id="gallery-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                          <p class="text-gray-400 col-span-full text-center">Loading gallery...</p>
+                     </div>
+                 </section>
+            </div>
+
+            <div id="blog-content" class="tab-content">
+                <section class="bg-gray-900 p-6 sm:p-8 rounded-lg border border-gray-800 mb-12 shadow-lg">
+                    <h2 class="text-2xl font-bold text-yellow-500 oswald mb-6">Create or Edit Blog Post</h2>
+                    <form id="blog-form" class="space-y-6">
+                        <input type="hidden" id="blog-post-id">
+                        <div><label for="blog-title" class="block text-sm font-medium text-gray-300 mb-2">Post Title</label><input type="text" id="blog-title" required class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-yellow-500 focus:border-yellow-500"></div>
+                        <div><label for="blog-author" class="block text-sm font-medium text-gray-300 mb-2">Author</label><input type="text" id="blog-author" required class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-yellow-500 focus:border-yellow-500"></div>
+                        <div>
+                            <label for="blog-content-editor" class="block text-sm font-medium text-gray-300 mb-2">Content (Markdown)</label>
+                            <textarea id="blog-content-editor"></textarea>
+                        </div>
+                        <div id="ai-write-section" style="display: none;">
+                            <label for="ai-prompt" class="block text-sm font-medium text-gray-300 mb-2 flex items-center">
+                                <i class="fas fa-robot mr-2 text-yellow-500"></i>
+                                AI Write Assistant
+                                <span class="ml-2 text-xs text-gray-400">(Beta)</span>
+                            </label>
+                            <div class="bg-gray-800 border border-gray-700 rounded-md p-4 mb-3">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="text-xs text-gray-400">Example prompts:</div>
+                                    <button id="refresh-suggestions-btn" class="text-xs text-yellow-500 hover:text-yellow-400 transition flex items-center" title="Get new suggestions">
+                                        <i class="fas fa-sync-alt mr-1"></i>
+                                        Refresh
+                                    </button>
+                                </div>
+                                <div id="suggestions-container" class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+                                    <button class="ai-suggestion-btn bg-gray-700 hover:bg-gray-600 text-gray-300 px-2 py-1 rounded transition" data-prompt="Write about AI-powered video editing tools and their impact on modern filmmaking">AI in video editing</button>
+                                    <button class="ai-suggestion-btn bg-gray-700 hover:bg-gray-600 text-gray-300 px-2 py-1 rounded transition" data-prompt="How to create viral short-form content for TikTok and Instagram Reels">Viral short-form content</button>
+                                    <button class="ai-suggestion-btn bg-gray-700 hover:bg-gray-600 text-gray-300 px-2 py-1 rounded transition" data-prompt="The rise of vertical video format and mobile-first content creation">Vertical video trends</button>
+                                    <button class="ai-suggestion-btn bg-gray-700 hover:bg-gray-600 text-gray-300 px-2 py-1 rounded transition" data-prompt="Using AR filters and effects in social media storytelling">AR filters in storytelling</button>
+                                    <button class="ai-suggestion-btn bg-gray-700 hover:bg-gray-600 text-gray-300 px-2 py-1 rounded transition" data-prompt="Sustainable content creation: Eco-friendly filming practices">Sustainable filmmaking</button>
+                                    <button class="ai-suggestion-btn bg-gray-700 hover:bg-gray-600 text-gray-300 px-2 py-1 rounded transition" data-prompt="Live streaming strategies for building engaged communities">Live streaming strategies</button>
+                                </div>
+                            </div>
+                            <textarea id="ai-prompt" rows="4" class="w-full px-3 py-3 bg-gray-800 border border-gray-700 rounded-md focus:ring-yellow-500 focus:border-yellow-500 resize-vertical" placeholder="Enter a detailed prompt for AI to generate content... e.g., 'Write a 500-word article about the latest trends in digital photography'"></textarea>
+                            <button type="button" id="generate-ai-content-btn" class="mt-3 w-full py-3 px-4 font-semibold text-black bg-yellow-500 rounded-md hover:bg-yellow-600 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
+                                <i class="fas fa-magic mr-2" id="generate-icon"></i>
+                                <span id="generate-text">Generate Content with AI</span>
+                                <i class="fas fa-spinner fa-spin ml-2 hidden" id="generating-spinner"></i>
+                            </button>
+                        </div>
+                        <div>
+                            <label for="blog-header-media-file" class="block text-sm font-medium text-gray-300 mb-2">Header Media (Image, Video, or YouTube Link)</label>
+                            <div id="blog-upload-area" class="file-upload-area">
+                                <i data-lucide="upload" class="w-12 h-12 mx-auto mb-2 text-gray-400"></i>
+                                <p class="text-gray-400 mb-2">Drag & drop your file here or click to browse</p>
+                                <input type="file" id="blog-header-media-file" accept="image/*,video/*" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-500 file:text-black hover:file:bg-yellow-600 cursor-pointer hidden">
+                                <p class="text-xs text-gray-500 mt-2">Supports JPG, PNG, MP4, MOV up to 100MB</p>
+                            </div>
+                            <div class="mt-2">
+                                <input type="url" id="blog-youtube-url" placeholder="Or paste YouTube URL (e.g., https://www.youtube.com/watch?v=VIDEO_ID)" class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-yellow-500 focus:border-yellow-500 text-sm">
+                            </div>
+                            <small class="text-gray-400 mt-1 block">Required for new posts. Upload a file OR paste a YouTube URL. Leave empty if editing to keep existing media.</small>
+                        </div>
+                        <div class="flex space-x-4">
+                            <button type="submit" class="w-full py-3 px-4 font-semibold text-black bg-yellow-500 rounded-md hover:bg-yellow-600 transition disabled:opacity-50 disabled:cursor-not-allowed">Save Post</button>
+                            <button type="button" id="clear-blog-form-btn" class="w-full py-3 px-4 font-semibold text-white bg-gray-600 rounded-md hover:bg-gray-700 transition">Clear Form / New Post</button>
+                        </div>
+                        <div id="blog-status" class="text-center text-sm h-5 min-h-[1.25rem]"></div>
+                    </form>
+                </section>
+                <section>
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                        <h2 class="text-2xl font-bold text-yellow-500 oswald mb-6">Manage Blog Posts</h2>
+                        <div class="flex items-center space-x-4">
+                            <div class="relative">
+                                <input type="text" id="blog-search" placeholder="Search posts..." class="px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-yellow-500 focus:border-yellow-500 text-sm">
+                                <i data-lucide="search" class="w-4 h-4 absolute right-3 top-3 text-gray-400"></i>
+                            </div>
+                            <select id="blog-sort" class="px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-yellow-500 focus:border-yellow-500 text-sm">
+                                <option value="newest">Newest First</option>
+                                <option value="oldest">Oldest First</option>
+                                <option value="title">Title (A-Z)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="blog-post-list" class="space-y-4">
+                         <p class="text-gray-400 text-center">Loading posts...</p>
+                    </div>
+                </section>
+            </div>
+
+            <div id="members-content" class="tab-content">
+                <section class="bg-gray-900 p-6 sm:p-8 rounded-lg border border-gray-800 mb-12 shadow-lg">
+                    <h2 class="text-2xl font-bold text-yellow-500 oswald mb-6">Add or Edit Member</h2>
+                    <form id="members-form" class="space-y-6">
+                        <input type="hidden" id="member-id">
+                        <div>
+                            <label for="member-name" class="block text-sm font-medium text-gray-300 mb-2">Member Name</label>
+                            <input type="text" id="member-name" required class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-yellow-500 focus:border-yellow-500">
+                        </div>
+                        <div>
+                            <label for="member-role" class="block text-sm font-medium text-gray-300 mb-2">Role / Position</label>
+                            <input type="text" id="member-role" required class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-yellow-500 focus:border-yellow-500">
+                        </div>
+                        <div>
+                            <label for="member-description" class="block text-sm font-medium text-gray-300 mb-2">Short Description (Optional)</label>
+                            <input type="text" id="member-description" class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-yellow-500 focus:border-yellow-500">
+                        </div>
+                        <div>
+                            <label for="member-image-file" class="block text-sm font-medium text-gray-300 mb-2">Member Photo</label>
+                            <div id="member-upload-area" class="file-upload-area">
+                                <i data-lucide="upload" class="w-12 h-12 mx-auto mb-2 text-gray-400"></i>
+                                <p class="text-gray-400 mb-2">Drag & drop your file here or click to browse</p>
+                                <input type="file" id="member-image-file" accept="image/*" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-500 file:text-black hover:file:bg-yellow-600 cursor-pointer hidden">
+                                <p class="text-xs text-gray-500 mt-2">Supports JPG, PNG up to 10MB</p>
+                            </div>
+                            <small class="text-gray-400 mt-1 block">Image required for new members. Leave empty if editing to keep existing photo.</small>
+                        </div>
+                        <div class="flex space-x-4">
+                            <button type="submit" class="w-full py-3 px-4 font-semibold text-black bg-yellow-500 rounded-md hover:bg-yellow-600 transition disabled:opacity-50 disabled:cursor-not-allowed">Save Member</button>
+                            <button type="button" id="clear-members-form-btn" class="w-full py-3 px-4 font-semibold text-white bg-gray-600 rounded-md hover:bg-gray-700 transition">Clear Form / New Member</button>
+                        </div>
+                        <div id="members-status" class="text-center text-sm h-5 min-h-[1.25rem]"></div>
+                    </form>
+                </section>
+                <section>
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                        <h2 class="text-2xl font-bold text-yellow-500 oswald mb-6">Manage Current Members</h2>
+                        <div class="relative">
+                            <input type="text" id="member-search" placeholder="Search members..." class="px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-yellow-500 focus:border-yellow-500 text-sm">
+                            <i data-lucide="search" class="w-4 h-4 absolute right-3 top-3 text-gray-400"></i>
+                        </div>
+                    </div>
+                    <div id="member-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                         <p class="text-gray-400 col-span-full text-center">Loading members...</p>
+                    </div>
+                </section>
+            </div>
+
+            <div id="invite-user-content" class="tab-content">
+                <section class="bg-gray-900 p-6 sm:p-8 rounded-lg border border-gray-800 mb-12 shadow-lg max-w-md mx-auto">
+                    <h2 class="text-2xl font-bold text-yellow-500 oswald mb-6">Invite New User</h2>
+                    <p class="text-gray-400 mb-6 text-sm">Enter the email address and role for the user you want to invite.</p>
+                    <form id="invite-user-form" class="space-y-6">
+                        <div>
+                            <label for="invite-email" class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+                            <input type="email" id="invite-email" required placeholder="new.user@example.com" class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-yellow-500 focus:border-yellow-500">
+                        </div>
+                        
+                        <div>
+                            <label for="invite-role" class="block text-sm font-medium text-gray-300 mb-2">Assign Role</label>
+                            <!-- === UPDATED ROLE DROPDOWN === -->
+                            <select id="invite-role" required class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-yellow-500 focus:border-yellow-500">
+                                <option value="member" selected>Member (No Admin Access)</option>
+                                <option value="editor">Editor (Manage Gallery & Blog)</option>
+                                <option value="admin">Admin (Manage Content & Members)</option>
+                                <option value="super_admin">Super Admin (Manage Content & Members)</option>
+                                <!-- NEW OWNER ROLE -->
+                                <option value="owner">Owner (Full Access)</option>
+                                <!-- END NEW ROLE -->
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <button type="submit" class="w-full py-3 px-4 font-semibold text-black bg-yellow-500 rounded-md hover:bg-yellow-600 transition disabled:opacity-50 disabled:cursor-not-allowed">Send Invitation</button>
+                        </div>
+                        <div id="invite-user-status" class="text-center text-sm h-5 min-h-[1.25rem]"></div>
+                    </form>
+                </section>
+            </div>
+            
+            <div id="profiles-content" class="tab-content">
+                <section class="bg-gray-900 p-6 sm:p-8 rounded-lg border border-gray-800 shadow-lg">
+                    <h2 class="text-2xl font-bold text-yellow-500 oswald mb-6">Manage User Profiles & Roles</h2>
+                    <p class="text-gray-400 mb-6 text-sm">Update the roles for existing users. Role changes will take effect on their next login session.</p>
+                    
+                    <div class="hidden md:grid grid-cols-12 gap-4 px-4 py-3 border-b border-gray-700 font-semibold text-gray-300 oswald tracking-wider">
+                        <div class="col-span-4">Name</div>
+                        <div class="col-span-4">Email</div>
+                        <div class="col-span-2">Current Role</div>
+                        <div class="col-span-2 text-right">Actions</div>
+                    </div>
+
+                    <div id="user-profile-list" class="space-y-2 mt-4">
+                        <p id="user-profile-loading" class="text-gray-400 text-center col-span-full py-8">Loading user profiles...</p>
+                        
+                        <!--
+                        == JS Row Template Example ==
+                        Your /js/admin/admin.js file should generate rows like this inside the 'user-profile-list' div
+                        (and remove the 'user-profile-loading' p tag).
+                        The 'update-role-btn' and 'delete-user-btn' need event listeners.
+                        -->
+                        <!--
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-gray-800 p-4 rounded-lg border border-gray-700">
+                            
+                            <div class="md:hidden col-span-12">
+                                <h3 class="text-lg font-semibold text-white">User Name (e.g., Jane Doe)</h3>
+                                <p class="text-sm text-gray-400">user.email@example.com</p>
+                            </div>
+                            
+                            <div class="hidden md:block col-span-4">
+                                <span class="text-white">User Name (e.g., Jane Doe)</span>
+                            </div>
+                            <div class="hidden md:block col-span-4">
+                                <span class="text-gray-400">user.email@example.com</span>
+                            </div>
+
+                            <div class="col-span-12 md:col-span-2">
+                                <label class="md:hidden text-sm font-medium text-gray-300 mb-1">Role</label>
+                                <select data-user-id="USER_ID_HERE" class="profile-role-select w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md focus:ring-yellow-500 focus:border-yellow-500">
+                                    <option value="member">Member</option>
+                                    <option value="editor">Editor</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="super_admin">Super Admin</option>
+                                </select>
+                                <div class="mt-2">
+                                    <label class="flex items-center">
+                                        <input type="checkbox" data-user-id="USER_ID_HERE" class="ai-access-toggle text-yellow-500 focus:ring-yellow-500">
+                                        <span class="ml-2 text-sm text-gray-300">AI Write Access</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-span-12 md:col-span-2 flex justify-end items-center gap-2 mt-2 md:mt-0">
+                                <button data-user-id="USER_ID_HERE" class="update-role-btn px-3 py-2 text-sm font-semibold bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">Update</button>
+                                
+                                <!- NEW DELETE BUTTON -->
+                                <button data-user-id="USER_ID_HERE" data-user-email="user.email@example.com" class="delete-user-btn px-3 py-2 text-sm font-semibold bg-red-600 text-white rounded-md hover:bg-red-700 transition" title="Delete User">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+               
+                        </div>
+                    <div id="profile-update-status" class="text-center text-sm h-5 min-h-[1.25rem]"></div>
+                </section>
+            </div>
+
+        </div> </main>
+        
+        <!-- Loading Modal -->
+        <div id="loading-modal" class="modal">
+            <div class="modal-content text-center">
+                <div class="flex justify-center mb-4">
+                    <div class="spinner"></div>
+                </div>
+                <p id="loading-text">Processing...</p>
+            </div>
+        </div>
+
+        <!-- Confirmation Modal -->
+        <div id="confirmation-modal" class="modal">
+            <div class="modal-content">
+                <h3 id="confirmation-title" class="text-xl font-bold text-white mb-4">Confirm Action</h3>
+                <p id="confirmation-message" class="text-gray-300 mb-6">Are you sure you want to perform this action?</p>
+                <div class="flex justify-end space-x-3">
+                    <button id="cancel-confirmation-btn" class="px-4 py-2 text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 transition">Cancel</button>
+                    <button id="confirm-confirmation-btn" class="px-4 py-2 text-white bg-red-600 rounded-md hover:bg-red-700 transition">Confirm</button>
+                </div>
+            </div>
+        </div>
+
+    <input type="file" id="easymde-file-input" style="display: none;" accept="image/*,video/*">
+
+    <!-- YouTube Player Modal -->
+    <div id="youtube-modal" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-gray-900 rounded-lg max-w-4xl w-full max-h-[90vh] relative">
+            <button id="youtube-modal-close" class="absolute -top-4 -right-4 bg-red-600 hover:bg-red-700 text-white rounded-full w-8 h-8 flex items-center justify-center z-10">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div id="youtube-player-container" class="relative w-full" style="padding-bottom: 56.25%;">
+                <!-- YouTube iframe will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/admin/admin.js" type="module"></script>
+</body>
+</html>

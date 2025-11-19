@@ -21,6 +21,33 @@ export async function loadMembers() {
     dom.memberList.innerHTML = '<p class="text-gray-400 col-span-full text-center">Loading members...</p>';
     try { const { data, error } = await _supabase.from('members').select('id, name, role, description, imageUrl, imagePath').order('created_at', { ascending: true }); if (error) throw error; dom.memberList.innerHTML = ''; if (!data || data.length === 0) { dom.memberList.innerHTML = '<p class="text-gray-400 col-span-full text-center">No members added yet.</p>'; } else { data.forEach(member => { const memberCard = document.createElement('div'); memberCard.className = 'member-card flex flex-col items-center text-center bg-gray-900 p-4 rounded-lg shadow-xl border border-gray-800 relative group'; memberCard.innerHTML = `<img src="${member.imageUrl || config.memberPlaceholder}" onerror="this.onerror=null;this.src='${config.memberPlaceholder}';" alt="${member.name}" class="w-full h-auto aspect-square object-cover rounded-md mb-4 border-2 border-yellow-500"><h3 class="text-xl font-bold text-white oswald leading-none">${member.name}</h3><p class="text-sm text-yellow-500 uppercase tracking-widest mt-1 mb-2">${member.role}</p>${member.description ? `<p class="text-xs text-gray-400">${member.description}</p>` : ''}<div class="absolute top-2 right-2 flex flex-col space-y-1 opacity-0 group-hover:opacity-100 transition-opacity"><button data-id="${member.id}" title="Edit Member" class="edit-member-btn p-1.5 bg-blue-600 text-white rounded-full hover:bg-blue-700"><svg data-lucide="edit-2" width="12" height="12"></svg></button><button data-id="${member.id}" data-path="${member.imagePath || ''}" ${!member.imagePath ? 'disabled title="Cannot delete - path missing"' : 'title="Delete Member"'} class="delete-member-btn p-1.5 bg-red-600 text-white rounded-full hover:bg-red-700 disabled:bg-gray-500 disabled:cursor-not-allowed"><svg data-lucide="trash-2" width="12" height="12"></svg></button></div>`; memberCard.querySelector('.edit-member-btn').addEventListener('click', () => populateMembersFormForEdit(member.id)); memberCard.querySelector('.delete-member-btn').addEventListener('click', () => handleMemberDelete(member.id, member.imagePath)); dom.memberList.appendChild(memberCard); }); lucide.createIcons(); } }
     catch (error) { console.error('Error loading members:', error); dom.memberList.innerHTML = `<p class="text-red-500 col-span-full text-center">Could not load members: ${error.message}</p>`; }
+    
+    initializeMemberSearch();
+}
+
+// Initialize member search functionality
+function initializeMemberSearch() {
+    if (!dom.memberSearch) return;
+    
+    dom.memberSearch.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        const memberCards = dom.memberList.querySelectorAll('.member-card');
+        
+        memberCards.forEach(card => {
+            const name = card.querySelector('h3').textContent.toLowerCase();
+            const role = card.querySelector('p.text-sm.text-yellow-500').textContent.toLowerCase();
+            const description = card.querySelector('p.text-xs.text-gray-400');
+            const descText = description ? description.textContent.toLowerCase() : '';
+            
+            const matchesSearch = name.includes(searchTerm) || role.includes(searchTerm) || descText.includes(searchTerm);
+            
+            if (!matchesSearch) {
+                card.style.display = 'none';
+            } else {
+                card.style.display = 'flex';
+            }
+        });
+    });
 }
 
 export function initMembersListeners() {

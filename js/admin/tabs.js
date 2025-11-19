@@ -2,6 +2,7 @@ import { loadGalleryItems } from './gallery.js';
 import { loadBlogPosts, initializeEasyMDE } from './blog.js';
 import { loadMembers } from './members.js';
 import { loadUserProfiles } from './profiles.js';
+import { loadAnalytics } from './auth.js';
 import * as dom from './dom.js';
 
 // --- TAB SWITCHING LOGIC ---
@@ -12,7 +13,8 @@ export function setupTabs() {
         { btn: dom.blogTabBtn, mobileBtn: dom.mobileBlogTabBtn, content: dom.blogContent, loadFunc: async () => { initializeEasyMDE(); await loadBlogPosts(); } },
         { btn: dom.membersTabBtn, mobileBtn: dom.mobileMembersTabBtn, content: dom.membersContent, loadFunc: loadMembers },
         { btn: dom.inviteUserTabBtn, mobileBtn: dom.mobileInviteUserTabBtn, content: dom.inviteUserContent, loadFunc: null },
-        { btn: dom.profilesTabBtn, mobileBtn: dom.mobileProfilesTabBtn, content: dom.profilesContent, loadFunc: loadUserProfiles }
+        { btn: dom.profilesTabBtn, mobileBtn: dom.mobileProfilesTabBtn, content: dom.profilesContent, loadFunc: loadUserProfiles },
+        { btn: dom.analyticsTabBtn, mobileBtn: dom.analyticsTabBtn, content: dom.analyticsContent, loadFunc: loadAnalytics }
     ];
 
     tabs.forEach(tab => {

@@ -183,6 +183,7 @@ export async function loadGalleryItems() {
         }
 
         initializeGalleryFilter();
+        initializeGallerySearch();
         lucide.createIcons();
 
     } catch (error) {
@@ -381,5 +382,30 @@ export function initGalleryListeners() {
                 }, 4000);
             }
         }
+    });
+}
+
+function initializeGallerySearch() {
+    if (!dom.gallerySearch) return;
+    
+    dom.gallerySearch.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        const galleryItems = dom.galleryList.querySelectorAll('.gallery-item');
+        
+        galleryItems.forEach(item => {
+            const title = item.querySelector('p.font-bold').textContent.toLowerCase();
+            const category = item.querySelector('p.text-xs').textContent.toLowerCase();
+            
+            const matchesSearch = title.includes(searchTerm) || category.includes(searchTerm);
+            const isCurrentlyVisible = !item.classList.contains('hidden');
+            const filterActive = item.classList.contains('hidden') === false; // Check if item is visible by filter
+            
+            // Only hide if it doesn't match search AND is currently visible
+            if (!matchesSearch) {
+                item.classList.add('hidden');
+            } else if (matchesSearch && isCurrentlyVisible) {
+                item.classList.remove('hidden');
+            }
+        });
     });
 }

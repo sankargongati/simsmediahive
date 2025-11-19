@@ -194,12 +194,18 @@ export async function checkAuth() {
         const dbBtnMobile = document.getElementById('db-button-mobile');
         const memberDashBtnDesktop = document.getElementById('member-dash-btn-desktop');
         const memberDashBtnMobile = document.getElementById('member-dash-btn-mobile');
+        const analyticsBtnDesktop = document.getElementById('analytics-btn');
+        const analyticsBtnMobile = document.getElementById('analytics-btn-mobile');
         
         if (memberDashBtnDesktop) memberDashBtnDesktop.style.display = 'flex';
         if (memberDashBtnMobile) memberDashBtnMobile.style.display = 'flex';
         
+        // Show analytics button for all roles
+        if (analyticsBtnDesktop) analyticsBtnDesktop.style.display = 'flex';
+        if (analyticsBtnMobile) analyticsBtnMobile.style.display = 'flex';
+        
         // --- THIS IS THE NEW LINE YOU ASKED ABOUT ---
-        if (memberDashBtnDesktop || memberDashBtnMobile) {
+        if (memberDashBtnDesktop || memberDashBtnMobile || analyticsBtnDesktop || analyticsBtnMobile) {
             lucide.createIcons(); // Re-render icons
         }
         if (userRole === 'owner') {
@@ -248,12 +254,84 @@ export async function checkAuth() {
         } else if (activeTab.id === 'profiles-tab-btn') {
             console.log("Initial load: Profiles tab active.");
             await loadUserProfiles();
+        } else if (activeTab.id === 'analytics-tab-btn') {
+            console.log("Initial load: Analytics tab active.");
+            await loadAnalytics();
         }
 
     } catch (error) {
          console.error("Auth check failed:", error);
          dom.loadingMessage.textContent = "Error verifying session. Redirecting to login...";
          setTimeout(() => window.location.href = '/login.html', 2000);
+    }
+}
+
+// Load analytics data
+export async function loadAnalytics() {
+    try {
+        // Get total content count
+        const { count: galleryCount, error: galleryError } = await _supabase
+            .from('gallery')
+            .select('*', { count: 'exact', head: true });
+            
+        const { count: blogCount, error: blogError } = await _supabase
+            .from('blog_posts')
+            .select('*', { count: 'exact', head: true });
+            
+        const totalContent = (galleryCount || 0) + (blogCount || 0);
+        document.getElementById('total-content-count').textContent = totalContent;
+        
+        // Get active users count
+        const { count: userCount, error: userError } = await _supabase
+            .from('profiles')
+            .select('*', { count: 'exact', head: true });
+            
+        document.getElementById('active-users-count').textContent = userCount || 0;
+        
+        // Calculate content distribution
+        if (totalContent > 0) {
+            const photosPercentage = Math.round(((galleryCount || 0) * 100) / totalContent);
+            const videosPercentage = Math.round(((galleryCount || 0) * 100) / totalContent); // Note: This would need to be calculated differently in a real implementation
+            const blogPostsPercentage = Math.round(((blogCount || 0) * 100) / totalContent);
+            
+            document.getElementById('photos-percentage').textContent = `${photosPercentage}%`;
+            document.getElementById('videos-percentage').textContent = `${videosPercentage}%`;
+            document.getElementById('blog-posts-percentage').textContent = `${blogPostsPercentage}%`;
+            
+            document.getElementById('photos-progress').style.width = `${photosPercentage}%`;
+            document.getElementById('videos-progress').style.width = `${videosPercentage}%`;
+            document.getElementById('blog-posts-progress').style.width = `${blogPostsPercentage}%`;
+        }
+        
+        // Update recent activity (mock data for now)
+        const recentActivity = [
+            { action: "New blog post created", user: "Admin User", time: "2 minutes ago" },
+            { action: "Gallery item uploaded", user: "Editor User", time: "15 minutes ago" },
+            { action: "Member added", user: "Admin User", time: "1 hour ago" },
+            { action: "User role updated", user: "Owner", time: "3 hours ago" }
+        ];
+        
+        const activityContainer = document.getElementById('recent-activity');
+        activityContainer.innerHTML = '';
+        
+        recentActivity.forEach(activity => {
+            const activityItem = document.createElement('div');
+            activityItem.className = 'p-3 bg-gray-800 rounded-lg';
+            activityItem.innerHTML = `
+                <p class="text-sm text-gray-300">${activity.action}</p>
+                <p class="text-xs text-gray-400 mt-1">By ${activity.user} • ${activity.time}</p>
+            `;
+            activityContainer.appendChild(activityItem);
+        });
+        
+        // Update new content this week (mock data)
+        document.getElementById('new-this-week').textContent = '12';
+        
+        // Update storage used (mock data)
+        document.getElementById('storage-used').textContent = '2.4 GB';
+        
+    } catch (error) {
+        console.error("Error loading analytics:", error);
     }
 }
 

@@ -4,12 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIMS Media Hive | Cinematic Media Club</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Oswald:wght@200..700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Oswald:wght@200..700&display=swap"></noscript>
+    
+    <!-- Inline critical CSS -->
     <style>
-        /* Custom styles to match the dark theme and font */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Oswald:wght@200..700&display=swap');
-
+        /* Critical CSS for faster rendering */
         :root {
             --primary-color: #eab308; /* Tailwind yellow-500 equivalent */
             --dark-bg: #0d0d0d;
@@ -59,10 +61,45 @@
         .oswald {
             font-family: 'Oswald', sans-serif;
         }
+        
+        /* Optimize loading for icons */
+        .lucide {
+            display: inline-block;
+            width: 1em;
+            height: 1em;
+            stroke-width: 0;
+            stroke: currentColor;
+            fill: none;
+        }
     </style>
-
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-YRRWP9405V">
+    
+    <!-- Load Tailwind CSS asynchronously -->
+    <script>
+        // Load Tailwind CSS asynchronously
+        (function() {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.tailwindcss.com';
+            script.async = true;
+            document.head.appendChild(script);
+        })();
     </script>
+    
+    <!-- Load Lucide icons asynchronously -->
+    <script>
+        // Load Lucide icons asynchronously
+        (function() {
+            const script = document.createElement('script');
+            script.src = 'https://unpkg.com/lucide@latest/dist/umd/lucide.js';
+            script.async = true;
+            script.onload = function() {
+                lucide.createIcons();
+            };
+            document.head.appendChild(script);
+        })();
+    </script>
+
+    <!-- Google Analytics asynchronously -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-YRRWP9405V"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
@@ -244,14 +281,14 @@
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
                 <div class="text-center">
-                    <img src="/src/Event-Organization1.jpg" onerror="this.onerror=null;this.src='https://placehold.co/600x400/1f2937/d1d5db?text=VIDEO+PRODUCTION';" alt="Video Production" class="rounded-lg mb-6 w-full h-auto object-cover transition duration-300 hover:opacity-90">
+                    <img src="/src/Event-Organization1.jpg" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/600x400/1f2937/d1d5db?text=VIDEO+PRODUCTION';" alt="Video Production" class="rounded-lg mb-6 w-full h-auto object-cover transition duration-300 hover:opacity-90">
                     <h3 class="text-xl font-semibold uppercase tracking-wider mb-3 text-yellow-500 oswald">Event Organization</h3>
                     <p class="text-sm text-gray-400 leading-relaxed">
                         From concept development and logistical planning to vendor coordination and on-site management, we handle every phase of the event organization process.
                     </p>
                 </div>
                 <div class="text-center">
-                    <img src="/src/Podcast.jpg" onerror="this.onerror=null;this.src='https://placehold.co/600x400/1f2937/d1d5db?text=VIDEO+PRODUCTION';" alt="Video Production" class="rounded-lg mb-6 w-full h-auto object-cover transition duration-300 hover:opacity-90">
+                    <img src="/src/Podcast.jpg" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/600x400/1f2937/d1d5db?text=VIDEO+PRODUCTION';" alt="Video Production" class="rounded-lg mb-6 w-full h-auto object-cover transition duration-300 hover:opacity-90">
                     <h3 class="text-xl font-semibold uppercase tracking-wider mb-3 text-yellow-500 oswald">Podcast</h3>
                     <p class="text-sm text-gray-400 leading-relaxed">
                         From concept development and guest booking to professional recording and final sound design, we handle every phase of the podcast production process.

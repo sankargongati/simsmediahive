@@ -9,12 +9,17 @@
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Oswald:wght@200..700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Oswald:wght@200..700&display=swap"></noscript>
     
-    <!-- Link to the main CSS file -->
-    <link rel="stylesheet" href="/css/style.css">
-    
     <!-- Inline critical CSS -->
     <style>
         /* Critical CSS for faster rendering */
+        :root {
+            --primary-color: #eab308; /* Tailwind yellow-500 equivalent */
+            --dark-bg: #0d0d0d;
+            --mid-bg: #1a1a1a;
+            --text-light: #f3f4f6;
+            --text-muted: #9ca3af;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--dark-bg);
@@ -68,8 +73,16 @@
         }
     </style>
     
-    <!-- Load Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Tailwind CSS asynchronously -->
+    <script>
+        // Load Tailwind CSS asynchronously
+        (function() {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.tailwindcss.com';
+            script.async = true;
+            document.head.appendChild(script);
+        })();
+    </script>
     
     <!-- Load Lucide icons asynchronously -->
     <script>
